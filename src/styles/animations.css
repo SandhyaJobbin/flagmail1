@@ -1,0 +1,148 @@
+/* Flagmail - All keyframe animations */
+
+@keyframes tooltipCountdown {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes springIn {
+  0%   { transform: scale(0.96); }
+  60%  { transform: scale(1.02); }
+  100% { transform: scale(1.0); }
+}
+
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-6px); }
+  30%  { transform: translateX(6px); }
+  45%  { transform: translateX(-6px); }
+  60%  { transform: translateX(6px); }
+  75%  { transform: translateX(-3px); }
+  90%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes stampIn {
+  0%   { transform: scale(1.4); opacity: 0; }
+  60%  { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.0); opacity: 1; }
+}
+
+@keyframes floatUp {
+  0%   { transform: translateY(0);    opacity: 1; }
+  100% { transform: translateY(-24px); opacity: 0; }
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes bannerDrop {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  65%  { transform: translateY(6px);   opacity: 1; }
+  80%  { transform: translateY(-3px);  opacity: 1; }
+  100% { transform: translateY(0);     opacity: 1; }
+}
+
+@keyframes bannerLift {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes envelopeOpen {
+  from { transform: scaleY(0.96) translateY(8px); opacity: 0.6; }
+  to   { transform: scaleY(1.0)  translateY(0);   opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 0px rgba(255,214,10,0); }
+  30%  { box-shadow: 0 0 16px rgba(255,214,10,0.7); }
+  60%  { box-shadow: 0 0 8px rgba(255,214,10,0.4); }
+  100% { box-shadow: 0 0 4px rgba(255,214,10,0.2); }
+}
+
+@keyframes inboxClear {
+  0%   { transform: translateY(0);     opacity: 1; }
+  100% { transform: translateY(-120vh); opacity: 0; }
+}
+
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes burstRing {
+  0%   { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes rankGlow {
+  0%   { box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+  50%  { box-shadow: 0 0 40px rgba(10,132,255,0.4); }
+  100% { box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+}
+
+@keyframes amberGlow {
+  0%, 100% { box-shadow: 0 0 0px rgba(255,214,10,0); }
+  50%       { box-shadow: 0 0 20px rgba(255,214,10,0.6); }
+}
+
+@keyframes ghostMove {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(40px, 60px); }
+  50%  { transform: translate(80px, 40px); }
+  75%  { transform: translate(120px, 80px); }
+  100% { transform: translate(160px, 20px); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes scoreFlash {
+  0%   { color: #1C1C1E; }
+  30%  { color: #34C759; transform: scale(1.15); }
+  100% { color: #1C1C1E; transform: scale(1); }
+}
+
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.88) translateY(16px); }
+  65%  { transform: scale(1.03) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1.0) translateY(0); }
+}
+
+/* Utility animation classes */
+.anim-fadeSlideUp    { animation: fadeSlideUp 0.3s ease forwards; }
+.anim-springIn       { animation: springIn 0.4s ease forwards; }
+.anim-shake          { animation: shake 0.3s ease forwards; }
+.anim-stampIn        { animation: stampIn 0.3s ease forwards; }
+.anim-floatUp        { animation: floatUp 0.8s ease forwards; }
+.anim-timerPulse     { animation: timerPulse 1s ease-in-out infinite; }
+.anim-toastSlideIn   { animation: toastSlideIn 0.4s ease forwards; }
+.anim-toastSlideOut  { animation: toastSlideOut 0.3s ease forwards; }
+.anim-bannerDrop     { animation: bannerDrop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.anim-bannerLift     { animation: bannerLift 0.3s ease forwards; }
+.anim-envelopeOpen   { animation: envelopeOpen 0.25s ease forwards; }
+.anim-glowPulse      { animation: glowPulse 0.6s ease forwards; }
+.anim-inboxClear     { animation: inboxClear 0.6s ease forwards; }
+.anim-staggerFadeIn  { animation: staggerFadeIn 0.3s ease forwards; }
+.anim-burstRing      { animation: burstRing 0.6s ease-out forwards; }
+.anim-rankGlow       { animation: rankGlow 1.2s ease-in-out; }
+.anim-slideInLeft    { animation: slideInFromLeft 0.4s ease forwards; }
