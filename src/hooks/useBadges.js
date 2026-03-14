@@ -25,13 +25,14 @@ export function useBadges() {
   const streakRef = useRef(0);
   const categoriesCorrect = useRef(new Set());
   const firstEmailRef = useRef(true);
+  const earnedSetRef = useRef(new Set());
 
   const earnBadge = useCallback((badgeId) => {
-    setEarned(prev => {
-      if (prev.includes(badgeId)) return prev;
-      setPendingToast(BADGES[badgeId]);
-      return [...prev, badgeId];
-    });
+    if (earnedSetRef.current.has(badgeId)) return false;
+    earnedSetRef.current.add(badgeId);
+    setPendingToast(BADGES[badgeId]);
+    setEarned(prev => [...prev, badgeId]);
+    return true;
   }, []);
 
   const dismissToast = useCallback(() => {
@@ -40,6 +41,7 @@ export function useBadges() {
 
   const checkAfterRound = useCallback(({ record, timeLeft, roundDuration = ROUND_DURATION_SECONDS }) => {
     const { l1Correct, l2Correct, cluesUsed } = record;
+    let unlockedAny = false;
 
     if (l1Correct) {
       streakRef.current += 1;
@@ -52,29 +54,29 @@ export function useBadges() {
     if (firstEmailRef.current) {
       firstEmailRef.current = false;
       if (l1Correct && l2Correct && cluesUsed === 0 && timeLeft >= roundDuration - SNIPER_SECONDS) {
-        earnBadge('SNIPER');
+        unlockedAny = earnBadge('SNIPER') || unlockedAny;
       }
     }
 
     // Lightning Read: correct in <= 10 seconds.
     if (l1Correct && timeLeft >= roundDuration - LIGHTNING_READ_SECONDS) {
-      earnBadge('LIGHTNING_READ');
+      unlockedAny = earnBadge('LIGHTNING_READ') || unlockedAny;
     }
 
     // Beat the Clock: correct with <= 5s remaining.
     if (l1Correct && timeLeft > 0 && timeLeft <= BEAT_THE_CLOCK_SECONDS) {
-      earnBadge('BEAT_THE_CLOCK');
+      unlockedAny = earnBadge('BEAT_THE_CLOCK') || unlockedAny;
     }
 
     if (streakRef.current >= 5) {
-      earnBadge('ON_FIRE');
+      unlockedAny = earnBadge('ON_FIRE') || unlockedAny;
     }
 
     if (categoriesCorrect.current.size >= 6) {
-      earnBadge('EAGLE_EYE');
+      unlockedAny = earnBadge('EAGLE_EYE') || unlockedAny;
     }
 
-    return { streak: streakRef.current };
+    return { streak: streakRef.current, unlockedAny };
   }, [earnBadge]);
 
   const checkAfterZone = useCallback(({ zoneEmails, zoneCluesUsed }) => {
@@ -105,6 +107,7 @@ export function useBadges() {
     streakRef.current = 0;
     categoriesCorrect.current = new Set();
     firstEmailRef.current = true;
+    earnedSetRef.current = new Set();
   }, []);
 
   return {

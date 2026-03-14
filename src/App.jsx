@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import './styles/animations.css';
 
 import { useGameState, SCREENS } from './hooks/useGameState.js';
@@ -23,6 +23,7 @@ export default function App() {
   const sc = useScoring();
   const bg = useBadges();
   const lb = useLeaderboard();
+  const pendingRoundRecordRef = useRef(null);
 
   // ── Submit a round ───────────────────────────────────────────────────────
   // timedOut=true is passed by GameRound when the timer fires (auto-submit)
@@ -35,9 +36,22 @@ export default function App() {
       cluesRevealed: round.cluesRevealed,
       timedOut,
     });
-    bg.checkAfterRound({ record, timeLeft });
+    const { unlockedAny } = bg.checkAfterRound({ record, timeLeft });
+    if (unlockedAny) {
+      pendingRoundRecordRef.current = record;
+      return;
+    }
     gs.submitRound(record);
   }, [gs, sc, bg]);
+
+  const handleBadgeDismiss = useCallback(() => {
+    bg.dismissToast();
+    if (pendingRoundRecordRef.current) {
+      const record = pendingRoundRecordRef.current;
+      pendingRoundRecordRef.current = null;
+      gs.submitRound(record);
+    }
+  }, [bg, gs]);
 
   // ── Move to next email ───────────────────────────────────────────────────
   const handleNext = useCallback(() => {
@@ -73,6 +87,7 @@ export default function App() {
 
   // ── Play again ───────────────────────────────────────────────────────────
   const handlePlayAgain = useCallback(() => {
+    pendingRoundRecordRef.current = null;
     sc.resetScoring();
     bg.resetBadges();
     gs.resetGame();
@@ -86,7 +101,7 @@ export default function App() {
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
       color: '#1C1C1E',
     }}>
-      <BadgeToast badge={bg.pendingToast} onDismiss={bg.dismissToast} />
+      <BadgeToast badge={bg.pendingToast} onDismiss={handleBadgeDismiss} />
 
       {gs.screen === SCREENS.LANDING && (
         <LandingScreen onStart={gs.startGame} />
