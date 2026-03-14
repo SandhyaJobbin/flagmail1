@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import gsap from 'gsap';
 
 const glass = {
   background: 'rgba(255,255,255,0.60)',
@@ -8,12 +10,21 @@ const glass = {
   boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
 };
 
+const ZONE_CARDS = [
+  { zone: 3, title: 'Zero-Day Vault', emails: 5,  color: '#0A84FF', locked: true,  desc: 'Advanced threat analysis', top: 32, zIndex: 1, scale: 0.94, rot: 2   },
+  { zone: 2, title: 'Shadow Inbox',   emails: 10, color: '#0A84FF', locked: true,  desc: 'Spot deceptive patterns',  top: 16, zIndex: 2, scale: 0.97, rot: 1   },
+  { zone: 1, title: 'Flag Academy',   emails: 10, color: '#0A84FF', locked: false, desc: 'Identify common threats',  top: 0,  zIndex: 3, scale: 1.0,  rot: 0   },
+];
 
 export default function LandingScreen({ onStart }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [focusedField, setFocusedField] = useState(null);
+
+  // Refs for GSAP card fan
+  const cardRefs = useRef([]);
+  const isFannedRef = useRef(false);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -27,6 +38,43 @@ export default function LandingScreen({ onStart }) {
     }
     setError('');
     onStart(name.trim(), email.trim());
+  }
+
+  function handleStackEnter() {
+    if (isFannedRef.current) return;
+    isFannedRef.current = true;
+    // Fan cards upward: back card fans left, middle fans right, front stays
+    const offsets = [
+      { y: -24, rotation: -6, scale: 0.96 }, // zone 3 (back)
+      { y: -16, rotation:  4, scale: 0.98 }, // zone 2 (middle)
+      { y: -8,  rotation:  0, scale: 1.0  }, // zone 1 (front)
+    ];
+    cardRefs.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.to(el, {
+        y: offsets[i].y,
+        rotation: offsets[i].rotation,
+        scale: offsets[i].scale,
+        duration: 0.4,
+        ease: 'back.out(1.4)',
+        delay: i * 0.04,
+      });
+    });
+  }
+
+  function handleStackLeave() {
+    isFannedRef.current = false;
+    cardRefs.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.to(el, {
+        y: 0,
+        rotation: 0,
+        scale: ZONE_CARDS[i].scale,
+        duration: 0.35,
+        ease: 'power2.out',
+        delay: i * 0.03,
+      });
+    });
   }
 
   const inputStyle = (field) => ({
@@ -62,64 +110,85 @@ export default function LandingScreen({ onStart }) {
       padding: '40px 16px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
     }}>
-      <div style={{ width: '100%', maxWidth: 400 }} className="anim-fadeSlideUp">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+        style={{ width: '100%', maxWidth: 400 }}
+      >
 
         {/* App identity */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          {/* Icon mark — glass shell */}
-          <div style={{
-            width: 72,
-            height: 72,
-            margin: '0 auto 20px',
-            borderRadius: 20,
-            background: 'linear-gradient(145deg, rgba(26,115,232,0.85) 0%, rgba(0,87,184,0.90) 100%)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.35)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(0, 87, 184, 0.35), 0 2px 8px rgba(0,0,0,0.12)',
-          }}>
+          {/* Icon mark */}
+          <motion.div
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 20, delay: 0.1 }}
+            style={{
+              width: 72,
+              height: 72,
+              margin: '0 auto 20px',
+              borderRadius: 20,
+              background: 'linear-gradient(145deg, rgba(26,115,232,0.85) 0%, rgba(0,87,184,0.90) 100%)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(0, 87, 184, 0.35), 0 2px 8px rgba(0,0,0,0.12)',
+            }}
+          >
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
               <path d="M18 4L30 10V20C30 26.627 24.627 32 18 32C11.373 32 6 26.627 6 20V10L18 4Z"
                 fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.5"/>
               <path d="M13 18.5L16.5 22L23 15" stroke="white" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </div>
+          </motion.div>
 
-          <div style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: 'rgba(60,60,67,0.65)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            marginBottom: 8,
-          }}>
-            Veridian Security
-          </div>
-          <h1 style={{
-            fontSize: 44,
-            fontWeight: 700,
-            color: '#1C1C1E',
-            margin: 0,
-            letterSpacing: '-0.02em',
-          }}>
-            Flagmail
-          </h1>
-          <p style={{
-            fontSize: 16,
-            color: 'rgba(60,60,67,0.6)',
-            margin: '8px 0 0',
-            fontWeight: 400,
-          }}>
-            Read between the lines. Flag what doesn't belong.
-          </p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.18, duration: 0.35 }}
+          >
+            <div style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: 'rgba(60,60,67,0.65)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}>
+              Veridian Security
+            </div>
+            <h1 style={{
+              fontSize: 44,
+              fontWeight: 700,
+              color: '#1C1C1E',
+              margin: 0,
+              letterSpacing: '-0.02em',
+            }}>
+              Flagmail
+            </h1>
+            <p style={{
+              fontSize: 16,
+              color: 'rgba(60,60,67,0.6)',
+              margin: '8px 0 0',
+              fontWeight: 400,
+            }}>
+              Read between the lines. Flag what doesn't belong.
+            </p>
+          </motion.div>
         </div>
 
         {/* Sign-in card */}
-        <div style={{ ...glass, borderRadius: 20, padding: '32px 28px', marginBottom: 14 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22, type: 'spring', stiffness: 240, damping: 22 }}
+          style={{ ...glass, borderRadius: 20, padding: '32px 28px', marginBottom: 14 }}
+        >
           <h2 style={{
             fontSize: 21,
             fontWeight: 600,
@@ -220,10 +289,15 @@ export default function LandingScreen({ onStart }) {
               Begin Briefing
             </button>
           </form>
-        </div>
+        </motion.div>
 
-        {/* Zone cards - stacked deck */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* Zone cards — stacked deck with GSAP fan hover */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.36, duration: 0.35 }}
+          style={{ display: 'flex', flexDirection: 'column' }}
+        >
           <div style={{
             fontSize: 10,
             fontWeight: 700,
@@ -236,31 +310,36 @@ export default function LandingScreen({ onStart }) {
             3 Zones · 25 Emails
           </div>
 
-          {/* Stacked cards container — render back-to-front */}
-          <div style={{ position: 'relative', height: 108 }}>
-            {[
-              { zone: 3, title: 'Zero-Day Vault', emails: 5,  color: '#FF3B30', locked: true,  desc: 'Advanced threat analysis', top: 32, zIndex: 1, scale: 0.94 },
-              { zone: 2, title: 'Shadow Inbox',   emails: 10, color: '#FF9500', locked: true,  desc: 'Spot deceptive patterns',  top: 16, zIndex: 2, scale: 0.97 },
-              { zone: 1, title: 'Flag Academy',   emails: 10, color: '#34C759', locked: false, desc: 'Identify common threats',  top: 0,  zIndex: 3, scale: 1.0  },
-            ].map(z => (
-              <div key={z.zone} style={{
-                ...glass,
-                borderRadius: 14,
-                padding: '14px 16px',
-                borderLeft: `3px solid ${z.locked ? 'rgba(0,0,0,0.12)' : z.color}`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: z.top,
-                zIndex: z.zIndex,
-                transform: `scale(${z.scale})`,
-                transformOrigin: 'top center',
-                opacity: z.locked ? 0.75 : 1,
-                overflow: 'hidden',
-              }}>
+          {/* Stacked cards with GSAP fan hover */}
+          <div
+            style={{ position: 'relative', height: 108, cursor: 'default' }}
+            onMouseEnter={handleStackEnter}
+            onMouseLeave={handleStackLeave}
+          >
+            {ZONE_CARDS.map((z, i) => (
+              <div
+                key={z.zone}
+                ref={el => cardRefs.current[i] = el}
+                style={{
+                  ...glass,
+                  borderRadius: 14,
+                  padding: '14px 16px',
+                  borderLeft: `3px solid ${z.locked ? 'rgba(0,0,0,0.12)' : z.color}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: z.top,
+                  zIndex: z.zIndex,
+                  transform: `scale(${z.scale})`,
+                  transformOrigin: 'top center',
+                  opacity: z.locked ? 0.75 : 1,
+                  overflow: 'hidden',
+                  willChange: 'transform',
+                }}
+              >
                 {/* Zone number badge */}
                 <div style={{
                   width: 40,
@@ -328,9 +407,9 @@ export default function LandingScreen({ onStart }) {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-      </div>
+      </motion.div>
     </div>
   );
 }

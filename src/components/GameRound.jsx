@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTimer } from '../hooks/useTimer.js';
 import TimerBar from './TimerBar.jsx';
 import EmailCard from './EmailCard.jsx';
 import ClueSystem from './ClueSystem.jsx';
 import Classifier from './Classifier.jsx';
+import gsap from 'gsap';
 
 const glassCard = {
   background: 'rgba(255,255,255,0.62)',
@@ -36,6 +38,31 @@ export default function GameRound({
   const roundRef = useRef(round);
   useEffect(() => { roundRef.current = round; }, [round]);
 
+  // GSAP score counter
+  const scoreDisplayRef = useRef(null);
+  const prevScoreRef = useRef(totalScore);
+  useEffect(() => {
+    if (!scoreDisplayRef.current) return;
+    const from = prevScoreRef.current;
+    const to = totalScore;
+    if (from === to) return;
+    gsap.fromTo(
+      { val: from },
+      { val: to, duration: 0.5, ease: 'power2.out',
+        onUpdate: function () {
+          if (scoreDisplayRef.current)
+            scoreDisplayRef.current.textContent = Math.round(this.targets()[0].val);
+        },
+      }
+    );
+    // Bounce the score element
+    gsap.fromTo(scoreDisplayRef.current,
+      { scale: 1.25, color: '#34C759' },
+      { scale: 1, color: '#1C1C1E', duration: 0.4, ease: 'back.out(2)' }
+    );
+    prevScoreRef.current = to;
+  }, [totalScore]);
+
   function handleTimeout() {
     onSubmit(0, true);
   }
@@ -57,6 +84,7 @@ export default function GameRound({
   }
 
   const phaseColor = phase === 'green' ? '#34C759' : phase === 'amber' ? '#FF9500' : '#FF3B30';
+  const urgencyLabel = phase === 'red' ? '⚠ Hurry!' : phase === 'amber' ? 'Running low' : null;
 
   return (
     <div style={{
@@ -88,60 +116,103 @@ export default function GameRound({
               Flagmail
             </span>
 
-            {/* Zone progress */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {Array.from({ length: emailsInZone }).map((_, i) => (
-                <div key={i} style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: i < emailInZone - 1
-                    ? '#34C759'
-                    : i === emailInZone - 1
-                      ? '#0A84FF'
-                      : 'rgba(0,0,0,0.12)',
-                  transition: 'background 0.3s',
-                }} />
-              ))}
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#636366', marginLeft: 4 }}>
+            {/* Zone progress — segmented bar replacing dots */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ display: 'flex', gap: 3 }}>
+                {Array.from({ length: emailsInZone }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      background: i < emailInZone - 1
+                        ? '#34C759'
+                        : i === emailInZone - 1
+                          ? '#0A84FF'
+                          : 'rgba(0,0,0,0.10)',
+                      scale: i === emailInZone - 1 ? 1.2 : 1,
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    style={{
+                      width: 18,
+                      height: 4,
+                      borderRadius: 2,
+                    }}
+                  />
+                ))}
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93' }}>
                 Zone {zone} · {emailInZone}/{emailsInZone}
               </span>
             </div>
 
-            {/* Score */}
+            {/* Score with GSAP counter */}
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 10, color: '#AEAEB2', fontWeight: 600, letterSpacing: '0.06em' }}>SCORE</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E', lineHeight: 1 }}>{totalScore}</div>
+              <div
+                ref={scoreDisplayRef}
+                style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E', lineHeight: 1, display: 'inline-block' }}
+              >
+                {totalScore}
+              </div>
             </div>
           </div>
 
-          {/* Timer */}
+          {/* Timer + urgency label */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 14 }}>
             <TimerBar timeLeft={timeLeft} phase={phase} progress={progress} />
-            <span style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: phaseColor,
-              minWidth: 30,
-              textAlign: 'right',
-              transition: 'color 0.3s',
-            }}>
-              {timeLeft}s
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 80, justifyContent: 'flex-end' }}>
+              <AnimatePresence mode="wait">
+                {urgencyLabel && (
+                  <motion.span
+                    key={urgencyLabel}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: phaseColor,
+                    }}
+                  >
+                    {urgencyLabel}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              <span style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: phaseColor,
+                minWidth: 30,
+                textAlign: 'right',
+                transition: 'color 0.3s',
+              }}
+                className={phase === 'red' ? 'anim-timerPulse' : ''}
+              >
+                {timeLeft}s
+              </span>
+            </div>
           </div>
         </div>
 
         {/* ── Two-column body ── */}
         <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
-          {/* Left — Email */}
-          <div style={{
-            flex: '0 0 58%',
-            padding: '20px 24px 24px',
-            overflowY: 'auto',
-          }}>
-            <EmailCard email={email} giveawayHighlight={false} />
-          </div>
+          {/* Left — Email (Framer Motion key-based re-entry on email change) */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={email?.id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              style={{
+                flex: '0 0 58%',
+                padding: '20px 24px 24px',
+                overflowY: 'auto',
+              }}
+            >
+              <EmailCard email={email} giveawayHighlight={false} />
+            </motion.div>
+          </AnimatePresence>
 
           {/* Divider */}
           <div style={glassDivider} />
@@ -165,9 +236,9 @@ export default function GameRound({
               boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
             }}>
               <div style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 700,
-                color: 'rgba(60,60,67,0.5)',
+                color: 'rgba(60,60,67,0.65)',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 marginBottom: 10,
@@ -200,9 +271,11 @@ export default function GameRound({
             </div>
 
             {/* Submit */}
-            <button
+            <motion.button
               onClick={handleSubmit}
               disabled={!canSubmit}
+              whileHover={canSubmit ? { scale: 1.02 } : {}}
+              whileTap={canSubmit ? { scale: 0.97 } : {}}
               style={{
                 width: '100%',
                 padding: '14px',
@@ -216,15 +289,13 @@ export default function GameRound({
                 fontWeight: 700,
                 cursor: canSubmit ? 'pointer' : 'not-allowed',
                 fontFamily: 'inherit',
-                transition: 'all 0.18s ease',
+                transition: 'background 0.18s ease, box-shadow 0.18s ease',
                 boxShadow: canSubmit ? '0 4px 16px rgba(10,132,255,0.35)' : 'none',
                 marginTop: 'auto',
               }}
-              onMouseEnter={e => canSubmit && (e.currentTarget.style.opacity = '0.88')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >
               Submit Classification
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

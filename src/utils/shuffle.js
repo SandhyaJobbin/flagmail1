@@ -1,4 +1,4 @@
-import { EMAILS } from '../data/emails.js';
+import { EMAIL_POOL as EMAILS } from '../data/emails.js';
 
 // Fisher-Yates shuffle
 function fisherYates(arr) {
@@ -11,14 +11,10 @@ function fisherYates(arr) {
 }
 
 /**
- * Draw 25 emails from the pool of 30, preserving zone distribution:
- * Zone 1: 10 emails (draw all 10 of available zone-1 emails, shuffled)
- * Zone 2: 10 emails (draw all 10 of available zone-2 emails, shuffled)
- * Zone 3:  5 emails (draw all  5 of available zone-3 emails, shuffled)
- *
- * Since the dataset has exactly 10/10/5 + buffer (E026 zone1, E027 zone2,
- * E028 zone2, E029 zone3, E030 zone2), we pick randomly from each zone
- * to get exactly 10/10/5.
+ * Draw 25 emails from the pool of 50, preserving zone distribution:
+ * Zone 1: 10 of 20 easy emails  (random selection, shuffled)
+ * Zone 2: 10 of 20 medium emails (random selection, shuffled)
+ * Zone 3:  5 of 10 hard emails   (random selection, shuffled)
  */
 // Shuffle clues for an email and truncate to the zone's allowed count
 function withShuffledClues(email) {

@@ -239,8 +239,8 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
           <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em' }}>
             L1 — THREAT CATEGORY
           </div>
-          <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.4)', fontStyle: 'italic' }}>
-            Hold to learn more
+          <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.65)', fontStyle: 'italic' }}>
+            Hover for details
           </div>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -288,8 +288,8 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
             <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em' }}>
               L2 — SUBCATEGORY
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.4)', fontStyle: 'italic' }}>
-              Hold to learn more
+            <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.65)', fontStyle: 'italic' }}>
+              Hover for details
             </div>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

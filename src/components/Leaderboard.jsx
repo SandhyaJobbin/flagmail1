@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import anime from 'animejs';
 import { getProgressTitle } from '../utils/competency.js';
 
 const glass = {
@@ -10,10 +12,76 @@ const glass = {
   boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
 };
 
+// Medal emoji refs for bounce animation
+function MedalCell({ rank, isMe }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current || rank > 2) return;
+    anime({
+      targets: ref.current,
+      scale: [0.4, 1.25, 0.9, 1.08, 1],
+      opacity: [0, 1],
+      duration: 700,
+      delay: rank * 80,
+      easing: 'easeOutElastic(1, 0.6)',
+    });
+  }, [rank]);
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const colors = ['#FFD60A', '#AEAEB2', '#CD7F32'];
+
+  if (rank <= 2) {
+    return (
+      <div
+        ref={ref}
+        style={{
+          fontSize: 18,
+          display: 'inline-block',
+          opacity: 0, // anime will set it
+        }}
+      >
+        {medals[rank]}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      fontSize: 14,
+      fontWeight: 700,
+      color: '#AEAEB2',
+    }}>
+      {rank + 1}
+    </div>
+  );
+}
+
 export default function Leaderboard({ playerName, playerScore, entries, loading, error, onFetch, onBack }) {
+  const rowsRef = useRef(null);
+
   useEffect(() => {
     onFetch();
   }, []);
+
+  // Stagger rows once entries arrive
+  useEffect(() => {
+    if (!entries || entries.length === 0) return;
+    // Small delay so rows have rendered
+    const t = setTimeout(() => {
+      const rows = document.querySelectorAll('.lb-row');
+      if (!rows.length) return;
+      anime({
+        targets: rows,
+        translateX: [-32, 0],
+        opacity: [0, 1],
+        duration: 380,
+        delay: anime.stagger(45),
+        easing: 'easeOutQuart',
+      });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [entries]);
 
   return (
     <div style={{
@@ -25,7 +93,12 @@ export default function Leaderboard({ playerName, playerScore, entries, loading,
       boxSizing: 'border-box',
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}
+      >
         <button onClick={onBack} style={{
           padding: '8px 14px',
           borderRadius: 20,
@@ -42,18 +115,26 @@ export default function Leaderboard({ playerName, playerScore, entries, loading,
         <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E', margin: 0 }}>
           Global Leaderboard
         </h2>
-        <div style={{ fontSize: 12, color: '#AEAEB2', fontWeight: 500 }}>This Week</div>
-      </div>
+        <div style={{ fontSize: 12, color: '#AEAEB2', fontWeight: 500 }}>All Time</div>
+      </motion.div>
 
       {loading && (
-        <div style={{ ...glass, padding: 40, textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{ ...glass, padding: 40, textAlign: 'center' }}
+        >
           <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
           <div style={{ fontSize: 14, color: '#636366' }}>Fetching leaderboard…</div>
-        </div>
+        </motion.div>
       )}
 
       {error && (
-        <div style={{ ...glass, padding: 24, textAlign: 'center', borderLeft: '3px solid #FF3B30' }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          style={{ ...glass, padding: 24, textAlign: 'center', borderLeft: '3px solid #FF3B30' }}
+        >
           <div style={{ fontSize: 14, color: '#FF3B30', marginBottom: 12 }}>{error}</div>
           <button onClick={onFetch} style={{
             padding: '8px 20px',
@@ -68,20 +149,34 @@ export default function Leaderboard({ playerName, playerScore, entries, loading,
           }}>
             Retry
           </button>
-        </div>
+        </motion.div>
       )}
 
       {!loading && !error && entries.length === 0 && (
-        <div style={{ ...glass, padding: 40, textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          style={{ ...glass, padding: 40, textAlign: 'center' }}
+        >
           <div style={{ fontSize: 32, marginBottom: 12 }}>📋</div>
-          <div style={{ fontSize: 14, color: '#636366' }}>
-            No leaderboard data yet. Configure the Google Apps Script URL in config.js to enable this feature.
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#1C1C1E', marginBottom: 6 }}>
+            No scores yet — be the first!
           </div>
-        </div>
+          <div style={{ fontSize: 13, color: '#636366' }}>
+            Complete the game to claim the top spot.
+          </div>
+        </motion.div>
       )}
 
       {!loading && !error && entries.length > 0 && (
-        <div style={{ ...glass, overflow: 'hidden' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+          style={{ ...glass, overflow: 'hidden' }}
+          ref={rowsRef}
+        >
           {/* Column headers */}
           <div style={{
             display: 'grid',
@@ -102,22 +197,21 @@ export default function Leaderboard({ playerName, playerScore, entries, loading,
           {entries.map((entry, i) => {
             const isMe = entry.name === playerName && entry.score === playerScore;
             return (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '40px 1fr 80px 100px',
-                padding: '14px 20px',
-                borderBottom: i < entries.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                background: isMe ? 'rgba(10,132,255,0.06)' : 'transparent',
-                animation: `slideInFromLeft 0.4s ease ${i * 40}ms forwards`,
-                opacity: 0,
-              }} className="anim-slideInLeft">
-                <div style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: i === 0 ? '#FFD60A' : i === 1 ? '#AEAEB2' : i === 2 ? '#CD7F32' : '#AEAEB2',
-                }}>
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
-                </div>
+              <div
+                key={i}
+                className="lb-row"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '40px 1fr 80px 100px',
+                  padding: '14px 20px',
+                  borderBottom: i < entries.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                  background: isMe ? 'rgba(10,132,255,0.06)' : 'transparent',
+                  opacity: 0, // anime will set it
+                  alignItems: 'center',
+                }}
+              >
+                <MedalCell rank={i} isMe={isMe} />
+
                 <div>
                   <div style={{ fontSize: 14, fontWeight: isMe ? 700 : 500, color: isMe ? '#0A84FF' : '#1C1C1E' }}>
                     {entry.name} {isMe && '(You)'}
@@ -126,16 +220,18 @@ export default function Leaderboard({ playerName, playerScore, entries, loading,
                     {entry.title || getProgressTitle(entry.score)}
                   </div>
                 </div>
+
                 <div style={{ fontSize: 16, fontWeight: 800, color: '#1C1C1E', textAlign: 'right' }}>
                   {entry.score}
                 </div>
-                <div style={{ fontSize: 11, color: '#AEAEB2', textAlign: 'right', alignSelf: 'center' }}>
+
+                <div style={{ fontSize: 11, color: '#AEAEB2', textAlign: 'right' }}>
                   {entry.date ? new Date(entry.date).toLocaleDateString() : '—'}
                 </div>
               </div>
             );
           })}
-        </div>
+        </motion.div>
       )}
     </div>
   );

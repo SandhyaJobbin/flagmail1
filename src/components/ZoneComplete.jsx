@@ -1,5 +1,139 @@
+import { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import anime from 'animejs';
+import Matter from 'matter-js';
+
+// ─── Confetti canvas (Matter.js) — only shown on flawless runs ───────────────
+function ConfettiCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const { Engine, Render, Runner, Bodies, Composite, Body } = Matter;
+
+    const engine = Engine.create({ gravity: { y: 1.4 } });
+    const render = Render.create({
+      canvas: canvasRef.current,
+      engine,
+      options: {
+        width: 480,
+        height: 340,
+        background: 'transparent',
+        wireframes: false,
+      },
+    });
+
+    const colors = ['#0A84FF', '#34C759', '#FF9500', '#FFD60A', '#FF3B30', '#BF5AF2'];
+    const confetti = Array.from({ length: 72 }, () => {
+      const x = Math.random() * 480;
+      const y = -20 - Math.random() * 160;
+      const w = 8 + Math.random() * 10;
+      const h = 4 + Math.random() * 6;
+      const body = Bodies.rectangle(x, y, w, h, {
+        restitution: 0.3,
+        friction: 0.01,
+        frictionAir: 0.025 + Math.random() * 0.02,
+        render: { fillStyle: colors[Math.floor(Math.random() * colors.length)] },
+        angle: Math.random() * Math.PI * 2,
+      });
+      Body.setVelocity(body, {
+        x: (Math.random() - 0.5) * 6,
+        y: Math.random() * -6 - 2,
+      });
+      Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.18);
+      return body;
+    });
+
+    Composite.add(engine.world, confetti);
+    Render.run(render);
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    const cleanup = setTimeout(() => {
+      Render.stop(render);
+      Runner.stop(runner);
+      Engine.clear(engine);
+    }, 3200);
+
+    return () => {
+      clearTimeout(cleanup);
+      Render.stop(render);
+      Runner.stop(runner);
+      Engine.clear(engine);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        pointerEvents: 'none',
+        zIndex: 10,
+        maxWidth: 480,
+        width: '100%',
+      }}
+    />
+  );
+}
+
+// ─── Animated accuracy bar (anime.js) ────────────────────────────────────────
+function AnimatedBar({ accuracy, color, delay = 0 }) {
+  const barRef = useRef(null);
+
+  useEffect(() => {
+    if (!barRef.current) return;
+    anime({
+      targets: barRef.current,
+      width: [`0%`, `${accuracy}%`],
+      duration: 900,
+      delay,
+      easing: 'easeOutQuart',
+    });
+  }, [accuracy, delay]);
+
+  return (
+    <div style={{ height: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+      <div
+        ref={barRef}
+        style={{ height: '100%', width: '0%', background: color, borderRadius: 3 }}
+      />
+    </div>
+  );
+}
+
+// ─── Animated stat counter (anime.js) ────────────────────────────────────────
+function StatCounter({ value, suffix = '', delay = 0 }) {
+  const ref = useRef(null);
+  const isNumeric = typeof value === 'number';
+
+  useEffect(() => {
+    if (!ref.current || !isNumeric) return;
+    const obj = { val: 0 };
+    anime({
+      targets: obj,
+      val: value,
+      duration: 900,
+      delay,
+      easing: 'easeOutQuart',
+      update: () => {
+        if (ref.current) ref.current.textContent = Math.round(obj.val) + suffix;
+      },
+    });
+  }, [value, suffix, delay, isNumeric]);
+
+  if (!isNumeric) {
+    return <span ref={ref}>{value}{suffix}</span>;
+  }
+  return <span ref={ref}>0{suffix}</span>;
+}
+
+// ─── Category breakdown with anime.js bars ───────────────────────────────────
 function CategoryBreakdown({ zoneEmails }) {
-  // Group by correct L1 category
   const catMap = {};
   zoneEmails.forEach(r => {
     const cat = r.correctL1;
@@ -28,52 +162,52 @@ function CategoryBreakdown({ zoneEmails }) {
 
   return (
     <div style={{ marginBottom: 24, textAlign: 'left' }}>
-      {/* Category accuracy bars */}
       <div style={{
         fontSize: 10, fontWeight: 700, color: 'rgba(60,60,67,0.45)',
         letterSpacing: '0.08em', marginBottom: 10,
       }}>
         CATEGORY BREAKDOWN
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: focusAreas.length ? 20 : 0 }}>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: focusAreas.length ? 20 : 0 }}>
         {breakdown.map(({ cat, accuracy, correct, total, topMiss }, i) => {
           const barColor = accuracy >= 70 ? '#34C759' : accuracy >= 50 ? '#FF9500' : '#FF3B30';
           return (
-            <div key={cat} style={{
-              animation: `staggerFadeIn 0.3s ease ${i * 70}ms forwards`,
-              opacity: 0,
-            }} className="anim-staggerFadeIn">
+            <motion.div
+              key={cat}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + i * 0.08, duration: 0.35, ease: 'easeOut' }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: '#1C1C1E' }}>{cat}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: barColor }}>
                   {correct}/{total} · {accuracy}%
                 </span>
               </div>
-              <div style={{ height: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: topMiss ? 4 : 0 }}>
-                <div style={{
-                  height: '100%', width: `${accuracy}%`,
-                  background: barColor, borderRadius: 3,
-                  transition: 'width 0.8s ease',
-                }} />
-              </div>
+              <AnimatedBar accuracy={accuracy} color={barColor} delay={i * 120} />
               {topMiss && (
-                <div style={{ fontSize: 11, color: '#AEAEB2' }}>
+                <div style={{ fontSize: 11, color: '#AEAEB2', marginTop: 4 }}>
                   Tagged as <span style={{ color: '#FF3B30', fontWeight: 600 }}>{topMiss}</span>
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
-      {/* Focus areas */}
       {focusAreas.length > 0 && (
-        <div style={{
-          background: 'rgba(255,59,48,0.06)',
-          border: '1px solid rgba(255,59,48,0.18)',
-          borderRadius: 12,
-          padding: '12px 14px',
-        }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 + breakdown.length * 0.08 }}
+          style={{
+            background: 'rgba(255,59,48,0.06)',
+            border: '1px solid rgba(255,59,48,0.18)',
+            borderRadius: 12,
+            padding: '12px 14px',
+          }}
+        >
           <div style={{
             fontSize: 10, fontWeight: 700, color: '#FF3B30',
             letterSpacing: '0.08em', marginBottom: 8,
@@ -86,17 +220,20 @@ function CategoryBreakdown({ zoneEmails }) {
                 <span style={{ fontSize: 13 }}>📖</span>
                 <div>
                   <span style={{ fontSize: 12, fontWeight: 600, color: '#1C1C1E' }}>{cat}</span>
-                  <span style={{ fontSize: 11, color: '#8E8E93', marginLeft: 6 }}>{accuracy}% accuracy — needs work</span>
+                  <span style={{ fontSize: 11, color: '#8E8E93', marginLeft: 6 }}>
+                    {accuracy}% accuracy — needs work
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const glass = {
   background: 'rgba(255,255,255,0.65)',
   backdropFilter: 'blur(24px) saturate(180%)',
@@ -107,18 +244,29 @@ const glass = {
 };
 
 const ZONE_META = {
-  1: { color: '#34C759', next: 'Zone 2 – Shadow Inbox' },
-  2: { color: '#FF9500', next: 'Zone 3 – Zero-Day Vault' },
-  3: { color: '#FF3B30', next: 'Final Results' },
+  1: { color: '#0A84FF', next: 'Zone 2 – Shadow Inbox' },
+  2: { color: '#0A84FF', next: 'Zone 3 – Zero-Day Vault' },
+  3: { color: '#0A84FF', next: 'Final Results' },
 };
 
-export default function ZoneComplete({ zone, zoneScore, maxZoneScore, zoneEmails, earlyUnlocked, consecutivePerfect, onContinue }) {
+// ─── Main export ──────────────────────────────────────────────────────────────
+export default function ZoneComplete({
+  zone, zoneScore, maxZoneScore, zoneEmails,
+  earlyUnlocked, consecutivePerfect, onContinue,
+}) {
   const meta = ZONE_META[zone];
   const accuracy = zoneEmails.length > 0
     ? Math.round((zoneEmails.filter(r => r.l1Correct).length / zoneEmails.length) * 100)
     : 0;
   const wrongCount = zoneEmails.filter(r => !r.l1Correct).length;
   const isLast = zone === 3;
+  const isFlawless = wrongCount === 0;
+
+  const stats = [
+    { label: 'Score', value: zoneScore, suffix: `/${maxZoneScore}`, isNumeric: false },
+    { label: 'Accuracy', value: accuracy, suffix: '%', isNumeric: true },
+    { label: 'Missed', value: wrongCount, suffix: '', isNumeric: true },
+  ];
 
   return (
     <div style={{
@@ -128,103 +276,145 @@ export default function ZoneComplete({ zone, zoneScore, maxZoneScore, zoneEmails
       justifyContent: 'center',
       padding: '24px 16px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
-      <div style={{ width: '100%', maxWidth: 480 }}>
 
-        {/* Early unlock badge */}
+      {/* Matter.js confetti — only on flawless */}
+      <AnimatePresence>
+        {isFlawless && <ConfettiCanvas key="confetti" />}
+      </AnimatePresence>
+
+      <div style={{ width: '100%', maxWidth: 480, position: 'relative', zIndex: 1 }}>
+
+        {/* Early unlock banner */}
         {earlyUnlocked && !isLast && (
-          <div style={{
-            ...glass,
-            padding: '12px 20px',
-            marginBottom: 16,
-            borderLeft: '3px solid #FFD60A',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-          }}>
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                position: 'absolute',
-                inset: -6,
-                borderRadius: '50%',
-                border: '2px solid #FFD60A',
-                animation: 'burstRing 0.6s ease-out forwards',
-              }} className="anim-burstRing" />
-              <span style={{ fontSize: 20 }}>⚡</span>
-            </div>
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            style={{
+              ...glass,
+              padding: '12px 20px',
+              marginBottom: 16,
+              borderLeft: '3px solid #FFD60A',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <motion.span
+              animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              style={{ fontSize: 20, display: 'inline-block' }}
+            >
+              ⚡
+            </motion.span>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#B8860B' }}>EARLY UNLOCK!</div>
               <div style={{ fontSize: 12, color: '#636366' }}>
                 {consecutivePerfect} consecutive perfect scores – next zone unlocked early!
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        <div style={{ ...glass, padding: 36, textAlign: 'center' }}>
+        {/* Main card */}
+        <motion.div
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+          style={{ ...glass, padding: 36, textAlign: 'center' }}
+        >
           {/* Zone icon */}
-          <div style={{ fontSize: 40, marginBottom: 12 }}>
-            {wrongCount === 0 ? '🏆' : zone === 3 ? '🎯' : '✅'}
-          </div>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 }}
+            style={{ fontSize: 44, marginBottom: 12, display: 'inline-block' }}
+          >
+            {isFlawless ? '🏆' : zone === 3 ? '🎯' : '✅'}
+          </motion.div>
 
-          <div style={{
-            display: 'inline-block',
-            fontSize: 12,
-            fontWeight: 700,
-            color: meta.color,
-            letterSpacing: '0.08em',
-            marginBottom: 8,
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
+            style={{
+              display: 'inline-block',
+              fontSize: 12,
+              fontWeight: 700,
+              color: meta.color,
+              letterSpacing: '0.08em',
+              marginBottom: 8,
+            }}
+          >
             ZONE {zone} COMPLETE
-          </div>
+          </motion.div>
 
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: '#1C1C1E', margin: '0 0 24px', letterSpacing: '-0.01em' }}>
-            {wrongCount === 0 ? 'Flawless!' : 'Zone cleared'}
-          </h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            style={{ fontSize: 28, fontWeight: 800, color: '#1C1C1E', margin: '0 0 24px', letterSpacing: '-0.01em' }}
+          >
+            {isFlawless ? 'Flawless!' : 'Zone cleared'}
+          </motion.h2>
 
-          {/* Stats row */}
+          {/* Stat tiles */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
-            {[
-              { label: 'Score', value: `${zoneScore}/${maxZoneScore}` },
-              { label: 'Accuracy', value: `${accuracy}%` },
-              { label: 'Wrong', value: wrongCount },
-            ].map(s => (
-              <div key={s.label} style={{
-                flex: 1,
-                background: 'rgba(0,0,0,0.04)',
-                borderRadius: 12,
-                padding: '14px 8px',
-              }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E' }}>{s.value}</div>
+            {stats.map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 + i * 0.08, duration: 0.35, ease: 'easeOut' }}
+                style={{
+                  flex: 1,
+                  background: 'rgba(0,0,0,0.04)',
+                  borderRadius: 12,
+                  padding: '14px 8px',
+                }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E' }}>
+                  {s.isNumeric
+                    ? <StatCounter value={s.value} suffix={s.suffix} delay={300 + i * 80} />
+                    : <span>{s.value}{s.suffix}</span>
+                  }
+                </div>
                 <div style={{ fontSize: 11, color: '#636366', marginTop: 2 }}>{s.label}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Category breakdown */}
           <CategoryBreakdown zoneEmails={zoneEmails} />
 
-
-          <button
+          {/* CTA button */}
+          <motion.button
             onClick={onContinue}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
             style={{
               width: '100%',
               padding: '15px',
               borderRadius: 12,
               border: 'none',
-              background: isLast ? '#1C1C1E' : meta.color,
+              background: '#0A84FF',
               color: '#fff',
               fontSize: 15,
               fontWeight: 700,
               cursor: 'pointer',
               fontFamily: 'inherit',
+              boxShadow: '0 4px 16px rgba(10,132,255,0.35)',
             }}
-            onMouseEnter={e => e.target.style.opacity = '0.88'}
-            onMouseLeave={e => e.target.style.opacity = '1'}
           >
             {isLast ? 'View Results →' : `Continue to ${meta.next} →`}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </div>
   );
