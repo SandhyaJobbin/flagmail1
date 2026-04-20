@@ -225,7 +225,7 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
     return () => clearTimeout(t);
   }, []);
 
-  const { l1Correct, timedOut, points, l1Points, l2Points, clueDeduction } = record;
+  const { l1Correct, timedOut, points } = record;
 
   const verdict = timedOut && !l1Correct
     ? { label: '⏱ Ran out of time', color: '#FF9500', bg: 'rgba(255,149,0,0.1)' }
@@ -236,12 +236,8 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
   const deltaStr = points > 0 ? `+${points}` : '0';
 
   function buildScoreBreak() {
-    const parts = [];
-    if (l1Points > 0) parts.push(`+${l1Points} L1`);
-    if (l2Points > 0) parts.push(`+${l2Points} L2`);
-    if (clueDeduction > 0) parts.push(`−${clueDeduction} clue${clueDeduction > 1 ? 's' : ''}`);
-    if (parts.length === 0) parts.push('0 pts');
-    return parts.join(' · ');
+    if (points > 0) return `+${points} pts — L1 correct`;
+    return '0 pts';
   }
 
   return (
@@ -344,9 +340,22 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
             <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em', marginBottom: 8 }}>
               ANALYSIS
             </div>
-            <div style={{ fontSize: 14, color: '#1C1C1E', lineHeight: 1.6, marginBottom: 16 }}>
+            <div style={{ fontSize: 14, color: '#1C1C1E', lineHeight: 1.6, marginBottom: 12 }}>
               {email.explanation}
             </div>
+
+            {email.subCategory && (
+              <div style={{ marginBottom: 16 }}>
+                <span style={{
+                  fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
+                  color: '#636366', background: 'rgba(0,0,0,0.06)',
+                  border: '1px solid rgba(0,0,0,0.1)', borderRadius: 20,
+                  padding: '3px 10px',
+                }}>
+                  {email.subCategory}
+                </span>
+              </div>
+            )}
 
             {/* Classification comparison rows */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -381,49 +390,6 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
                       <span style={{ fontSize: 12, color: '#8E8E93' }}>Correct answer</span>
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#34C759' }}>
                         {record.correctL1}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* L2 row */}
-              {(record.l1Correct && (record.timedOut || (record.selectedL2 && !record.l2Correct))) && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.32, duration: 0.3 }}
-                  style={{
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    border: record.l2Correct
-                      ? '1px solid rgba(52,199,89,0.35)'
-                      : '1px solid rgba(255,59,48,0.35)',
-                  }}
-                >
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '7px 12px',
-                    background: record.l2Correct ? 'rgba(52,199,89,0.1)' : 'rgba(255,59,48,0.08)',
-                  }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: '#636366' }}>
-                      SUBCATEGORY (L2)
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#FF3B30' }}>
-                      {record.timedOut && !record.selectedL2 ? '⏱ Ran out of time' : '↗ Missed it'}
-                    </span>
-                  </div>
-                  <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>You selected</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#FF3B30' }}>
-                        {record.selectedL2 || '— (timed out)'}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>Correct answer</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#34C759' }}>
-                        {record.correctL2}
                       </span>
                     </div>
                   </div>

@@ -68,7 +68,7 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
       {/* ── Mail Header ── */}
       <div style={{
         padding: '16px 20px 14px',
-        borderBottom: '1px solid rgba(0,0,0,0.07)',
+        borderBottom: '0.5px solid rgba(0,0,0,0.1)',
         background: '#FAFAFA',
       }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -105,13 +105,13 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
                 {senderName}
               </span>
               <span style={{ fontSize: 12, color: '#AEAEB2', flexShrink: 0 }}>
-                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {`Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
               </span>
             </div>
 
             <div style={{
               fontSize: 12,
-              color: '#8E8E93',
+              color: 'rgba(60,60,67,0.55)',
               marginTop: 1,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -121,10 +121,10 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
             </div>
 
             <div style={{
-              fontSize: 13,
-              color: '#3A3A3C',
+              fontSize: 15,
+              color: '#1C1C1E',
               marginTop: 6,
-              fontWeight: 500,
+              fontWeight: 600,
             }}>
               {email.subject}
             </div>
@@ -148,9 +148,9 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
       {/* ── Body ── */}
       <div style={{
         padding: '18px 20px 20px',
-        fontSize: 14,
-        color: '#1C1C1E',
-        lineHeight: 1.7,
+        fontSize: 15,
+        color: '#3A3A3C',
+        lineHeight: 1.65,
         whiteSpace: 'pre-wrap',
         background: '#FFFFFF',
       }}>
