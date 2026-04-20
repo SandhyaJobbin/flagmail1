@@ -6,6 +6,7 @@ import { useScoring } from './hooks/useScoring.js';
 import { useBadges } from './hooks/useBadges.js';
 import { useLeaderboard } from './hooks/useLeaderboard.js';
 
+import AppleHelloIntro from './components/AppleHelloIntro.jsx';
 import LandingScreen    from './components/LandingScreen.jsx';
 import TutorialScreen   from './components/TutorialScreen.jsx';
 import ZoneIntroCard    from './components/ZoneIntroCard.jsx';
@@ -102,6 +103,10 @@ export default function App() {
       color: '#1C1C1E',
     }}>
       <BadgeToast badge={bg.pendingToast} onDismiss={handleBadgeDismiss} />
+
+      {gs.screen === SCREENS.INTRO && (
+        <AppleHelloIntro onContinue={gs.completeIntro} />
+      )}
 
       {gs.screen === SCREENS.LANDING && (
         <LandingScreen onStart={gs.startGame} />

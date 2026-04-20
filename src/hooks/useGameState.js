@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { shuffleEmails } from '../utils/shuffle.js';
 
 export const SCREENS = {
+  INTRO:         'intro',
   LANDING:       'landing',
   TUTORIAL:      'tutorial',
   ZONE_INTRO:    'zone_intro',
@@ -26,7 +27,7 @@ function initialRoundState() {
 }
 
 export function useGameState() {
-  const [screen, setScreen] = useState(SCREENS.LANDING);
+  const [screen, setScreen] = useState(SCREENS.INTRO);
   const [player, setPlayer] = useState({ name: '', email: '' });
   const [emailPool, setEmailPool] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -61,6 +62,10 @@ export function useGameState() {
       setScreen(SCREENS.ZONE_INTRO);
     }
   }, [tutorialSeen]);
+
+  const completeIntro = useCallback(() => {
+    setScreen(SCREENS.LANDING);
+  }, []);
 
   const completeTutorial = useCallback(() => {
     setTutorialSeen(true);
@@ -148,7 +153,7 @@ export function useGameState() {
   }, []);
 
   const resetGame = useCallback(() => {
-    setScreen(SCREENS.LANDING);
+    setScreen(SCREENS.INTRO);
     setPlayer({ name: '', email: '' });
     setEmailPool([]);
     setCurrentIndex(0);
@@ -174,6 +179,7 @@ export function useGameState() {
     round,
     // actions
     startGame,
+    completeIntro,
     completeTutorial,
     startZone,
     revealClue,
