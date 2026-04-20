@@ -33,8 +33,7 @@ export default function App() {
     const record = sc.scoreRound({
       email: currentEmail,
       selectedL1: round.selectedL1,
-      selectedL2: timedOut ? null : round.selectedL2,
-      cluesRevealed: round.cluesRevealed,
+      hintRevealed: round.hintRevealed,
       timedOut,
     });
     const { unlockedAny } = bg.checkAfterRound({ record, timeLeft });
@@ -59,8 +58,8 @@ export default function App() {
     // Check zone badges when crossing zone boundary
     if (gs.currentIndex + 1 >= gs.zoneEnd) {
       const zoneEmails = sc.perEmail.filter(r => r.zone === gs.zone);
-      const zoneCluesUsed = zoneEmails.reduce((sum, r) => sum + r.cluesUsed, 0);
-      bg.checkAfterZone({ zoneEmails, zoneCluesUsed, zone: gs.zone });
+      const zoneHintsUsed = zoneEmails.filter(r => r.hintUsed).length;
+      bg.checkAfterZone({ zoneEmails, zoneHintsUsed, zone: gs.zone });
     }
     gs.nextEmail();
   }, [gs, sc, bg]);
@@ -68,13 +67,13 @@ export default function App() {
   // ── Advance zone / end game ──────────────────────────────────────────────
   const handleAdvanceZone = useCallback(() => {
     if (gs.zone === 3) {
-      const totalCluesUsed = sc.perEmail.reduce((sum, r) => sum + r.cluesUsed, 0);
-      bg.checkAfterGame({ perEmail: sc.perEmail, totalCluesUsed });
+      const totalHintsUsed = sc.perEmail.filter(r => r.hintUsed).length;
+      bg.checkAfterGame({ perEmail: sc.perEmail, totalHintsUsed });
       lb.submitScore({
         name: gs.player.name,
         email: gs.player.email,
         score: sc.totalScore,
-        title: sc.totalScore >= 70 ? 'Threat Intelligence Lead' : sc.totalScore >= 40 ? 'Senior Analyst' : 'Junior Analyst',
+        title: sc.totalScore >= 50 ? 'Threat Intelligence Lead' : sc.totalScore >= 30 ? 'Senior Analyst' : 'Junior Analyst',
         badges: bg.earned.length,
         zone1Score: sc.zoneScores[1],
         zone2Score: sc.zoneScores[2],
@@ -132,9 +131,8 @@ export default function App() {
           emailsInZone={gs.emailsInZone}
           totalScore={sc.totalScore}
           round={gs.round}
-          onRevealClue={gs.revealClue}
+          onRevealHint={gs.revealHint}
           onSelectL1={gs.selectL1}
-          onSelectL2={gs.selectL2}
           onSubmit={handleSubmit}
         />
       )}
@@ -152,7 +150,7 @@ export default function App() {
         <ZoneComplete
           zone={gs.zone}
           zoneScore={sc.zoneScores[gs.zone]}
-          maxZoneScore={gs.zone === 3 ? 20 : 40}
+          maxZoneScore={20}
           zoneEmails={sc.perEmail.filter(r => r.zone === gs.zone)}
           earlyUnlocked={gs.earlyUnlocked}
           consecutivePerfect={gs.consecutivePerfect}
