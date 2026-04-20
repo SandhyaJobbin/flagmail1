@@ -8,9 +8,9 @@ import '../styles/animations.css';
 
 const STEPS = [
   { src: img1, caption: 'Read the email like you\'re the last line of defense' },
-  { src: img2, caption: 'Stuck? Unlock a clue — but every hint costs you points' },
-  { src: img3, caption: 'Pick the threat type (L1), then nail the subcategory (L2)' },
-  { src: img4, caption: 'Confident? Lock it in before the clock runs out' },
+  { src: img2, caption: 'Stuck? Tap ⓘ to reveal a hint — no point deduction' },
+  { src: img3, caption: 'Classify into one of 3 categories: Legitimate, Spam & Junk, or Phishing & Spoofing' },
+  { src: img4, caption: 'Confident? Lock it in before the 45-second clock runs out' },
 ];
 
 const STEP_DURATION = 5000;

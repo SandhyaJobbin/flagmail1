@@ -11,9 +11,9 @@ const glass = {
 };
 
 const ZONE_CARDS = [
-  { zone: 3, title: 'Zero-Day Vault', emails: 5,  color: '#0A84FF', locked: true,  desc: 'Advanced threat analysis', top: 32, zIndex: 1, scale: 0.94, rot: 2   },
-  { zone: 2, title: 'Shadow Inbox',   emails: 10, color: '#0A84FF', locked: true,  desc: 'Spot deceptive patterns',  top: 16, zIndex: 2, scale: 0.97, rot: 1   },
-  { zone: 1, title: 'Flag Academy',   emails: 10, color: '#0A84FF', locked: false, desc: 'Identify common threats',  top: 0,  zIndex: 3, scale: 1.0,  rot: 0   },
+  { zone: 3, title: 'The Escalation', emails: 10, color: '#0A84FF', locked: true,  desc: 'Advanced threat analysis', top: 32, zIndex: 1, scale: 0.94, rot: 2   },
+  { zone: 2, title: 'The Queue',      emails: 10, color: '#0A84FF', locked: true,  desc: 'Spot deceptive patterns',  top: 16, zIndex: 2, scale: 0.97, rot: 1   },
+  { zone: 1, title: 'The Inbox',      emails: 10, color: '#0A84FF', locked: false, desc: 'Identify common threats',  top: 0,  zIndex: 3, scale: 1.0,  rot: 0   },
 ];
 
 export default function LandingScreen({ onStart }) {
@@ -307,7 +307,7 @@ export default function LandingScreen({ onStart }) {
             textAlign: 'center',
             marginBottom: 12,
           }}>
-            3 Zones · 25 Emails
+            3 Zones · 30 Emails
           </div>
 
           {/* Stacked cards with GSAP fan hover */}
