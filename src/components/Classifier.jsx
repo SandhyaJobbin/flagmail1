@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { L1_CATEGORIES, L2_BY_L1 } from '../data/emails.js';
 
@@ -179,8 +179,13 @@ function HelpTooltip({ tooltip, color }) {
 export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelectL2, disabled }) {
   const l2Options = selectedL1 ? L2_BY_L1[selectedL1] || [] : [];
   const [tooltip, setTooltip] = useState(null);
+  const [activeControl, setActiveControl] = useState(null);
   const hoverTimer = useRef(null);
   const dismissTimer = useRef(null);
+  const l1HelpId = useId();
+  const l1StatusId = useId();
+  const l2HelpId = useId();
+  const l2StatusId = useId();
 
   function clearAll() {
     clearTimeout(hoverTimer.current);
@@ -207,6 +212,16 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
   function hide() {
     clearAll();
     setTooltip(null);
+  }
+
+  function activateControl(id, type, color, e) {
+    setActiveControl(`${type}:${id}`);
+    showAfterDelay(id, type, color, e);
+  }
+
+  function deactivateControl() {
+    setActiveControl(null);
+    hide();
   }
 
   const tooltipColor = tooltip
@@ -240,46 +255,104 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
           }}>
             Primary classification
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.54)' }}>
-            Choose the strongest category
+          <div id={l1HelpId} style={{ fontSize: 11, color: 'rgba(17,24,39,0.60)' }}>
+            Each option is a button. Select one primary category to unlock submission.
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div
+          role="group"
+          aria-label="Primary classification choices"
+          aria-describedby={`${l1HelpId} ${l1StatusId}`}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}
+        >
           {L1_CATEGORIES.map((cat) => {
             const isSelected = selectedL1 === cat.id;
+            const isActive = activeControl === `l1:${cat.id}`;
+
             return (
               <button
                 key={cat.id}
+                type="button"
                 onClick={() => !disabled && onSelectL1(cat.id)}
-                onMouseEnter={(e) => !disabled && showAfterDelay(cat.id, 'l1', cat.color, e)}
-                onMouseLeave={hide}
+                onMouseEnter={(e) => !disabled && activateControl(cat.id, 'l1', cat.color, e)}
+                onMouseLeave={deactivateControl}
+                onFocus={(e) => !disabled && activateControl(cat.id, 'l1', cat.color, e)}
+                onBlur={deactivateControl}
                 disabled={disabled}
+                aria-pressed={isSelected}
+                aria-describedby={`${l1HelpId} ${l1StatusId}`}
+                aria-label={`${cat.label}. ${isSelected ? 'Selected primary category.' : 'Select as primary category.'}`}
+                title={isSelected ? `${cat.label} selected` : `Select ${cat.label}`}
                 style={{
-                  padding: '11px 16px',
+                  minWidth: 220,
+                  padding: '12px 14px',
                   borderRadius: 16,
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: disabled ? 'default' : 'pointer',
                   transition: 'all 0.18s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  textAlign: 'left',
                   ...(isSelected ? {
-                    background: `linear-gradient(180deg, rgba(${hexToRgb(cat.color)},0.18) 0%, rgba(255,255,255,0.94) 100%)`,
+                    background: `linear-gradient(180deg, rgba(${hexToRgb(cat.color)},0.24) 0%, rgba(255,255,255,0.97) 100%)`,
                     border: `1.5px solid ${cat.color}`,
-                    boxShadow: `0 10px 24px rgba(${hexToRgb(cat.color)},0.16), 0 0 0 4px rgba(${hexToRgb(cat.color)},0.08)`,
+                    boxShadow: `0 12px 28px rgba(${hexToRgb(cat.color)},0.16), 0 0 0 4px rgba(${hexToRgb(cat.color)},0.08)`,
                     color: cat.color,
                     transform: 'translateY(-1px)',
                   } : {
-                    background: 'rgba(255,255,255,0.78)',
-                    border: '1.5px solid rgba(13,26,51,0.08)',
+                    background: isActive ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.88)',
+                    border: isActive ? `1.5px solid ${cat.color}99` : '1.5px solid rgba(13,26,51,0.14)',
                     color: '#111827',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.72)',
+                    boxShadow: isActive
+                      ? `0 10px 22px rgba(${hexToRgb(cat.color)},0.10), inset 0 1px 0 rgba(255,255,255,0.84)`
+                      : '0 4px 14px rgba(17,24,39,0.06), inset 0 1px 0 rgba(255,255,255,0.72)',
+                    transform: isActive ? 'translateY(-1px)' : 'none',
                   }),
                 }}
               >
-                {cat.label}
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    border: isSelected ? `5px solid ${cat.color}` : `2px solid ${isActive ? cat.color : 'rgba(17,24,39,0.30)'}`,
+                    background: isSelected ? '#fff' : 'transparent',
+                    boxShadow: isSelected ? `0 0 0 4px rgba(${hexToRgb(cat.color)},0.14)` : 'none',
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ display: 'grid', gap: 2, flex: 1, minWidth: 0 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isSelected ? cat.color : 'rgba(17,24,39,0.48)' }}>
+                    Primary category
+                  </span>
+                  <span>{cat.label}</span>
+                </span>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    padding: '5px 8px',
+                    borderRadius: 999,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    background: isSelected ? `${cat.color}18` : 'rgba(17,24,39,0.06)',
+                    color: isSelected ? cat.color : 'rgba(17,24,39,0.62)',
+                    border: isSelected ? `1px solid ${cat.color}28` : '1px solid rgba(13,26,51,0.08)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {isSelected ? 'Selected' : 'Select'}
+                </span>
               </button>
             );
           })}
+        </div>
+
+        <div id={l1StatusId} aria-live="polite" style={{ marginTop: 10, fontSize: 12, color: 'rgba(17,24,39,0.58)' }}>
+          {selectedL1 ? `Primary category selected: ${selectedL1}.` : 'No primary category selected yet.'}
         </div>
       </div>
 
@@ -302,45 +375,92 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
             }}>
               Secondary diagnosis
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.54)' }}>
-              Optional — refine if confident
+            <div id={l2HelpId} style={{ fontSize: 11, color: 'rgba(17,24,39,0.60)' }}>
+              Optional button choices to refine the primary category.
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div
+            role="group"
+            aria-label={`Secondary diagnosis choices for ${selectedL1}`}
+            aria-describedby={`${l2HelpId} ${l2StatusId}`}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}
+          >
             {l2Options.map((sub) => {
               const isSelected = selectedL2 === sub;
               const catColor = L1_CATEGORIES.find((cat) => cat.id === selectedL1)?.color || '#0A84FF';
+              const isActive = activeControl === `l2:${sub}`;
+
               return (
                 <button
                   key={sub}
+                  type="button"
                   onClick={() => !disabled && onSelectL2(sub)}
-                  onMouseEnter={(e) => !disabled && showAfterDelay(sub, 'l2', catColor, e)}
-                  onMouseLeave={hide}
+                  onMouseEnter={(e) => !disabled && activateControl(sub, 'l2', catColor, e)}
+                  onMouseLeave={deactivateControl}
+                  onFocus={(e) => !disabled && activateControl(sub, 'l2', catColor, e)}
+                  onBlur={deactivateControl}
                   disabled={disabled}
+                  aria-pressed={isSelected}
+                  aria-describedby={`${l2HelpId} ${l2StatusId}`}
+                  aria-label={`${sub}. ${isSelected ? 'Selected secondary diagnosis.' : 'Select as secondary diagnosis.'}`}
+                  title={isSelected ? `${sub} selected` : `Select ${sub}`}
                   style={{
-                    padding: '9px 14px',
+                    padding: '10px 12px',
                     borderRadius: 999,
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: disabled ? 'default' : 'pointer',
                     transition: 'all 0.18s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
                     ...(isSelected ? {
                       background: `linear-gradient(180deg, rgba(${hexToRgb(catColor)},0.16) 0%, rgba(255,255,255,0.94) 100%)`,
                       border: `1.5px solid ${catColor}`,
                       color: catColor,
                       boxShadow: `0 8px 18px rgba(${hexToRgb(catColor)},0.14)`,
                     } : {
-                      background: 'rgba(255,255,255,0.78)',
-                      border: '1.5px solid rgba(13,26,51,0.08)',
-                      color: 'rgba(17,24,39,0.66)',
+                      background: isActive ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.88)',
+                      border: isActive ? `1.5px solid ${catColor}99` : '1.5px solid rgba(13,26,51,0.12)',
+                      color: 'rgba(17,24,39,0.78)',
+                      boxShadow: isActive ? `0 8px 18px rgba(${hexToRgb(catColor)},0.10)` : '0 4px 12px rgba(17,24,39,0.05)',
                     }),
                   }}
                 >
-                  {sub}
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      background: isSelected ? catColor : (isActive ? catColor : 'rgba(17,24,39,0.24)'),
+                      boxShadow: isSelected ? `0 0 0 4px rgba(${hexToRgb(catColor)},0.12)` : 'none',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span>{sub}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      marginLeft: 'auto',
+                      padding: '3px 7px',
+                      borderRadius: 999,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      background: isSelected ? `${catColor}18` : 'rgba(17,24,39,0.06)',
+                      color: isSelected ? catColor : 'rgba(17,24,39,0.56)',
+                    }}
+                  >
+                    {isSelected ? 'Selected' : 'Select'}
+                  </span>
                 </button>
               );
             })}
+          </div>
+
+          <div id={l2StatusId} aria-live="polite" style={{ marginTop: 10, fontSize: 12, color: 'rgba(17,24,39,0.58)' }}>
+            {selectedL2 ? `Secondary diagnosis selected: ${selectedL2}.` : 'Secondary diagnosis is optional.'}
           </div>
         </div>
       )}

@@ -33,7 +33,7 @@ const ZONE_CARDS = [
 const STATS = [
   { value: '15', label: 'emails' },
   { value: '3', label: 'zones' },
-  { value: '45s', label: 'per round' },
+  { value: '120s', label: 'per round' },
 ];
 
 export default function LandingScreen({ onStart }) {
@@ -234,7 +234,7 @@ export default function LandingScreen({ onStart }) {
                     maxWidth: 540,
                   }}
                 >
-                  15 timed scenarios across 3 escalating zones. Your decisions are scored and mapped to a competency tier.
+                  15 timed scenarios across 3 escalating zones. Each decision is scored, reviewed, and translated into a competency tier.
                 </p>
               </div>
 
@@ -409,7 +409,7 @@ export default function LandingScreen({ onStart }) {
                   maxWidth: 420,
                 }}
               >
-                Enter your details to start. Your name and email are used to record your result.
+                Enter your details to begin. Your name and email are used to record the final assessment result.
               </p>
             </div>
 
@@ -504,6 +504,17 @@ export default function LandingScreen({ onStart }) {
                 gap: 10,
               }}
             >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,24,39,0.48)',
+                }}
+              >
+                Assessment flow
+              </div>
               {[
                 'Enter your details and start the assessment.',
                 'Classify each email under time pressure.',

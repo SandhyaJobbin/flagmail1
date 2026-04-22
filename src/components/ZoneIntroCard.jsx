@@ -14,38 +14,98 @@ const ZONES = [
     title: 'The Inbox',
     subtitle: 'Section 1 of 3',
     emails: 5,
-    icon: '✦',
+    difficulty: 'Foundation',
     accent: '#0A84FF',
     mission: 'Spot the loud red flags fast and build your rhythm.',
     contextCopy: 'Start with the obvious ones and find your footing.',
-    signals: ['Urgent asks', 'Mismatched senders', 'Low-trust promotions'],
+    signals: [
+      {
+        title: 'Urgent asks',
+        detail: 'Pressure-heavy requests that want a fast reaction before you verify anything.',
+      },
+      {
+        title: 'Mismatched senders',
+        detail: 'The name, email address, and story do not line up cleanly.',
+      },
+      {
+        title: 'Low-trust promotions',
+        detail: 'Noisy offers, weak credibility, and incentives that feel slightly off.',
+      },
+    ],
+    prep: [
+      'Move quickly on obvious tells.',
+      'Use sender and tone as your first filter.',
+      'Build momentum before the harder zones.',
+    ],
   },
   {
     zone: 2,
     title: 'The Queue',
     subtitle: 'Section 2 of 3',
     emails: 5,
-    icon: '◌',
+    difficulty: 'Intermediate',
     accent: '#30B0C7',
     mission: 'The copy gets cleaner here. Trust the details, not the polish.',
     contextCopy: 'Polish can hide a lot. Read slower.',
-    signals: ['Lookalike domains', 'Workflow mismatches', 'Suspicious requests'],
+    signals: [
+      {
+        title: 'Lookalike domains',
+        detail: 'Small spelling changes and realistic branding used to borrow trust.',
+      },
+      {
+        title: 'Workflow mismatches',
+        detail: 'Messages that sound plausible until you compare them to real process.',
+      },
+      {
+        title: 'Suspicious requests',
+        detail: 'Seemingly routine asks that quietly push for risky action.',
+      },
+    ],
+    prep: [
+      'Slow down and compare details.',
+      'Check whether the workflow feels real.',
+      'Treat polished writing with healthy skepticism.',
+    ],
   },
   {
     zone: 3,
     title: 'The Escalation',
     subtitle: 'Section 3 of 3',
     emails: 5,
-    icon: '◎',
+    difficulty: 'Advanced',
     accent: '#FF7A1A',
     mission: 'One subtle inconsistency is usually the whole story.',
     contextCopy: 'High stakes. One detail changes everything.',
-    signals: ['Subtle social engineering', 'Operational realism', 'One decisive clue'],
+    signals: [
+      {
+        title: 'Subtle social engineering',
+        detail: 'The message sounds credible because it mirrors real pressure and timing.',
+      },
+      {
+        title: 'Operational realism',
+        detail: 'Details are believable enough that only one mismatch stands out.',
+      },
+      {
+        title: 'One decisive clue',
+        detail: 'A single overlooked inconsistency usually decides the classification.',
+      },
+    ],
+    prep: [
+      'Read for what feels slightly wrong.',
+      'Expect only one or two decisive clues.',
+      'Accuracy matters more than speed here.',
+    ],
   },
 ];
 
 export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
   const meta = ZONES.find((item) => item.zone === zone);
+  const progressWidth = `${(meta.zone / ZONES.length) * 100}%`;
+  const statCards = [
+    { label: 'Emails', value: meta.emails, helper: 'Short burst' },
+    { label: 'Max points', value: meta.emails * 5, helper: '5 each' },
+    { label: 'Time each', value: '120s', helper: 'Timed read' },
+  ];
 
   return (
     <div
@@ -58,10 +118,15 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
       }}
     >
       <style>{`
+        .zone-intro-shell {
+          min-height: calc(100dvh - (2 * clamp(18px, 3vw, 30px)));
+        }
+
         @media (max-width: 900px) {
           .zone-intro-shell {
             grid-template-columns: 1fr !important;
             overflow: auto !important;
+            min-height: auto !important;
           }
         }
 
@@ -69,6 +134,13 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
           .zone-intro-main,
           .zone-intro-side {
             padding: 22px !important;
+          }
+
+          .zone-intro-hero,
+          .zone-intro-bottom,
+          .zone-intro-side-grid,
+          .zone-intro-action-row {
+            grid-template-columns: 1fr !important;
           }
 
           .zone-intro-stats {
@@ -97,11 +169,11 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
         className="zone-intro-shell"
         style={{
           width: '100%',
-          maxWidth: 1120,
+          maxWidth: 1240,
           height: '100%',
           margin: '0 auto',
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)',
+          gridTemplateColumns: 'minmax(0, 1.12fr) minmax(360px, 0.88fr)',
           gap: 20,
           alignItems: 'stretch',
           position: 'relative',
@@ -117,108 +189,203 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             borderRadius: 34,
             padding: 'clamp(24px, 3vw, 34px)',
             display: 'grid',
-            gap: 22,
-            alignContent: 'space-between',
+            gap: 24,
             minHeight: 0,
+            minWidth: 0,
+            overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'grid', gap: 16 }}>
+          <div
+            className="zone-intro-hero"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1.2fr) minmax(250px, 0.8fr)',
+              gap: 16,
+              alignItems: 'stretch',
+              minWidth: 0,
+            }}
+          >
+            <div style={{ display: 'grid', gap: 18, minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  background: `${meta.accent}12`,
+                  border: `1px solid ${meta.accent}24`,
+                  justifySelf: 'start',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: meta.accent,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Zone {meta.zone}
+                </span>
+                <span
+                  style={{
+                    width: 1,
+                    height: 14,
+                    background: `${meta.accent}35`,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: 'rgba(17,24,39,0.56)',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {meta.subtitle}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12, maxWidth: 660 }}>
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(44px, 6vw, 80px)',
+                    lineHeight: 0.92,
+                    letterSpacing: '-0.06em',
+                    color: '#111827',
+                    fontWeight: 700,
+                  }}
+                >
+                  {meta.title}
+                </h1>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(16px, 1.75vw, 19px)',
+                    lineHeight: 1.55,
+                    color: 'rgba(17,24,39,0.66)',
+                    maxWidth: 560,
+                  }}
+                >
+                  {meta.mission}
+                </p>
+              </div>
+            </div>
+
             <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '8px 14px',
-                borderRadius: 999,
-                background: `${meta.accent}12`,
-                border: `1px solid ${meta.accent}24`,
-                justifySelf: 'start',
+                borderRadius: 28,
+                padding: '18px',
+                background: `linear-gradient(160deg, ${meta.accent}16 0%, rgba(255,255,255,0.88) 55%, rgba(255,255,255,0.68) 100%)`,
+                border: `1px solid ${meta.accent}18`,
+                display: 'grid',
+                gap: 12,
+                alignContent: 'start',
+                minWidth: 0,
               }}
             >
-              <span
+              <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 700,
-                  color: meta.accent,
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
+                  color: meta.accent,
                 }}
               >
-                Zone {meta.zone}
-              </span>
-              <span
+                Focus for this zone
+              </div>
+              <div
                 style={{
-                  width: 1,
-                  height: 14,
-                  background: `${meta.accent}35`,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 12,
+                  fontSize: 24,
+                  lineHeight: 1,
                   fontWeight: 700,
-                  color: 'rgba(17,24,39,0.56)',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {meta.subtitle}
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gap: 12, maxWidth: 650 }}>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 'clamp(42px, 6vw, 76px)',
-                  lineHeight: 0.95,
-                  letterSpacing: '-0.055em',
+                  letterSpacing: '-0.04em',
                   color: '#111827',
-                  fontWeight: 700,
                 }}
               >
-                {meta.title}
-              </h1>
-
-              <p
+                {meta.difficulty}
+              </div>
+              <div
                 style={{
-                  margin: 0,
-                  fontSize: 'clamp(16px, 1.8vw, 19px)',
+                  fontSize: 13,
                   lineHeight: 1.55,
                   color: 'rgba(17,24,39,0.66)',
-                  maxWidth: 560,
                 }}
               >
-                {meta.mission}
-              </p>
-            </div>
-
-            <div
-              className="zone-intro-stats"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: 12,
-                maxWidth: 620,
-              }}
-            >
-              {[
-                { label: 'Emails', value: 5 },
-                { label: 'Max points', value: 25 },
-                { label: 'Time each', value: '45s' },
-              ].map((stat) => (
+                {meta.contextCopy}
+              </div>
+              <div
+                style={{
+                  marginTop: 2,
+                  height: 8,
+                  borderRadius: 999,
+                  background: 'rgba(17,24,39,0.08)',
+                  overflow: 'hidden',
+                }}
+              >
                 <div
-                  key={stat.label}
                   style={{
-                    borderRadius: 22,
-                    padding: '18px 16px',
-                    background: 'rgba(255,255,255,0.82)',
-                    border: '1px solid rgba(13,26,51,0.06)',
+                    width: progressWidth,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: `linear-gradient(90deg, ${meta.accent} 0%, rgba(255,255,255,0.9) 140%)`,
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 10,
+                  fontSize: 11,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,24,39,0.48)',
+                }}
+              >
+                <span>Start here</span>
+                <span>{meta.subtitle}</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="zone-intro-stats"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 12,
+            }}
+          >
+            {statCards.map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  borderRadius: 22,
+                  padding: '16px 16px 15px',
+                  background: 'rgba(255,255,255,0.82)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'grid',
+                  gap: 6,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'end',
+                    justifyContent: 'space-between',
+                    gap: 10,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 28,
+                      fontSize: 30,
                       lineHeight: 1,
                       fontWeight: 700,
                       letterSpacing: '-0.05em',
@@ -229,74 +396,169 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
                   </div>
                   <div
                     style={{
-                      marginTop: 6,
                       fontSize: 11,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.10em',
                       fontWeight: 700,
-                      color: 'rgba(17,24,39,0.50)',
+                      color: meta.accent,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
                     }}
                   >
-                    {stat.label}
+                    {stat.helper}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.10em',
+                    fontWeight: 700,
+                    color: 'rgba(17,24,39,0.50)',
+                  }}
+                >
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="zone-intro-bottom"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1.05fr) minmax(260px, 0.95fr)',
+              gap: 16,
+              minHeight: 0,
+              minWidth: 0,
+            }}
+          >
+            <div style={{ display: 'grid', gap: 12, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(17,24,39,0.50)',
+                }}
+              >
+                What to watch for
+              </div>
+
+              {meta.signals.map((signal, index) => (
+                <div
+                  key={signal.title}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '38px minmax(0, 1fr)',
+                    gap: 12,
+                    alignItems: 'start',
+                    borderRadius: 20,
+                    padding: '14px 16px',
+                    background: 'rgba(255,255,255,0.8)',
+                    border: '1px solid rgba(13,26,51,0.06)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 999,
+                      background: `${meta.accent}12`,
+                      color: meta.accent,
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontSize: 13,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        lineHeight: 1.35,
+                        fontWeight: 700,
+                        letterSpacing: '-0.02em',
+                        color: '#111827',
+                      }}
+                    >
+                      {signal.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.55,
+                        color: 'rgba(17,24,39,0.62)',
+                      }}
+                    >
+                      {signal.detail}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          <div style={{ display: 'grid', gap: 10 }}>
             <div
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                color: 'rgba(17,24,39,0.50)',
+                borderRadius: 28,
+                padding: '18px',
+                background: 'rgba(249,250,252,0.82)',
+                border: '1px solid rgba(13,26,51,0.06)',
+                display: 'grid',
+                gap: 12,
+                alignContent: 'start',
+                minWidth: 0,
               }}
             >
-              What to watch for
-            </div>
-
-            {meta.signals.map((signal, index) => (
               <div
-                key={signal}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '32px minmax(0, 1fr)',
-                  gap: 10,
-                  alignItems: 'start',
-                  borderRadius: 18,
-                  padding: '12px 14px',
-                  background: 'rgba(255,255,255,0.8)',
-                  border: '1px solid rgba(13,26,51,0.06)',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(17,24,39,0.50)',
                 }}
               >
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 999,
-                    background: `${meta.accent}12`,
-                    color: meta.accent,
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
-                >
-                  {index + 1}
-                </div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.5,
-                    color: 'rgba(17,24,39,0.66)',
-                  }}
-                >
-                  {signal}
-                </div>
+                Quick prep
               </div>
-            ))}
+              {meta.prep.map((item, index) => (
+                <div
+                  key={item}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '24px minmax(0, 1fr)',
+                    gap: 10,
+                    alignItems: 'start',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 999,
+                      background: 'rgba(17,24,39,0.06)',
+                      color: '#111827',
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontSize: 11,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: 'rgba(17,24,39,0.64)',
+                    }}
+                  >
+                    {item}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
 
@@ -316,39 +578,209 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
           }}
         >
           <div
+            className="zone-intro-side-grid"
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 22,
-              background: `${meta.accent}18`,
-              border: `1px solid ${meta.accent}24`,
               display: 'grid',
-              placeItems: 'center',
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.75), 0 16px 32px ${meta.accent}18`,
+              gridTemplateColumns: 'minmax(0, 1fr)',
+              gap: 14,
             }}
           >
-            <span
+            <div
               style={{
-                fontSize: 36,
-                lineHeight: 1,
-                color: meta.accent,
+                borderRadius: 26,
+                padding: '18px',
+                background: `linear-gradient(180deg, ${meta.accent}14 0%, rgba(255,255,255,0.88) 100%)`,
+                border: `1px solid ${meta.accent}22`,
+                display: 'grid',
+                gap: 12,
               }}
             >
-              {meta.icon}
-            </span>
-          </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '56px minmax(0, 1fr)',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    background: 'rgba(255,255,255,0.7)',
+                    border: `1px solid ${meta.accent}22`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.75), 0 12px 24px ${meta.accent}14`,
+                    position: 'relative',
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      inset: '50% auto auto 50%',
+                      width: 18,
+                      height: 18,
+                      transform: 'translate(-50%, -50%) rotate(45deg)',
+                      borderRadius: 6,
+                      background: meta.accent,
+                    }}
+                  />
+                </div>
 
-          <div style={{ display: 'grid', gap: 10 }}>
-            <p
+                <div style={{ display: 'grid', gap: 4 }}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.12em',
+                      color: 'rgba(17,24,39,0.48)',
+                    }}
+                  >
+                    Mission note
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      lineHeight: 1.05,
+                      letterSpacing: '-0.04em',
+                      fontWeight: 700,
+                      color: '#111827',
+                    }}
+                  >
+                    Find the pattern fast.
+                  </div>
+                </div>
+              </div>
+
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: 'rgba(17,24,39,0.66)',
+                }}
+              >
+                {meta.contextCopy}
+              </p>
+            </div>
+
+            <div
               style={{
-                margin: 0,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'rgba(17,24,39,0.66)',
+                borderRadius: 24,
+                padding: '16px',
+                background: 'rgba(255,255,255,0.82)',
+                border: '1px solid rgba(13,26,51,0.06)',
+                display: 'grid',
+                gap: 12,
               }}
             >
-              {meta.contextCopy}
-            </p>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.12em',
+                      color: 'rgba(17,24,39,0.48)',
+                    }}
+                  >
+                    Zone sequence
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 18,
+                      fontWeight: 700,
+                      letterSpacing: '-0.03em',
+                      color: '#111827',
+                    }}
+                  >
+                    Step {meta.zone} of 3
+                  </div>
+                </div>
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 999,
+                    background: `${meta.accent}10`,
+                    color: meta.accent,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {meta.difficulty}
+                </div>
+              </div>
+
+              {ZONES.map((item) => (
+                <div
+                  key={item.zone}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '28px minmax(0, 1fr)',
+                    gap: 10,
+                    alignItems: 'center',
+                    padding: '8px 0',
+                    borderTop: item.zone === 1 ? 'none' : '1px solid rgba(13,26,51,0.06)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      display: 'grid',
+                      placeItems: 'center',
+                      background: item.zone === meta.zone ? `${item.accent}12` : 'rgba(17,24,39,0.05)',
+                      color: item.zone === meta.zone ? item.accent : 'rgba(17,24,39,0.42)',
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {item.zone}
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 10,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 13,
+                        color: item.zone === meta.zone ? '#111827' : 'rgba(17,24,39,0.58)',
+                        fontWeight: item.zone === meta.zone ? 700 : 600,
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(17,24,39,0.42)',
+                      }}
+                    >
+                      {item.difficulty}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {earlyUnlocked && zone > 1 && (
@@ -370,26 +802,67 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             </div>
           )}
 
-          <motion.button
-            onClick={onStart}
-            whileHover={{ scale: 1.015 }}
-            whileTap={{ scale: 0.985 }}
+          <div
+            className="zone-intro-action-row"
             style={{
-              width: '100%',
               marginTop: 'auto',
-              padding: '16px 18px',
-              borderRadius: 18,
-              border: '1px solid rgba(255,255,255,0.5)',
-              background: `linear-gradient(135deg, ${meta.accent} 0%, ${meta.zone === 3 ? '#E56A00' : '#0066CC'} 100%)`,
-              boxShadow: `0 18px 32px ${meta.accent}2E`,
-              color: '#fff',
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: '0.01em',
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr)',
+              gap: 12,
             }}
           >
-            Start Zone {meta.zone}
-          </motion.button>
+            <div
+              style={{
+                borderRadius: 22,
+                padding: '14px 16px',
+                background: 'rgba(249,250,252,0.82)',
+                border: '1px solid rgba(13,26,51,0.06)',
+                display: 'grid',
+                gap: 4,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(17,24,39,0.48)',
+                }}
+              >
+                Before you begin
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: 'rgba(17,24,39,0.64)',
+                }}
+              >
+                Read the sender, the request, and the pressure tactics before you commit.
+              </div>
+            </div>
+
+            <motion.button
+              onClick={onStart}
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid rgba(255,255,255,0.5)',
+                background: `linear-gradient(135deg, ${meta.accent} 0%, ${meta.zone === 3 ? '#E56A00' : '#0066CC'} 100%)`,
+                boxShadow: `0 18px 32px ${meta.accent}2E`,
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: 700,
+                letterSpacing: '0.01em',
+              }}
+            >
+              Start Zone {meta.zone}
+            </motion.button>
+          </div>
         </motion.div>
       </motion.div>
     </div>

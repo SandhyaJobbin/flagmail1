@@ -1,269 +1,34 @@
-import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import anime from 'animejs';
-import Matter from 'matter-js';
+import { motion } from 'framer-motion';
 
-// ─── Confetti canvas (Matter.js) — only shown on flawless runs ───────────────
-function ConfettiCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const { Engine, Render, Runner, Bodies, Composite, Body } = Matter;
-
-    const engine = Engine.create({ gravity: { y: 1.4 } });
-    const render = Render.create({
-      canvas: canvasRef.current,
-      engine,
-      options: {
-        width: 480,
-        height: 340,
-        background: 'transparent',
-        wireframes: false,
-      },
-    });
-
-    const colors = ['#0A84FF', '#34C759', '#FF9500', '#FFD60A', '#FF3B30', '#BF5AF2'];
-    const confetti = Array.from({ length: 72 }, () => {
-      const x = Math.random() * 480;
-      const y = -20 - Math.random() * 160;
-      const w = 8 + Math.random() * 10;
-      const h = 4 + Math.random() * 6;
-      const body = Bodies.rectangle(x, y, w, h, {
-        restitution: 0.3,
-        friction: 0.01,
-        frictionAir: 0.025 + Math.random() * 0.02,
-        render: { fillStyle: colors[Math.floor(Math.random() * colors.length)] },
-        angle: Math.random() * Math.PI * 2,
-      });
-      Body.setVelocity(body, {
-        x: (Math.random() - 0.5) * 6,
-        y: Math.random() * -6 - 2,
-      });
-      Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.18);
-      return body;
-    });
-
-    Composite.add(engine.world, confetti);
-    Render.run(render);
-    const runner = Runner.create();
-    Runner.run(runner, engine);
-
-    const cleanup = setTimeout(() => {
-      Render.stop(render);
-      Runner.stop(runner);
-      Engine.clear(engine);
-    }, 3200);
-
-    return () => {
-      clearTimeout(cleanup);
-      Render.stop(render);
-      Runner.stop(runner);
-      Engine.clear(engine);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        pointerEvents: 'none',
-        zIndex: 10,
-        maxWidth: 480,
-        width: '100%',
-      }}
-    />
-  );
-}
-
-// ─── Animated accuracy bar (anime.js) ────────────────────────────────────────
-function AnimatedBar({ accuracy, color, delay = 0 }) {
-  const barRef = useRef(null);
-
-  useEffect(() => {
-    if (!barRef.current) return;
-    anime({
-      targets: barRef.current,
-      width: [`0%`, `${accuracy}%`],
-      duration: 900,
-      delay,
-      easing: 'easeOutQuart',
-    });
-  }, [accuracy, delay]);
-
-  return (
-    <div style={{ height: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-      <div
-        ref={barRef}
-        style={{ height: '100%', width: '0%', background: color, borderRadius: 3 }}
-      />
-    </div>
-  );
-}
-
-// ─── Animated stat counter (anime.js) ────────────────────────────────────────
-function StatCounter({ value, suffix = '', delay = 0 }) {
-  const ref = useRef(null);
-  const isNumeric = typeof value === 'number';
-
-  useEffect(() => {
-    if (!ref.current || !isNumeric) return;
-    const obj = { val: 0 };
-    anime({
-      targets: obj,
-      val: value,
-      duration: 900,
-      delay,
-      easing: 'easeOutQuart',
-      update: () => {
-        if (ref.current) ref.current.textContent = Math.round(obj.val) + suffix;
-      },
-    });
-  }, [value, suffix, delay, isNumeric]);
-
-  if (!isNumeric) {
-    return <span ref={ref}>{value}{suffix}</span>;
-  }
-  return <span ref={ref}>0{suffix}</span>;
-}
-
-// ─── Category breakdown with anime.js bars ───────────────────────────────────
-function CategoryBreakdown({ zoneEmails }) {
-  const catMap = {};
-  zoneEmails.forEach(r => {
-    const cat = r.correctL1;
-    if (!catMap[cat]) catMap[cat] = { correct: 0, total: 0, missed: {} };
-    catMap[cat].total++;
-    if (r.l1Correct) {
-      catMap[cat].correct++;
-    } else if (r.selectedL1) {
-      catMap[cat].missed[r.selectedL1] = (catMap[cat].missed[r.selectedL1] || 0) + 1;
-    }
-  });
-
-  const breakdown = Object.entries(catMap)
-    .map(([cat, v]) => ({
-      cat,
-      accuracy: Math.round((v.correct / v.total) * 100),
-      correct: v.correct,
-      total: v.total,
-      topMiss: Object.entries(v.missed).sort((a, b) => b[1] - a[1])[0]?.[0] || null,
-    }))
-    .sort((a, b) => b.accuracy - a.accuracy);
-
-  const focusAreas = breakdown.filter(c => c.accuracy < 50);
-
-  if (breakdown.length === 0) return null;
-
-  return (
-    <div style={{ marginBottom: 24, textAlign: 'left' }}>
-      <div style={{
-        fontSize: 10, fontWeight: 700, color: 'rgba(60,60,67,0.45)',
-        letterSpacing: '0.08em', marginBottom: 10,
-      }}>
-        CATEGORY BREAKDOWN
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: focusAreas.length ? 20 : 0 }}>
-        {breakdown.map(({ cat, accuracy, correct, total, topMiss }, i) => {
-          const barColor = accuracy >= 70 ? '#34C759' : accuracy >= 50 ? '#FF9500' : '#FF3B30';
-          return (
-            <motion.div
-              key={cat}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + i * 0.08, duration: 0.35, ease: 'easeOut' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#1C1C1E' }}>{cat}</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: barColor }}>
-                  {correct}/{total} · {accuracy}%
-                </span>
-              </div>
-              <AnimatedBar accuracy={accuracy} color={barColor} delay={i * 120} />
-              {topMiss && (
-                <div style={{ fontSize: 11, color: '#AEAEB2', marginTop: 4 }}>
-                  Tagged as <span style={{ color: '#FF3B30', fontWeight: 600 }}>{topMiss}</span>
-                </div>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {focusAreas.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 + breakdown.length * 0.08 }}
-          style={{
-            background: 'rgba(255,59,48,0.06)',
-            border: '1px solid rgba(255,59,48,0.18)',
-            borderRadius: 12,
-            padding: '12px 14px',
-          }}
-        >
-          <div style={{
-            fontSize: 10, fontWeight: 700, color: '#FF3B30',
-            letterSpacing: '0.08em', marginBottom: 8,
-          }}>
-            STUDY UP ON
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {focusAreas.map(({ cat, accuracy }) => (
-              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13 }}>📖</span>
-                <div>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#1C1C1E' }}>{cat}</span>
-                  <span style={{ fontSize: 11, color: '#8E8E93', marginLeft: 6 }}>
-                    {accuracy}% accuracy — needs work
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const glass = {
-  background: 'rgba(255,255,255,0.65)',
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  border: '1px solid rgba(255,255,255,0.8)',
-  borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+const surface = {
+  background: 'rgba(255,255,255,0.76)',
+  backdropFilter: 'blur(22px) saturate(150%)',
+  WebkitBackdropFilter: 'blur(22px) saturate(150%)',
+  border: '1px solid rgba(255,255,255,0.82)',
+  boxShadow: '0 24px 80px rgba(32, 52, 89, 0.10), 0 8px 24px rgba(32, 52, 89, 0.05)',
 };
 
 const ZONE_META = {
-  1: { color: '#0A84FF' },
-  2: { color: '#30B0C7' },
-  3: { color: '#FF7A1A' },
+  1: { label: 'Inbox', accent: '#0A84FF' },
+  2: { label: 'Queue', accent: '#30B0C7' },
+  3: { label: 'Escalation', accent: '#FF7A1A' },
 };
 
 const PERFORMANCE_MESSAGES = {
   1: {
     high: 'Strong start. You cut through the obvious threats cleanly.',
-    mid: 'Solid pass. A few clear threats slipped through.',
-    low: 'Some obvious flags were missed. Zone 2 demands more.',
+    mid: 'Solid opening pass. A few clear signals still slipped through.',
+    low: 'This zone needed cleaner first-pass judgment before the harder rounds.',
   },
   2: {
-    high: 'Sharp eye. You handled the polished fakes well.',
-    mid: 'The cleaner emails created some uncertainty.',
-    low: 'The polished emails caused problems. Slow down in Zone 3.',
+    high: 'You handled the polished fakes well and kept the details in view.',
+    mid: 'The cleaner emails created hesitation, but the pattern is there.',
+    low: 'The polished messages caused trouble. Slow down and compare details.',
   },
   3: {
-    high: 'Specialist-level judgment. You found the subtle signals.',
-    mid: 'The edge cases tested your limits. A few key details were missed.',
-    low: 'The subtle signals in this zone proved difficult.',
+    high: 'Specialist-level finish. You found the subtle signals that mattered.',
+    mid: 'The edge cases held up reasonably well, but a few decisive clues were missed.',
+    low: 'The subtle signals proved difficult here. The final review should help.',
   },
 };
 
@@ -274,176 +39,361 @@ function getPerformanceTier(correctCount) {
   return 'low';
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+function CategoryBreakdown({ zoneEmails, accent }) {
+  const categories = {};
+
+  for (const record of zoneEmails) {
+    const key = record.correctL1;
+    if (!categories[key]) categories[key] = { total: 0, correct: 0 };
+    categories[key].total += 1;
+    if (record.l1Correct) categories[key].correct += 1;
+  }
+
+  const rows = Object.entries(categories)
+    .map(([name, value]) => ({
+      name,
+      accuracy: value.total ? Math.round((value.correct / value.total) * 100) : 0,
+      correct: value.correct,
+      total: value.total,
+    }))
+    .sort((a, b) => b.accuracy - a.accuracy);
+
+  if (!rows.length) return null;
+
+  return (
+    <div
+      style={{
+        borderRadius: 24,
+        padding: '18px',
+        background: 'rgba(249,250,252,0.84)',
+        border: '1px solid rgba(13,26,51,0.06)',
+        display: 'grid',
+        gap: 12,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'rgba(17,24,39,0.48)',
+        }}
+      >
+        Zone Breakdown
+      </div>
+
+      {rows.map((row) => (
+        <div key={row.name} style={{ display: 'grid', gap: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{row.name}</span>
+            <span style={{ fontSize: 13, color: 'rgba(17,24,39,0.56)' }}>
+              {row.correct}/{row.total} · {row.accuracy}%
+            </span>
+          </div>
+          <div
+            style={{
+              height: 8,
+              borderRadius: 999,
+              background: 'rgba(17,24,39,0.08)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                width: `${row.accuracy}%`,
+                height: '100%',
+                borderRadius: 999,
+                background: `linear-gradient(90deg, ${accent} 0%, ${accent}AA 100%)`,
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ZoneComplete({
-  zone, zoneScore, maxZoneScore, zoneEmails,
-  earlyUnlocked, consecutivePerfect, onContinue,
+  zone,
+  zoneScore,
+  maxZoneScore,
+  zoneEmails,
+  earlyUnlocked,
+  consecutivePerfect,
+  onContinue,
 }) {
   const meta = ZONE_META[zone];
-  const correctCount = zoneEmails.filter(r => r.l1Correct).length;
-  const accuracy = zoneEmails.length > 0
-    ? Math.round((correctCount / zoneEmails.length) * 100)
-    : 0;
-  const wrongCount = zoneEmails.filter(r => !r.l1Correct).length;
-  const isLast = zone === 3;
-  const isFlawless = wrongCount === 0;
-  const tier = getPerformanceTier(correctCount);
-  const performanceMsg = PERFORMANCE_MESSAGES[zone]?.[tier] ?? '';
+  const correctCount = zoneEmails.filter((record) => record.l1Correct).length;
+  const wrongCount = zoneEmails.length - correctCount;
+  const accuracy = zoneEmails.length ? Math.round((correctCount / zoneEmails.length) * 100) : 0;
+  const flawless = wrongCount === 0;
+  const lastZone = zone === 3;
+  const performanceMessage = PERFORMANCE_MESSAGES[zone][getPerformanceTier(correctCount)];
 
   const stats = [
-    { label: 'Score', value: `${zoneScore} / ${maxZoneScore}`, isNumeric: false },
-    { label: 'Accuracy', value: accuracy, suffix: '%', isNumeric: true },
-    { label: 'Missed', value: wrongCount, suffix: '', isNumeric: true },
+    { label: 'Zone score', value: `${zoneScore}/${maxZoneScore}` },
+    { label: 'Accuracy', value: `${accuracy}%` },
+    { label: 'Missed', value: `${wrongCount}` },
   ];
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px 16px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <div
+      style={{
+        minHeight: '100dvh',
+        padding: 'clamp(18px, 3vw, 28px)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <style>{`
+        @media (max-width: 920px) {
+          .zone-complete-shell {
+            grid-template-columns: 1fr !important;
+          }
+        }
 
-      {/* Matter.js confetti — only on flawless */}
-      <AnimatePresence>
-        {isFlawless && <ConfettiCanvas key="confetti" />}
-      </AnimatePresence>
+        @media (max-width: 720px) {
+          .zone-complete-main,
+          .zone-complete-side {
+            padding: 20px !important;
+            border-radius: 28px !important;
+          }
 
-      <div style={{ width: '100%', maxWidth: 480, position: 'relative', zIndex: 1 }}>
+          .zone-complete-stats {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
 
-        {/* Early unlock banner */}
-        {earlyUnlocked && !isLast && (
-          <motion.div
-            initial={{ opacity: 0, y: -16, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: [
+            `radial-gradient(circle at 14% 16%, ${meta.accent}16, transparent 24%)`,
+            'radial-gradient(circle at 84% 14%, rgba(255,255,255,0.72), transparent 20%)',
+            flawless ? 'radial-gradient(circle at 50% 82%, rgba(52,199,89,0.12), transparent 28%)' : 'radial-gradient(circle at 50% 82%, rgba(17,24,39,0.06), transparent 28%)',
+          ].join(','),
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+        className="zone-complete-shell"
+        style={{
+          maxWidth: 1120,
+          margin: '0 auto',
+          minHeight: 'calc(100dvh - (2 * clamp(18px, 3vw, 28px)))',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.08fr) minmax(320px, 0.92fr)',
+          gap: 18,
+          alignItems: 'stretch',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <div
+          className="zone-complete-main"
+          style={{
+            ...surface,
+            borderRadius: 34,
+            padding: 'clamp(24px, 3vw, 30px)',
+            display: 'grid',
+            gap: 18,
+            alignContent: 'start',
+          }}
+        >
+          <div
             style={{
-              ...glass,
-              padding: '12px 20px',
-              marginBottom: 16,
-              borderLeft: '3px solid #FFD60A',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: 10,
-            }}
-          >
-            <motion.span
-              animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              style={{ fontSize: 20, display: 'inline-block' }}
-            >
-              ⚡
-            </motion.span>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#B8860B' }}>EARLY UNLOCK!</div>
-              <div style={{ fontSize: 12, color: '#636366' }}>
-                {consecutivePerfect} consecutive perfect scores – next zone unlocked early!
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Main card */}
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-          style={{ ...glass, padding: 36, textAlign: 'center' }}
-        >
-          {/* Zone icon */}
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 }}
-            style={{ fontSize: 44, marginBottom: 12, display: 'inline-block' }}
-          >
-            {isFlawless ? '🏆' : zone === 3 ? '🎯' : '✅'}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.3 }}
-            style={{
-              display: 'inline-block',
-              fontSize: 12,
+              padding: '8px 14px',
+              borderRadius: 999,
+              background: `${meta.accent}12`,
+              border: `1px solid ${meta.accent}24`,
+              justifySelf: 'start',
+              color: meta.accent,
+              fontSize: 11,
               fontWeight: 700,
-              color: meta.color,
-              letterSpacing: '0.08em',
-              marginBottom: 8,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
             }}
           >
-            ZONE {zone} COMPLETE — SECTION {zone} OF 3
-          </motion.div>
+            Zone {zone} complete
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.3 }}
-            style={{ fontSize: 28, fontWeight: 800, color: '#1C1C1E', margin: '0 0 24px', letterSpacing: '-0.01em' }}
-          >
-            {performanceMsg}
-          </motion.h2>
-
-          {/* Stat tiles */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
-            {stats.map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 + i * 0.08, duration: 0.35, ease: 'easeOut' }}
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div
+              style={{
+                fontSize: 'clamp(40px, 6vw, 72px)',
+                lineHeight: 0.92,
+                letterSpacing: '-0.06em',
+                fontWeight: 700,
+                color: '#111827',
+                maxWidth: '10ch',
+              }}
+            >
+              {flawless ? 'Flawless pass.' : performanceMessage}
+            </div>
+            {!flawless && (
+              <p
                 style={{
-                  flex: 1,
-                  background: 'rgba(0,0,0,0.04)',
-                  borderRadius: 12,
-                  padding: '14px 8px',
+                  margin: 0,
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  color: 'rgba(17,24,39,0.64)',
+                  maxWidth: 620,
                 }}
               >
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E' }}>
-                  {s.isNumeric
-                    ? <StatCounter value={s.value} suffix={s.suffix} delay={300 + i * 80} />
-                    : <span>{s.value}</span>
-                  }
+                {performanceMessage}
+              </p>
+            )}
+            {flawless && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  color: 'rgba(17,24,39,0.64)',
+                  maxWidth: 620,
+                }}
+              >
+                Every category call landed cleanly in this zone. Carry the same discipline into the next room.
+              </p>
+            )}
+          </div>
+
+          <div
+            className="zone-complete-stats"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 12,
+            }}
+          >
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  borderRadius: 22,
+                  padding: '16px',
+                  background: 'rgba(255,255,255,0.84)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'grid',
+                  gap: 8,
+                }}
+              >
+                <div style={{ fontSize: 30, lineHeight: 1, fontWeight: 800, letterSpacing: '-0.05em', color: '#111827' }}>
+                  {stat.value}
                 </div>
-                <div style={{ fontSize: 11, color: '#636366', marginTop: 2 }}>{s.label}</div>
-              </motion.div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.48)' }}>
+                  {stat.label}
+                </div>
+              </div>
             ))}
           </div>
 
-          {/* Category breakdown */}
-          <CategoryBreakdown zoneEmails={zoneEmails} />
+          <CategoryBreakdown zoneEmails={zoneEmails} accent={meta.accent} />
+        </div>
 
-          {/* CTA button */}
+        <div
+          className="zone-complete-side"
+          style={{
+            ...surface,
+            borderRadius: 32,
+            padding: 'clamp(24px, 3vw, 28px)',
+            display: 'grid',
+            gap: 16,
+            alignContent: 'start',
+          }}
+        >
+          <div
+            style={{
+              borderRadius: 24,
+              padding: '18px',
+              background: `linear-gradient(180deg, ${meta.accent}14 0%, rgba(255,255,255,0.92) 100%)`,
+              border: `1px solid ${meta.accent}20`,
+              display: 'grid',
+              gap: 8,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: meta.accent }}>
+              Section summary
+            </div>
+            <div style={{ fontSize: 26, lineHeight: 1, fontWeight: 700, letterSpacing: '-0.04em', color: '#111827' }}>
+              {meta.label}
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.64)' }}>
+              {lastZone ? 'Final review is ready.' : `Next up: Zone ${zone + 1}.`}
+            </div>
+          </div>
+
+          {earlyUnlocked && !lastZone && (
+            <div
+              style={{
+                borderRadius: 22,
+                padding: '16px',
+                background: 'rgba(255,184,0,0.12)',
+                border: '1px solid rgba(255,184,0,0.24)',
+                display: 'grid',
+                gap: 6,
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#A16207' }}>
+                Early unlock
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.68)' }}>
+                {consecutivePerfect} consecutive perfect rounds unlocked the next zone early.
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              borderRadius: 22,
+              padding: '16px',
+              background: 'rgba(249,250,252,0.84)',
+              border: '1px solid rgba(13,26,51,0.06)',
+              display: 'grid',
+              gap: 10,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.48)' }}>
+              What to carry forward
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.66)' }}>
+              Keep checking sender credibility, request realism, and any pressure to act before verifying.
+            </div>
+          </div>
+
           <motion.button
             onClick={onContinue}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             style={{
               width: '100%',
-              padding: '15px',
-              borderRadius: 12,
-              border: 'none',
-              background: '#0A84FF',
+              marginTop: 'auto',
+              padding: '16px 18px',
+              borderRadius: 18,
+              border: '1px solid rgba(255,255,255,0.36)',
+              background: `linear-gradient(135deg, ${meta.accent} 0%, ${lastZone ? '#E56A00' : '#0066CC'} 100%)`,
               color: '#fff',
               fontSize: 15,
               fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              boxShadow: '0 4px 16px rgba(10,132,255,0.35)',
+              letterSpacing: '0.01em',
+              boxShadow: `0 18px 30px ${meta.accent}26`,
             }}
           >
-            {isLast ? 'See Your Results' : `Enter Zone ${zone + 1}`}
+            {lastZone ? 'See final results' : `Enter zone ${zone + 1}`}
           </motion.button>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

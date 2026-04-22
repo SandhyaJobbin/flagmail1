@@ -1,75 +1,65 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmailCard from './EmailCard.jsx';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Confetti canvas helper
-// ─────────────────────────────────────────────────────────────────────────────
 function runConfetti(canvas) {
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  canvas.width = W;
-  canvas.height = H;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d');
-  const COLORS = [
-    '#FF3B30', '#34C759', '#0A84FF', '#FF9500',
-    '#5856D6', '#FFD60A', '#FF2D55', '#30D158',
-  ];
+  const colors = ['#0A84FF', '#34C759', '#FF9500', '#FF3B30', '#30B0C7'];
 
-  const pieces = Array.from({ length: 160 }, () => ({
-    x: W * 0.15 + Math.random() * W * 0.7,
+  const pieces = Array.from({ length: 120 }, () => ({
+    x: width * 0.18 + Math.random() * width * 0.64,
     y: -20 - Math.random() * 120,
-    vx: (Math.random() - 0.5) * 8,
-    vy: 2.5 + Math.random() * 5,
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    w: 7 + Math.random() * 9,
-    h: 4 + Math.random() * 5,
+    vx: (Math.random() - 0.5) * 7,
+    vy: 2 + Math.random() * 4,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    w: 8 + Math.random() * 8,
+    h: 4 + Math.random() * 4,
     rotation: Math.random() * 360,
     rotVel: (Math.random() - 0.5) * 9,
   }));
 
-  let raf;
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    let alive = false;
-    pieces.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.13; // gravity
-      p.vx *= 0.995; // subtle air drag
-      p.rotation += p.rotVel;
-      if (p.y < H + 40) alive = true;
+  let raf = 0;
 
-      const alpha = Math.max(0, Math.min(1, 1 - p.y / (H * 1.1)));
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    let active = false;
+    for (const piece of pieces) {
+      piece.x += piece.vx;
+      piece.y += piece.vy;
+      piece.vy += 0.12;
+      piece.vx *= 0.994;
+      piece.rotation += piece.rotVel;
+      if (piece.y < height + 40) active = true;
+
       ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(p.x, p.y);
-      ctx.rotate((p.rotation * Math.PI) / 180);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.globalAlpha = Math.max(0, Math.min(1, 1 - piece.y / (height * 1.08)));
+      ctx.translate(piece.x, piece.y);
+      ctx.rotate((piece.rotation * Math.PI) / 180);
+      ctx.fillStyle = piece.color;
+      ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
       ctx.restore();
-    });
-    if (alive) raf = requestAnimationFrame(draw);
+    }
+    if (active) raf = requestAnimationFrame(draw);
   }
+
   draw();
   return () => cancelAnimationFrame(raf);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Full-screen correct-answer overlay
-// ─────────────────────────────────────────────────────────────────────────────
 function CorrectAnswerOverlay({ points, onDone }) {
   const canvasRef = useRef(null);
 
-  // Auto-dismiss after 2.4 s
   useEffect(() => {
-    const t = setTimeout(onDone, 2400);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onDone, 2100);
+    return () => clearTimeout(timer);
   }, [onDone]);
 
-  // Kick off confetti once canvas is mounted
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) return undefined;
     return runConfetti(canvasRef.current);
   }, []);
 
@@ -84,401 +74,495 @@ function CorrectAnswerOverlay({ points, onDone }) {
         position: 'fixed',
         inset: 0,
         zIndex: 2000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(0,0,0,0.60)',
-        backdropFilter: 'blur(5px)',
-        WebkitBackdropFilter: 'blur(5px)',
+        display: 'grid',
+        placeItems: 'center',
+        background: 'rgba(17,24,39,0.52)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         cursor: 'pointer',
       }}
     >
-      {/* Confetti layer */}
-      <canvas
-        ref={canvasRef}
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-      />
+      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
 
-      {/* Burst ring */}
       <motion.div
-        initial={{ scale: 0.3, opacity: 0.7 }}
-        animate={{ scale: 3.5, opacity: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        initial={{ opacity: 0, y: 18, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+        transition={{ type: 'spring', stiffness: 340, damping: 24 }}
         style={{
-          position: 'absolute',
-          width: 180,
-          height: 180,
-          borderRadius: '50%',
-          border: '3px solid rgba(52,199,89,0.7)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Center content */}
-      <motion.div
-        initial={{ scale: 0.45, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.85, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.04 }}
-        style={{
-          position: 'relative',
           textAlign: 'center',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+          color: '#fff',
           userSelect: 'none',
         }}
       >
-        {/* Emoji */}
-        <motion.div
-          animate={{ rotate: [0, -10, 10, -6, 6, 0] }}
-          transition={{ delay: 0.18, duration: 0.55, ease: 'easeInOut' }}
-          style={{ fontSize: 96, lineHeight: 1, marginBottom: 16 }}
-        >
-          🎯
-        </motion.div>
-
-        {/* "NAILED IT!" */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, type: 'spring', stiffness: 300, damping: 20 }}
+        <div
           style={{
-            fontSize: 58,
-            fontWeight: 900,
-            color: '#fff',
-            letterSpacing: '-0.03em',
-            lineHeight: 1,
-            textShadow: '0 4px 28px rgba(0,0,0,0.45)',
-            marginBottom: 14,
+            width: 104,
+            height: 104,
+            borderRadius: '50%',
+            margin: '0 auto 18px',
+            display: 'grid',
+            placeItems: 'center',
+            background: 'linear-gradient(180deg, rgba(52,199,89,0.28) 0%, rgba(52,199,89,0.16) 100%)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.24)',
+            fontSize: 40,
+            fontWeight: 800,
+          }}
+        >
+          ✓
+        </div>
+
+        <div
+          style={{
+            fontSize: 52,
+            lineHeight: 0.96,
+            letterSpacing: '-0.05em',
+            fontWeight: 800,
+            marginBottom: 10,
           }}
         >
           Correct
-        </motion.div>
+        </div>
 
-        {/* Points */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 340, damping: 18, delay: 0.36 }}
+        <div
           style={{
             display: 'inline-block',
-            fontSize: 38,
-            fontWeight: 800,
-            color: '#34C759',
-            background: 'rgba(52,199,89,0.15)',
-            border: '1.5px solid rgba(52,199,89,0.45)',
-            borderRadius: 20,
-            padding: '6px 28px',
-            textShadow: '0 2px 14px rgba(52,199,89,0.55)',
+            padding: '8px 20px',
+            borderRadius: 999,
+            background: 'rgba(52,199,89,0.16)',
+            border: '1px solid rgba(52,199,89,0.32)',
+            color: '#7CFFAC',
+            fontSize: 24,
+            fontWeight: 700,
           }}
         >
           +{points} pts
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.55 }}
-          transition={{ delay: 0.55 }}
-          style={{
-            marginTop: 18,
-            fontSize: 13,
-            color: '#fff',
-            fontWeight: 500,
-          }}
-        >
-          Tap anywhere to continue
-        </motion.p>
+        </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Glass style + section variant (unchanged)
-// ─────────────────────────────────────────────────────────────────────────────
 const glass = {
-  background: 'rgba(255,255,255,0.65)',
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  border: '1px solid rgba(255,255,255,0.8)',
-  borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+  background: 'rgba(255,255,255,0.74)',
+  backdropFilter: 'blur(24px) saturate(155%)',
+  WebkitBackdropFilter: 'blur(24px) saturate(155%)',
+  border: '1px solid rgba(255,255,255,0.82)',
+  boxShadow: '0 24px 80px rgba(32, 52, 89, 0.10), 0 8px 24px rgba(32, 52, 89, 0.05)',
 };
 
-const section = {
-  hidden: { opacity: 0, y: 14 },
-  visible: (delay) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay, type: 'spring', stiffness: 260, damping: 22 },
-  }),
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Main ExplanationCard
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ExplanationCard({ email, record, totalScore, onNext }) {
-  const [showDelta, setShowDelta] = useState(false);
   const [showOverlay, setShowOverlay] = useState(record.l1Correct);
+  const [showDelta, setShowDelta] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowDelta(true), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setShowDelta(true), 260);
+    return () => clearTimeout(timer);
   }, []);
 
   const { l1Correct, timedOut, points, l1Points, l2Points, clueDeduction } = record;
 
   const verdict = timedOut && !l1Correct
-    ? { label: '⏱ Ran out of time', color: '#FF9500', bg: 'rgba(255,149,0,0.1)' }
+    ? { label: 'Timed out', accent: '#FF9500', tone: 'The round expired before the correct classification landed.' }
     : l1Correct
-    ? { label: '✓ Correct', color: '#34C759', bg: 'rgba(52,199,89,0.1)' }
-    : { label: '↗ Missed it', color: '#FF3B30', bg: 'rgba(255,59,48,0.1)' };
+      ? { label: 'Strong call', accent: '#34C759', tone: 'You identified the right category and can review why it was correct.' }
+      : { label: 'Missed it', accent: '#FF3B30', tone: 'The explanation below shows which detail changed the classification.' };
 
-  const deltaStr = points > 0 ? `+${points}` : '0';
-
-  function buildScoreBreak() {
-    const parts = [];
-    if (l1Points > 0) parts.push(`+${l1Points} L1`);
-    if (l2Points > 0) parts.push(`+${l2Points} L2`);
-    if (clueDeduction > 0) parts.push(`−${clueDeduction} clue${clueDeduction > 1 ? 's' : ''}`);
-    if (record.reasoningCorrect) parts.push('+1 reasoning');
-    if (parts.length === 0) parts.push('0 pts');
-    return parts.join(' · ');
-  }
+  const scoreLines = [];
+  if (l1Points > 0) scoreLines.push(`+${l1Points} for L1`);
+  if (l2Points > 0) scoreLines.push(`+${l2Points} for L2`);
+  if (clueDeduction > 0) scoreLines.push(`-${clueDeduction} from hints`);
+  if (record.reasoningCorrect) scoreLines.push('+1 reasoning');
+  if (scoreLines.length === 0) scoreLines.push('0 points this round');
 
   return (
     <>
-      {/* ── Correct-answer celebration overlay ── */}
       <AnimatePresence>
         {showOverlay && (
-          <CorrectAnswerOverlay
-            points={points}
-            onDone={() => setShowOverlay(false)}
-          />
+          <CorrectAnswerOverlay points={points} onDone={() => setShowOverlay(false)} />
         )}
       </AnimatePresence>
 
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-        padding: '20px 16px',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-
-          {/* Verdict banner */}
-          <motion.div
-            initial={l1Correct ? { opacity: 0, scale: 0.88, y: -8 } : { opacity: 0, x: -10 }}
-            animate={l1Correct ? { opacity: 1, scale: 1, y: 0 } : { opacity: 1, x: 0 }}
-            transition={
-              l1Correct
-                ? { type: 'spring', stiffness: 420, damping: 22 }
-                : { type: 'spring', stiffness: 380, damping: 18 }
+      <div
+        style={{
+          minHeight: '100dvh',
+          padding: '20px 16px 28px',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+          position: 'relative',
+        }}
+      >
+        <style>{`
+          @media (max-width: 980px) {
+            .explanation-summary-grid {
+              grid-template-columns: 1fr !important;
             }
+          }
+        `}</style>
+
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: [
+              `radial-gradient(circle at 16% 14%, ${verdict.accent}14, transparent 26%)`,
+              'radial-gradient(circle at 84% 10%, rgba(255,255,255,0.72), transparent 20%)',
+              'radial-gradient(circle at 50% 84%, rgba(17,24,39,0.05), transparent 26%)',
+            ].join(','),
+          }}
+        />
+
+        <div style={{ maxWidth: 1240, margin: '0 auto', position: 'relative', zIndex: 1, display: 'grid', gap: 14 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: 'easeOut' }}
             style={{
               ...glass,
-              padding: '16px 20px',
-              marginBottom: 14,
-              background: verdict.bg,
-              border: `1px solid ${verdict.color}30`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              borderRadius: 30,
+              padding: '20px 22px',
+              overflow: 'hidden',
             }}
           >
-            <span style={{ fontSize: 18, fontWeight: 700, color: verdict.color }}>
-              {verdict.label}
-            </span>
-            <div style={{ textAlign: 'right', position: 'relative' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: verdict.color }}>
-                {deltaStr} pts
-              </div>
-              <div style={{ fontSize: 12, color: '#636366' }}>
-                {buildScoreBreak()}
-              </div>
-
-              {/* Floating delta */}
-              <AnimatePresence>
-                {showDelta && (
-                  <motion.div
-                    key="delta"
-                    initial={{ opacity: 1, y: 0 }}
-                    animate={{ opacity: 0, y: -24 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.7, ease: 'easeOut' }}
-                    style={{
-                      position: 'absolute',
-                      top: -20,
-                      right: 0,
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: verdict.color,
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    {deltaStr}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-
-          {/* Email with giveaway highlights */}
-          <motion.div
-            custom={0.08}
-            variants={section}
-            initial="hidden"
-            animate="visible"
-            style={{ marginBottom: 14 }}
-          >
-            <EmailCard email={email} giveawayHighlight={true} />
-          </motion.div>
-
-          {/* Analysis card */}
-          <motion.div
-            custom={0.16}
-            variants={section}
-            initial="hidden"
-            animate="visible"
-            style={{ ...glass, padding: 20, marginBottom: 14, borderLeft: '3px solid #0A84FF' }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em', marginBottom: 8 }}>
-              ANALYSIS
-            </div>
-            <div style={{ fontSize: 14, color: '#1C1C1E', lineHeight: 1.6, marginBottom: 16 }}>
-              {email.explanation}
-            </div>
-
-            {/* Classification comparison rows */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-
-              {/* L1 row */}
-              {(!record.l1Correct && (record.selectedL1 || record.timedOut)) && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.28, duration: 0.3 }}
-                  style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,59,48,0.35)' }}
-                >
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '7px 12px', background: 'rgba(255,59,48,0.08)',
-                  }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: '#636366' }}>
-                      CATEGORY (L1)
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#FF3B30' }}>
-                      {record.timedOut && !record.selectedL1 ? '⏱ Ran out of time' : '↗ Missed it'}
-                    </span>
-                  </div>
-                  <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>You selected</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#FF3B30' }}>
-                        {record.selectedL1 || '— (timed out)'}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>Correct answer</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#34C759' }}>
-                        {record.correctL1}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* L2 row */}
-              {(record.l1Correct && (record.timedOut || (record.selectedL2 && !record.l2Correct))) && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.32, duration: 0.3 }}
+            <div
+              className="explanation-summary-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1.15fr) minmax(280px, 0.85fr)',
+                gap: 16,
+                alignItems: 'start',
+              }}
+            >
+              <div>
+                <div
                   style={{
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    border: record.l2Correct
-                      ? '1px solid rgba(52,199,89,0.35)'
-                      : '1px solid rgba(255,59,48,0.35)',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.48)',
+                    marginBottom: 8,
                   }}
                 >
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '7px 12px',
-                    background: record.l2Correct ? 'rgba(52,199,89,0.1)' : 'rgba(255,59,48,0.08)',
-                  }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: '#636366' }}>
-                      SUBCATEGORY (L2)
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#FF3B30' }}>
-                      {record.timedOut && !record.selectedL2 ? '⏱ Ran out of time' : '↗ Missed it'}
-                    </span>
+                  Round Review
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    flexWrap: 'wrap',
+                    marginBottom: 8,
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 999,
+                      background: `${verdict.accent}12`,
+                      border: `1px solid ${verdict.accent}24`,
+                      color: verdict.accent,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {verdict.label}
                   </div>
-                  <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>You selected</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#FF3B30' }}>
-                        {record.selectedL2 || '— (timed out)'}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: '#8E8E93' }}>Correct answer</span>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#34C759' }}>
-                        {record.correctL2}
-                      </span>
-                    </div>
+                  <div
+                    style={{
+                      fontSize: 30,
+                      lineHeight: 1,
+                      fontWeight: 800,
+                      letterSpacing: '-0.05em',
+                      color: '#111827',
+                    }}
+                  >
+                    {points > 0 ? `+${points}` : '0'} pts
                   </div>
-                </motion.div>
-              )}
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: 'rgba(17,24,39,0.64)',
+                    maxWidth: 620,
+                  }}
+                >
+                  {verdict.tone}
+                </p>
+              </div>
 
+              <div
+                style={{
+                  position: 'relative',
+                  borderRadius: 24,
+                  padding: '16px',
+                  background: 'rgba(249,250,252,0.84)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'grid',
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.48)',
+                  }}
+                >
+                  Score Breakdown
+                </div>
+                <div style={{ display: 'grid', gap: 6 }}>
+                  {scoreLines.map((line) => (
+                    <div
+                      key={line}
+                      style={{
+                        fontSize: 14,
+                        lineHeight: 1.5,
+                        color: 'rgba(17,24,39,0.68)',
+                      }}
+                    >
+                      {line}
+                    </div>
+                  ))}
+                </div>
+
+                <AnimatePresence>
+                  {showDelta && (
+                    <motion.div
+                      initial={{ opacity: 1, y: 0 }}
+                      animate={{ opacity: 0, y: -20 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.7, ease: 'easeOut' }}
+                      style={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 14,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: verdict.accent,
+                      }}
+                    >
+                      {points > 0 ? `+${points}` : '0'}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
 
-          {/* Score so far */}
-          <motion.div
-            custom={0.24}
-            variants={section}
-            initial="hidden"
-            animate="visible"
-            style={{
-              ...glass,
-              padding: '12px 20px',
-              marginBottom: 14,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ fontSize: 13, color: '#636366', fontWeight: 500 }}>Score so far</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E' }}>{totalScore} pts</span>
-          </motion.div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.08fr) minmax(320px, 0.92fr)', gap: 14, alignItems: 'start' }}>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.06, duration: 0.28, ease: 'easeOut' }}
+            >
+              <EmailCard email={email} giveawayHighlight />
+            </motion.div>
 
-          {/* Next button */}
-          <motion.button
-            onClick={onNext}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            custom={0.3}
-            variants={section}
-            initial="hidden"
-            animate="visible"
-            style={{
-              width: '100%',
-              padding: '15px',
-              borderRadius: 12,
-              border: 'none',
-              background: '#0A84FF',
-              color: '#fff',
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              boxShadow: '0 4px 16px rgba(10,132,255,0.32)',
-            }}
-          >
-            Next Email →
-          </motion.button>
+            <motion.div
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1, duration: 0.28, ease: 'easeOut' }}
+              style={{
+                ...glass,
+                borderRadius: 28,
+                padding: 18,
+                display: 'grid',
+                gap: 14,
+                position: 'sticky',
+                top: 20,
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: 22,
+                  padding: '16px',
+                  background: `linear-gradient(180deg, ${verdict.accent}10 0%, rgba(255,255,255,0.90) 100%)`,
+                  border: `1px solid ${verdict.accent}20`,
+                  display: 'grid',
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.48)',
+                  }}
+                >
+                  Analysis
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.65,
+                    color: '#1C1C1E',
+                  }}
+                >
+                  {email.explanation}
+                </div>
+              </div>
 
+              <div
+                style={{
+                  borderRadius: 22,
+                  padding: '16px',
+                  background: 'rgba(249,250,252,0.84)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'grid',
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.48)',
+                  }}
+                >
+                  Classification Review
+                </div>
+
+                {(!record.l1Correct && (record.selectedL1 || record.timedOut)) && (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,59,48,0.22)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 12px',
+                        background: 'rgba(255,59,48,0.08)',
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.50)' }}>
+                        Category
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#FF3B30' }}>
+                        {record.timedOut && !record.selectedL1 ? 'Timed out' : 'Missed'}
+                      </span>
+                    </div>
+                    <div style={{ padding: '12px', display: 'grid', gap: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 12, color: 'rgba(17,24,39,0.46)' }}>You selected</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#FF3B30' }}>{record.selectedL1 || 'No answer'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 12, color: 'rgba(17,24,39,0.46)' }}>Correct answer</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#34C759' }}>{record.correctL1}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {(record.l1Correct && (record.timedOut || (record.selectedL2 && !record.l2Correct))) && (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,149,0,0.20)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 12px',
+                        background: 'rgba(255,149,0,0.08)',
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.50)' }}>
+                        Subcategory
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#FF9500' }}>
+                        {record.timedOut && !record.selectedL2 ? 'Timed out' : 'Needs refinement'}
+                      </span>
+                    </div>
+                    <div style={{ padding: '12px', display: 'grid', gap: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 12, color: 'rgba(17,24,39,0.46)' }}>You selected</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#FF9500' }}>{record.selectedL2 || 'No answer'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 12, color: 'rgba(17,24,39,0.46)' }}>Correct answer</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#34C759' }}>{record.correctL2}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {record.l1Correct && (record.l2Correct || !record.correctL2) && (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      padding: '14px 16px',
+                      background: 'rgba(52,199,89,0.08)',
+                      border: '1px solid rgba(52,199,89,0.16)',
+                      fontSize: 14,
+                      lineHeight: 1.55,
+                      color: 'rgba(17,24,39,0.68)',
+                    }}
+                  >
+                    The classification matched the intended answer. Review the highlighted clue and continue to the next message.
+                  </div>
+                )}
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 20,
+                  padding: '14px 16px',
+                  background: 'rgba(255,255,255,0.82)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ fontSize: 13, color: 'rgba(17,24,39,0.54)' }}>Score so far</span>
+                <span style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.04em', color: '#111827' }}>{totalScore} pts</span>
+              </div>
+
+              <motion.button
+                onClick={onNext}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                style={{
+                  width: '100%',
+                  padding: '16px 18px',
+                  borderRadius: 18,
+                  border: '1px solid rgba(10,132,255,0.24)',
+                  background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+                  color: '#fff',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  letterSpacing: '0.01em',
+                  boxShadow: '0 18px 30px rgba(10,132,255,0.24)',
+                }}
+              >
+                Next email
+              </motion.button>
+            </motion.div>
+          </div>
         </div>
       </div>
     </>

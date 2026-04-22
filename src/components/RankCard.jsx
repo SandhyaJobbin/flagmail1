@@ -2,109 +2,144 @@ import { getProgressTitle } from '../utils/competency.js';
 
 export default function RankCard({ player, finalScore, badgeCount }) {
   const title = getProgressTitle(finalScore);
-  const maxScore = 100;
-  const pct = Math.round((finalScore / maxScore) * 100);
-
-  const titleColor = finalScore >= 80 ? '#FF3B30' : finalScore >= 50 ? '#FF9500' : '#34C759';
+  const accent = finalScore >= 80 ? '#FF3B30' : finalScore >= 50 ? '#FF9500' : '#34C759';
+  const eyebrow = finalScore >= 80 ? 'Advanced analyst' : finalScore >= 50 ? 'Developing analyst' : 'Foundation analyst';
 
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.75)',
-      backdropFilter: 'blur(24px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-      border: '1px solid rgba(255,255,255,0.8)',
-      borderRadius: 20,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-      padding: 28,
-      textAlign: 'center',
-      animation: 'rankGlow 1.2s ease-in-out',
-    }} className="anim-rankGlow">
-      {/* Flagmail badge */}
-      <div style={{
-        fontFamily: 'ui-monospace, "SF Mono", monospace',
-        fontSize: 11,
-        fontWeight: 600,
-        color: '#AEAEB2',
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        marginBottom: 16,
-      }}>
-        Flagmail Assessment
-      </div>
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.76)',
+        backdropFilter: 'blur(22px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(22px) saturate(150%)',
+        border: '1px solid rgba(255,255,255,0.82)',
+        borderRadius: 26,
+        boxShadow: '0 24px 80px rgba(32, 52, 89, 0.10), 0 8px 24px rgba(32, 52, 89, 0.05)',
+        padding: 24,
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: `radial-gradient(circle at 18% 18%, ${accent}16, transparent 24%)`,
+        }}
+      />
 
-      {/* Avatar placeholder */}
-      <div style={{
-        width: 60,
-        height: 60,
-        borderRadius: '50%',
-        background: `linear-gradient(135deg, ${titleColor}30, ${titleColor}10)`,
-        border: `2px solid ${titleColor}40`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 14px',
-        fontSize: 24,
-      }}>
-        {finalScore >= 80 ? '🎯' : finalScore >= 50 ? '🛡' : '🔍'}
-      </div>
-
-      {/* Name */}
-      <div style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E', marginBottom: 4 }}>
-        {player.name}
-      </div>
-
-      {/* Title – stamp animation */}
-      <div style={{
-        display: 'inline-block',
-        padding: '6px 16px',
-        borderRadius: 20,
-        background: `${titleColor}15`,
-        border: `2px solid ${titleColor}`,
-        fontSize: 14,
-        fontWeight: 800,
-        color: titleColor,
-        letterSpacing: '0.04em',
-        marginBottom: 20,
-        animation: 'stampIn 0.3s ease forwards',
-      }} className="anim-stampIn">
-        {title}
-      </div>
-
-      {/* Score */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 48, fontWeight: 800, color: '#1C1C1E', lineHeight: 1, letterSpacing: '-0.02em' }}>
-          {finalScore}
+      <div style={{ position: 'relative', display: 'grid', gap: 18 }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            justifySelf: 'start',
+            padding: '8px 14px',
+            borderRadius: 999,
+            background: `${accent}12`,
+            border: `1px solid ${accent}22`,
+            color: accent,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {eyebrow}
         </div>
-        <div style={{ fontSize: 14, color: '#636366' }}>out of {maxScore} points</div>
-      </div>
 
-      {/* Score bar */}
-      <div style={{ height: 6, background: 'rgba(0,0,0,0.06)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
-        <div style={{
-          height: '100%',
-          width: `${pct}%`,
-          background: `linear-gradient(90deg, ${titleColor}, ${titleColor}99)`,
-          borderRadius: 3,
-          transition: 'width 1s ease',
-        }} />
-      </div>
+        <div>
+          <div style={{ fontSize: 32, lineHeight: 0.98, fontWeight: 700, letterSpacing: '-0.05em', color: '#111827', marginBottom: 8 }}>
+            {player.name}
+          </div>
+          <div style={{ fontSize: 14, color: 'rgba(17,24,39,0.60)', lineHeight: 1.55 }}>
+            Final score based on classification accuracy, subcategory precision, and clue usage.
+          </div>
+        </div>
 
-      {/* Badges */}
-      <div style={{ fontSize: 13, color: '#636366' }}>
-        {badgeCount} badge{badgeCount !== 1 ? 's' : ''} earned
-      </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            gap: 12,
+            alignItems: 'end',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)', marginBottom: 6 }}>
+              Competency tier
+            </div>
+            <div style={{ fontSize: 24, lineHeight: 1, fontWeight: 800, letterSpacing: '-0.04em', color: accent }}>
+              {title}
+            </div>
+          </div>
 
-      {/* Watermark */}
-      <div style={{
-        marginTop: 20,
-        paddingTop: 14,
-        borderTop: '1px solid rgba(0,0,0,0.06)',
-        fontFamily: 'ui-monospace, "SF Mono", monospace',
-        fontSize: 10,
-        color: '#AEAEB2',
-        letterSpacing: '0.08em',
-      }}>
-        FLAGMAIL ASSESSMENT
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, color: '#111827' }}>
+            <span style={{ fontSize: 62, lineHeight: 0.92, fontWeight: 800, letterSpacing: '-0.06em' }}>{finalScore}</span>
+            <span style={{ fontSize: 22, fontWeight: 600, color: 'rgba(17,24,39,0.30)' }}>/100</span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            height: 10,
+            borderRadius: 999,
+            background: 'rgba(17,24,39,0.08)',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${Math.max(0, Math.min(100, finalScore))}%`,
+              height: '100%',
+              borderRadius: 999,
+              background: `linear-gradient(90deg, ${accent} 0%, ${accent}AA 100%)`,
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              borderRadius: 18,
+              padding: '14px',
+              background: 'rgba(255,255,255,0.84)',
+              border: '1px solid rgba(13,26,51,0.06)',
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
+              Badges earned
+            </div>
+            <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, letterSpacing: '-0.04em', color: '#111827' }}>
+              {badgeCount}
+            </div>
+          </div>
+
+          <div
+            style={{
+              borderRadius: 18,
+              padding: '14px',
+              background: 'rgba(255,255,255,0.84)',
+              border: '1px solid rgba(13,26,51,0.06)',
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
+              Assessment
+            </div>
+            <div style={{ fontSize: 18, lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', color: '#111827' }}>
+              Flagmail
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
