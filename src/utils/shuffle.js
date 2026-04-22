@@ -58,12 +58,21 @@ function withShuffledClues(email, random) {
   return { ...email, clues: fisherYates([...email.clues], random).slice(0, maxClues) };
 }
 
+function withStaticClues(email) {
+  const maxClues = ZONE_CLUE_LIMITS[email.zone] ?? 4;
+  return { ...email, clues: [...email.clues].slice(0, maxClues) };
+}
+
 export function shuffleEmails(player = {}) {
   const byId = new Map(EMAILS.map(email => [email.id, email]));
   const playerSeed = buildPlayerSeed(player);
 
   return Object.entries(CURATED_ZONE_EMAIL_IDS)
     .flatMap(([zone, ids]) => {
+      if (Number(zone) === 1) {
+        return ids.map((id) => withStaticClues(byId.get(id)));
+      }
+
       const random = createSeededRandom(`${playerSeed}:zone:${zone}`);
       return fisherYates(ids, random).map((id) => withShuffledClues(byId.get(id), random));
     })
