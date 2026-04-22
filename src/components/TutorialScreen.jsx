@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     src: img2,
-    title: 'Use hints deliberately',
-    caption: 'Clues can save a round, but each one reduces the score you keep.',
+    title: 'Use hints only when needed',
+    caption: 'Clues can rescue a tough round, but each one costs a point from your score.',
   },
   {
     src: img3,
@@ -126,20 +126,21 @@ export default function TutorialScreen({ onSkip }) {
         onClick={onSkip}
         style={{
           position: 'absolute',
-          top: 16,
-          right: 18,
+          top: 20,
+          right: 22,
           zIndex: 2,
-          padding: '10px 16px',
-          borderRadius: 999,
-          border: '1px solid rgba(13,26,51,0.08)',
-          background: 'rgba(255,255,255,0.82)',
-          color: 'rgba(17,24,39,0.62)',
+          padding: '4px 0',
+          border: 'none',
+          background: 'transparent',
+          color: 'rgba(17,24,39,0.44)',
           fontSize: 13,
-          fontWeight: 600,
-          boxShadow: '0 10px 24px rgba(32, 52, 89, 0.08)',
+          fontWeight: 500,
+          cursor: 'pointer',
+          textDecoration: 'underline',
+          textUnderlineOffset: 3,
         }}
       >
-        Skip
+        Skip tutorial
       </button>
 
       <motion.div
@@ -217,18 +218,6 @@ export default function TutorialScreen({ onSkip }) {
               >
                 A fast briefing before the first zone.
               </h1>
-              <p
-                style={{
-                  margin: '14px 0 0',
-                  fontSize: 17,
-                  lineHeight: 1.6,
-                  color: 'rgba(17,24,39,0.64)',
-                  maxWidth: 560,
-                }}
-              >
-                Flagmail works best when the instructions feel brief and operational. Review the flow,
-                then move straight into the inbox.
-              </p>
             </div>
           </div>
 
@@ -332,17 +321,6 @@ export default function TutorialScreen({ onSkip }) {
                     >
                       {current.title}
                     </div>
-                    <p
-                      style={{
-                        margin: '8px 0 0',
-                        fontSize: 14,
-                        lineHeight: 1.55,
-                        color: 'rgba(17,24,39,0.62)',
-                        maxWidth: 520,
-                      }}
-                    >
-                      {current.caption}
-                    </p>
                   </div>
 
                   <div
@@ -384,14 +362,6 @@ export default function TutorialScreen({ onSkip }) {
                           transition: stepProgress === 0 ? 'none' : 'width 0.1s linear',
                         }}
                       />
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: 'rgba(17,24,39,0.52)',
-                      }}
-                    >
-                      Moves automatically unless you choose a step.
                     </div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {STEPS.map((_, index) => (
@@ -447,9 +417,9 @@ export default function TutorialScreen({ onSkip }) {
             <div
               style={{
                 fontSize: 30,
-                lineHeight: 0.98,
+                lineHeight: 1.1,
                 fontWeight: 700,
-                letterSpacing: '-0.05em',
+                letterSpacing: '-0.04em',
                 color: '#111827',
                 marginBottom: 10,
               }}
@@ -565,7 +535,7 @@ export default function TutorialScreen({ onSkip }) {
                 color: 'rgba(17,24,39,0.68)',
               }}
             >
-              You will get 15 scenarios across 3 zones, with 120 seconds per round and a score normalized to 100.
+              You will get 15 scenarios across 3 zones, with 120 seconds per round. Your score reflects accuracy across all three zones.
             </div>
           </div>
 
