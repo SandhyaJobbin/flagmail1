@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Lottie from 'lottie-react';
 import RankCard from './RankCard.jsx';
-import BadgeCollection from './BadgeCollection.jsx';
 import CompetencySummary from './CompetencySummary.jsx';
 import { getProgressTitle } from '../utils/competency.js';
 import CELEBRATION from '../assets/animation/Celebration Update Color.json';
@@ -33,13 +32,11 @@ export default function ResultsScreen({
   displayScore,
   zoneScores = {},
   categoryCorrect = {},
-  earned = [],
   perEmail = [],
   onLeaderboard,
   onPlayAgain,
 }) {
   const safePlayer = player ?? { name: 'Analyst' };
-  const safeEarned = Array.isArray(earned) ? earned : [];
   const safePerEmail = Array.isArray(perEmail) ? perEmail : [];
   const normalized = displayScore ?? Math.round((finalScore / MAX_SCORE) * 100);
   const title = getProgressTitle(normalized);
@@ -176,9 +173,6 @@ export default function ResultsScreen({
               >
                 {title}
               </div>
-              <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.62)' }}>
-                {safeEarned.length} badge{safeEarned.length !== 1 ? 's' : ''} earned across the full assessment.
-              </div>
             </div>
           </div>
         </motion.div>
@@ -217,7 +211,7 @@ export default function ResultsScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16, duration: 0.26, ease: 'easeOut' }}
           >
-            <RankCard player={safePlayer} finalScore={normalized} badgeCount={safeEarned.length} />
+            <RankCard player={safePlayer} finalScore={normalized} />
           </motion.div>
 
           <motion.div
@@ -229,17 +223,6 @@ export default function ResultsScreen({
             <CompetencySummary categoryCorrect={categoryCorrect} />
           </motion.div>
         </div>
-
-        {safeEarned.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.24, duration: 0.26, ease: 'easeOut' }}
-            style={{ ...surface, borderRadius: 28, padding: 20 }}
-          >
-            <BadgeCollection earned={safeEarned} />
-          </motion.div>
-        )}
 
         <div className="results-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <motion.button
