@@ -29,28 +29,31 @@ function titleTone(score) {
 
 export default function ResultsScreen({
   player,
-  finalScore,
+  finalScore = 0,
   displayScore,
-  zoneScores,
-  categoryCorrect,
-  earned,
-  perEmail,
+  zoneScores = {},
+  categoryCorrect = {},
+  earned = [],
+  perEmail = [],
   onLeaderboard,
   onPlayAgain,
 }) {
+  const safePlayer = player ?? { name: 'Analyst' };
+  const safeEarned = Array.isArray(earned) ? earned : [];
+  const safePerEmail = Array.isArray(perEmail) ? perEmail : [];
   const normalized = displayScore ?? Math.round((finalScore / MAX_SCORE) * 100);
   const title = getProgressTitle(normalized);
   const perfect = normalized >= 100;
   const tone = titleTone(normalized);
 
   const zoneAcc = (zone) => {
-    const emails = perEmail.filter((record) => record.zone === zone);
+    const emails = safePerEmail.filter((record) => record.zone === zone);
     return emails.length ? Math.round((emails.filter((record) => record.l1Correct).length / emails.length) * 100) : 0;
   };
 
   const zones = [1, 2, 3].map((zone) => ({
     ...zoneMeta[zone],
-    score: zoneScores[zone],
+    score: zoneScores[zone] ?? 0,
     max: ZONE_MAX_SCORE,
     accuracy: zoneAcc(zone),
   }));
@@ -133,7 +136,7 @@ export default function ResultsScreen({
                 Assessment complete
               </div>
               <h1 style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 58px)', lineHeight: 0.94, letterSpacing: '-0.06em', color: '#111827' }}>
-                {player.name}&apos;s final judgment score.
+                {safePlayer.name}&apos;s final judgment score.
               </h1>
               <p style={{ margin: '14px 0 0', fontSize: 16, lineHeight: 1.6, color: 'rgba(17,24,39,0.64)', maxWidth: 560 }}>
                 Based on how accurately you classified each email across all three zones, under real time pressure.
@@ -174,7 +177,7 @@ export default function ResultsScreen({
                 {title}
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.62)' }}>
-                {earned.length} badge{earned.length !== 1 ? 's' : ''} earned across the full assessment.
+                {safeEarned.length} badge{safeEarned.length !== 1 ? 's' : ''} earned across the full assessment.
               </div>
             </div>
           </div>
@@ -214,7 +217,7 @@ export default function ResultsScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16, duration: 0.26, ease: 'easeOut' }}
           >
-            <RankCard player={player} finalScore={normalized} badgeCount={earned.length} />
+            <RankCard player={safePlayer} finalScore={normalized} badgeCount={safeEarned.length} />
           </motion.div>
 
           <motion.div
@@ -227,14 +230,14 @@ export default function ResultsScreen({
           </motion.div>
         </div>
 
-        {earned.length > 0 && (
+        {safeEarned.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.24, duration: 0.26, ease: 'easeOut' }}
             style={{ ...surface, borderRadius: 28, padding: 20 }}
           >
-            <BadgeCollection earned={earned} />
+            <BadgeCollection earned={safeEarned} />
           </motion.div>
         )}
 

@@ -15,7 +15,7 @@ export const BADGES = {
   EAGLE_EYE:        { id: 'EAGLE_EYE',        name: 'Eagle Eye',        icon: '\uD83E\uDD85', rare: false, desc: 'All 6 L1 categories identified correctly at least once' },
   GHOST_DETECTIVE:  { id: 'GHOST_DETECTIVE',  name: 'Ghost Detective',  icon: '\uD83D\uDC7B', rare: true,  desc: 'Full game - zero clues revealed' },
   ICE_COLD:         { id: 'ICE_COLD',         name: 'Ice Cold',         icon: '\uD83E\uDDCA', rare: true,  desc: 'All 5 hard emails correct, no clues' },
-  PERFECT_EYE:      { id: 'PERFECT_EYE',      name: 'Perfect Eye',      icon: '\uD83D\uDD2E', rare: true,  desc: 'All 25 emails: L1 + L2 correct' },
+  PERFECT_EYE:      { id: 'PERFECT_EYE',      name: 'Perfect Eye',      icon: '\uD83D\uDD2E', rare: true,  desc: 'All 15 emails: L1 + L2 correct' },
   NO_HINTS_NEEDED:  { id: 'NO_HINTS_NEEDED',  name: 'No Hints Needed',  icon: '\uD83D\uDD75', rare: true,  desc: 'Complete a zone without revealing any clue' },
 };
 
@@ -97,7 +97,7 @@ export function useBadges() {
       hardEmails.every(r => r.l1Correct && r.l2Correct && r.cluesUsed === 0);
     if (iceCold) earnBadge('ICE_COLD');
 
-    const perfectEye = perEmail.length === 25 && perEmail.every(r => r.l1Correct && r.l2Correct);
+    const perfectEye = perEmail.length === 15 && perEmail.every(r => r.l1Correct && r.l2Correct);
     if (perfectEye) earnBadge('PERFECT_EYE');
   }, [earnBadge]);
 

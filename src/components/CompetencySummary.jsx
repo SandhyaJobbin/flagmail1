@@ -1,9 +1,10 @@
 import { generateCompetency } from '../utils/competency.js';
 
 export default function CompetencySummary({ categoryCorrect }) {
-  const summary = generateCompetency(categoryCorrect);
+  const safeCategoryCorrect = categoryCorrect ?? {};
+  const summary = generateCompetency(safeCategoryCorrect);
 
-  const categories = Object.entries(categoryCorrect)
+  const categories = Object.entries(safeCategoryCorrect)
     .filter(([, value]) => value.total > 0)
     .map(([category, value]) => ({
       category,
