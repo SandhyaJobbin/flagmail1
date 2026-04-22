@@ -70,7 +70,10 @@ export default function GameRound({
     const to = totalScore;
     if (from === to) return;
 
+    const scoreProxy = { val: from };
+
     gsap.fromTo(
+      scoreProxy,
       { val: from },
       {
         val: to,
@@ -78,7 +81,7 @@ export default function GameRound({
         ease: 'power2.out',
         onUpdate() {
           if (scoreDisplayRef.current) {
-            scoreDisplayRef.current.textContent = Math.round(this.targets()[0].val);
+            scoreDisplayRef.current.textContent = Math.round(scoreProxy.val);
           }
         },
       }
