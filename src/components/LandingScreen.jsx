@@ -1,19 +1,39 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
 
 const glass = {
-  background: 'rgba(255,255,255,0.60)',
-  backdropFilter: 'blur(28px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-  border: '1px solid rgba(255,255,255,0.75)',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+  background: 'rgba(255,255,255,0.72)',
+  backdropFilter: 'blur(28px) saturate(165%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(165%)',
+  border: '1px solid rgba(255,255,255,0.86)',
+  boxShadow: '0 24px 80px rgba(32, 52, 89, 0.11), 0 8px 24px rgba(32, 52, 89, 0.06)',
 };
 
 const ZONE_CARDS = [
-  { zone: 3, title: 'Zero-Day Vault', emails: 5, color: '#0A84FF', locked: true, desc: 'Advanced threat analysis', top: 32, zIndex: 1, scale: 0.94, rot: 2 },
-  { zone: 2, title: 'Shadow Inbox', emails: 5, color: '#0A84FF', locked: true, desc: 'Spot deceptive patterns', top: 16, zIndex: 2, scale: 0.97, rot: 1 },
-  { zone: 1, title: 'Flag Academy', emails: 5, color: '#0A84FF', locked: false, desc: 'Identify common threats', top: 0, zIndex: 3, scale: 1.0, rot: 0 },
+  {
+    zone: '01',
+    title: 'Inbox',
+    detail: 'Spot the loud red flags fast and build your rhythm.',
+    accent: '#0A84FF',
+  },
+  {
+    zone: '02',
+    title: 'Queue',
+    detail: 'The copy gets cleaner here. Trust the details, not the polish.',
+    accent: '#30B0C7',
+  },
+  {
+    zone: '03',
+    title: 'Escalation',
+    detail: 'One subtle inconsistency is usually the whole story.',
+    accent: '#FF7A1A',
+  },
+];
+
+const STATS = [
+  { value: '15', label: 'emails' },
+  { value: '3', label: 'zones' },
+  { value: '45s', label: 'per round' },
 ];
 
 export default function LandingScreen({ onStart }) {
@@ -21,10 +41,6 @@ export default function LandingScreen({ onStart }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [focusedField, setFocusedField] = useState(null);
-
-  // Refs for GSAP card fan
-  const cardRefs = useRef([]);
-  const isFannedRef = useRef(false);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -40,375 +56,497 @@ export default function LandingScreen({ onStart }) {
     onStart(name.trim(), email.trim());
   }
 
-  function handleStackEnter() {
-    if (isFannedRef.current) return;
-    isFannedRef.current = true;
-    // Fan cards upward: back card fans left, middle fans right, front stays
-    const offsets = [
-      { y: -24, rotation: -6, scale: 0.96 }, // zone 3 (back)
-      { y: -16, rotation:  4, scale: 0.98 }, // zone 2 (middle)
-      { y: -8,  rotation:  0, scale: 1.0  }, // zone 1 (front)
-    ];
-    cardRefs.current.forEach((el, i) => {
-      if (!el) return;
-      gsap.to(el, {
-        y: offsets[i].y,
-        rotation: offsets[i].rotation,
-        scale: offsets[i].scale,
-        duration: 0.4,
-        ease: 'back.out(1.4)',
-        delay: i * 0.04,
-      });
-    });
-  }
-
-  function handleStackLeave() {
-    isFannedRef.current = false;
-    cardRefs.current.forEach((el, i) => {
-      if (!el) return;
-      gsap.to(el, {
-        y: 0,
-        rotation: 0,
-        scale: ZONE_CARDS[i].scale,
-        duration: 0.35,
-        ease: 'power2.out',
-        delay: i * 0.03,
-      });
-    });
-  }
-
   const inputStyle = (field) => ({
     width: '100%',
-    padding: '11px 14px',
-    borderRadius: 12,
+    padding: '14px 16px',
+    borderRadius: 16,
     border: focusedField === field
-      ? '1.5px solid rgba(0,113,227,0.8)'
-      : '1.5px solid rgba(255,255,255,0.6)',
+      ? '1.5px solid rgba(10,132,255,0.6)'
+      : '1.5px solid rgba(13,26,51,0.08)',
     background: focusedField === field
-      ? 'rgba(255,255,255,0.75)'
-      : 'rgba(255,255,255,0.50)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+      ? 'rgba(255,255,255,0.92)'
+      : 'rgba(249,250,252,0.88)',
     fontSize: 15,
-    color: '#1C1C1E',
+    color: '#111827',
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
-    transition: 'border-color 0.15s ease, background 0.15s ease',
+    transition: 'border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease',
     boxShadow: focusedField === field
-      ? '0 0 0 3px rgba(0,113,227,0.15)'
+      ? '0 0 0 4px rgba(10,132,255,0.10)'
       : 'none',
   });
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 16px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-        style={{ width: '100%', maxWidth: 400 }}
-      >
+    <div
+      className="landing-screen"
+      style={{
+        minHeight: '100dvh',
+        padding: 'clamp(16px, 2.8vw, 32px)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
+        position: 'relative',
+        overflowY: 'auto',
+      }}
+    >
+      <style>{`
+        @media (max-width: 1080px) {
+          .landing-shell {
+            grid-template-columns: minmax(0, 1fr) !important;
+            max-width: 860px !important;
+          }
+        }
 
-        {/* App identity */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          {/* Icon mark */}
+        @media (max-width: 720px) {
+          .landing-root {
+            min-height: auto !important;
+          }
+
+          .landing-card {
+            padding: 22px !important;
+          }
+
+          .landing-stats,
+          .landing-zones {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: [
+            'radial-gradient(circle at 16% 20%, rgba(10,132,255,0.14), transparent 28%)',
+            'radial-gradient(circle at 84% 16%, rgba(255,122,26,0.13), transparent 24%)',
+            'radial-gradient(circle at 50% 80%, rgba(48,176,199,0.10), transparent 32%)',
+          ].join(','),
+        }}
+      />
+
+      <motion.div
+        className="landing-root"
+        initial={{ opacity: 0, y: 22 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 28 }}
+        style={{
+          width: '100%',
+          maxWidth: 1220,
+          minHeight: 'calc(100dvh - (2 * clamp(16px, 2.8vw, 32px)))',
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          className="landing-shell"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.08fr) minmax(360px, 0.92fr)',
+            gap: 20,
+            alignItems: 'stretch',
+            width: '100%',
+          }}
+        >
           <motion.div
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 20, delay: 0.1 }}
+            className="landing-card"
+            initial={{ opacity: 0, x: -14 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.06, duration: 0.4 }}
             style={{
-              width: 72,
-              height: 72,
-              margin: '0 auto 20px',
-              borderRadius: 20,
-              background: 'linear-gradient(145deg, rgba(26,115,232,0.85) 0%, rgba(0,87,184,0.90) 100%)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.35)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(0, 87, 184, 0.35), 0 2px 8px rgba(0,0,0,0.12)',
+              ...glass,
+              borderRadius: 34,
+              padding: 'clamp(24px, 2.8vw, 34px)',
+              display: 'grid',
+              gap: 22,
+              alignContent: 'space-between',
             }}
           >
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-              <path d="M18 4L30 10V20C30 26.627 24.627 32 18 32C11.373 32 6 26.627 6 20V10L18 4Z"
-                fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.5"/>
-              <path d="M13 18.5L16.5 22L23 15" stroke="white" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <div style={{ display: 'grid', gap: 18 }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(13,26,51,0.07)',
+                  justifySelf: 'start',
+                }}
+              >
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(180deg, #0A84FF 0%, #0066CC 100%)',
+                    boxShadow: '0 0 0 6px rgba(10,132,255,0.12)',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.62)',
+                  }}
+                >
+                  Flagmail Assessment
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12, maxWidth: 680 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,24,39,0.48)',
+                  }}
+                >
+                  Sharpen Judgment, Not Just Recall
+                </div>
+
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(42px, 5.4vw, 68px)',
+                    lineHeight: 0.92,
+                    letterSpacing: '-0.06em',
+                    color: '#111827',
+                    fontWeight: 700,
+                    maxWidth: '8.5ch',
+                  }}
+                >
+                  Prove your judgment on real email threats.
+                </h1>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(15px, 1.5vw, 18px)',
+                    lineHeight: 1.55,
+                    color: 'rgba(17,24,39,0.68)',
+                    maxWidth: 540,
+                  }}
+                >
+                  15 timed scenarios across 3 escalating zones. Your decisions are scored and mapped to a competency tier.
+                </p>
+              </div>
+
+              <div
+                className="landing-stats"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 12,
+                  maxWidth: 560,
+                }}
+              >
+                {STATS.map((stat) => (
+                  <div
+                    key={stat.label}
+                    style={{
+                      background: 'rgba(255,255,255,0.82)',
+                      border: '1px solid rgba(13,26,51,0.06)',
+                      borderRadius: 22,
+                      padding: '14px 16px 12px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 28,
+                        fontWeight: 700,
+                        letterSpacing: '-0.04em',
+                        color: '#111827',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        lineHeight: 1.4,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        color: 'rgba(17,24,39,0.54)',
+                        marginTop: 6,
+                      }}
+                    >
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  fontWeight: 700,
+                  color: 'rgba(17,24,39,0.52)',
+                }}
+              >
+                What you'll face
+              </div>
+
+              <div
+                className="landing-zones"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 12,
+                }}
+              >
+                {ZONE_CARDS.map((card) => (
+                  <div
+                    key={card.zone}
+                    style={{
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: 24,
+                      padding: '16px',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(244,247,252,0.94) 100%)',
+                      border: '1px solid rgba(13,26,51,0.06)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: '0 auto 0 0',
+                        width: 4,
+                        background: `linear-gradient(180deg, ${card.accent} 0%, rgba(255,255,255,0) 100%)`,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        color: card.accent,
+                        marginBottom: 10,
+                      }}
+                    >
+                      {card.zone}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        letterSpacing: '-0.03em',
+                        color: '#111827',
+                        marginBottom: 6,
+                      }}
+                    >
+                      {card.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: 'rgba(17,24,39,0.62)',
+                      }}
+                    >
+                      {card.detail}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.18, duration: 0.35 }}
+            className="landing-card"
+            initial={{ opacity: 0, x: 14 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.12, duration: 0.4 }}
+            style={{
+              ...glass,
+              borderRadius: 32,
+              padding: 'clamp(24px, 2.6vw, 30px)',
+              display: 'grid',
+              gap: 18,
+              alignContent: 'start',
+            }}
           >
-            <div style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'rgba(60,60,67,0.65)',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              marginBottom: 8,
-            }}>
-              Veridian Security
-            </div>
-            <h1 style={{
-              fontSize: 44,
-              fontWeight: 700,
-              color: '#1C1C1E',
-              margin: 0,
-              letterSpacing: '-0.02em',
-            }}>
-              Flagmail
-            </h1>
-            <p style={{
-              fontSize: 16,
-              color: 'rgba(60,60,67,0.6)',
-              margin: '8px 0 0',
-              fontWeight: 400,
-            }}>
-              Read between the lines. Flag what doesn't belong.
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Sign-in card */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, type: 'spring', stiffness: 240, damping: 22 }}
-          style={{ ...glass, borderRadius: 20, padding: '32px 28px', marginBottom: 14 }}
-        >
-          <h2 style={{
-            fontSize: 21,
-            fontWeight: 600,
-            color: '#1C1C1E',
-            margin: '0 0 4px',
-            textAlign: 'center',
-          }}>
-            Analyst Briefing
-          </h2>
-          <p style={{
-            fontSize: 13,
-            color: 'rgba(60,60,67,0.6)',
-            margin: '0 0 24px',
-            textAlign: 'center',
-            lineHeight: 1.55,
-          }}>
-            You've been hired as an Email Security Analyst.<br/>
-            Classify every email. Prove your instincts.
-          </p>
-
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{
-                display: 'block',
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#1C1C1E',
-                marginBottom: 6,
-              }}>
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                onFocus={() => setFocusedField('name')}
-                onBlur={() => setFocusedField(null)}
-                placeholder="Your full name"
-                style={inputStyle('name')}
-              />
-            </div>
-
-            <div style={{ marginBottom: 8 }}>
-              <label style={{
-                display: 'block',
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#1C1C1E',
-                marginBottom: 6,
-              }}>
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onFocus={() => setFocusedField('email')}
-                onBlur={() => setFocusedField(null)}
-                placeholder="your@email.com"
-                style={inputStyle('email')}
-              />
-            </div>
-
-            {error && (
-              <p style={{
-                fontSize: 12,
-                color: '#FF3B30',
-                margin: '8px 0 0',
-                textAlign: 'center',
-              }}>
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              style={{
-                width: '100%',
-                marginTop: 22,
-                padding: '13px',
-                borderRadius: 12,
-                border: '1px solid rgba(0,113,227,0.5)',
-                background: 'rgba(0,113,227,0.88)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                color: '#fff',
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                letterSpacing: '0.01em',
-                transition: 'background 0.15s ease',
-                boxShadow: '0 4px 16px rgba(0,113,227,0.30)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,119,237,0.95)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,113,227,0.88)'}
-            >
-              Begin Briefing
-            </button>
-          </form>
-        </motion.div>
-
-        {/* Zone cards — stacked deck with GSAP fan hover */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.36, duration: 0.35 }}
-          style={{ display: 'flex', flexDirection: 'column' }}
-        >
-          <div style={{
-            fontSize: 10,
-            fontWeight: 700,
-            color: 'rgba(60,60,67,0.5)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            textAlign: 'center',
-            marginBottom: 12,
-          }}>
-            3 Zones · 15 Emails
-          </div>
-
-          {/* Stacked cards with GSAP fan hover */}
-          <div
-            style={{ position: 'relative', height: 108, cursor: 'default' }}
-            onMouseEnter={handleStackEnter}
-            onMouseLeave={handleStackLeave}
-          >
-            {ZONE_CARDS.map((z, i) => (
+            <div style={{ display: 'grid', gap: 10 }}>
               <div
-                key={z.zone}
-                ref={el => cardRefs.current[i] = el}
                 style={{
-                  ...glass,
-                  borderRadius: 14,
-                  padding: '14px 16px',
-                  borderLeft: `3px solid ${z.locked ? 'rgba(0,0,0,0.12)' : z.color}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: z.top,
-                  zIndex: z.zIndex,
-                  transform: `scale(${z.scale})`,
-                  transformOrigin: 'top center',
-                  opacity: z.locked ? 0.75 : 1,
-                  overflow: 'hidden',
-                  willChange: 'transform',
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  fontWeight: 700,
+                  color: 'rgba(17,24,39,0.52)',
                 }}
               >
-                {/* Zone number badge */}
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  background: z.locked ? 'rgba(0,0,0,0.06)' : `${z.color}18`,
-                  border: `1.5px solid ${z.locked ? 'rgba(0,0,0,0.10)' : `${z.color}40`}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  {z.locked
-                    ? <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <rect x="3" y="7" width="10" height="8" rx="2" fill="rgba(60,60,67,0.35)"/>
-                        <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="rgba(60,60,67,0.35)" strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    : <span style={{ fontSize: 14, fontWeight: 800, color: z.color }}>Z{z.zone}</span>
-                  }
-                </div>
-
-                {/* Text */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2 }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700,
-                      color: z.locked ? 'rgba(60,60,67,0.4)' : z.color,
-                      letterSpacing: '0.06em',
-                    }}>
-                      ZONE {z.zone}
-                    </span>
-                    {z.locked && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 700,
-                        color: 'rgba(60,60,67,0.4)',
-                        background: 'rgba(0,0,0,0.07)',
-                        padding: '1px 6px',
-                        borderRadius: 6,
-                        letterSpacing: '0.05em',
-                      }}>LOCKED</span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: z.locked ? 'rgba(60,60,67,0.5)' : '#1C1C1E' }}>
-                    {z.title}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'rgba(60,60,67,0.5)', marginTop: 1 }}>
-                    {z.desc} · {z.emails} emails
-                  </div>
-                </div>
-
-                {/* Active indicator */}
-                {!z.locked && (
-                  <div style={{
-                    fontSize: 11, fontWeight: 600,
-                    color: z.color,
-                    background: `${z.color}15`,
-                    border: `1px solid ${z.color}30`,
-                    padding: '4px 10px',
-                    borderRadius: 8,
-                    flexShrink: 0,
-                  }}>
-                    Start →
-                  </div>
-                )}
+                Candidate Access
               </div>
-            ))}
-          </div>
-        </motion.div>
+              <div
+                style={{
+                  fontSize: 'clamp(28px, 2.7vw, 38px)',
+                  fontWeight: 700,
+                  letterSpacing: '-0.05em',
+                  color: '#111827',
+                  lineHeight: 0.98,
+                }}
+              >
+                Begin the assessment
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: 'rgba(17,24,39,0.66)',
+                  maxWidth: 420,
+                }}
+              >
+                Enter your details to start. Your name and email are used to record your result.
+              </p>
+            </div>
 
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#111827',
+                    marginBottom: 8,
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Your full name"
+                  style={inputStyle('name')}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#111827',
+                    marginBottom: 8,
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="you@example.com"
+                  style={inputStyle('email')}
+                />
+              </div>
+
+              {error && (
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: '#FF3B30',
+                    margin: 0,
+                  }}
+                >
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  marginTop: 4,
+                  padding: '15px 18px',
+                  borderRadius: 18,
+                  border: '1px solid rgba(10,132,255,0.32)',
+                  background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+                  color: '#fff',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  letterSpacing: '0.01em',
+                  boxShadow: '0 18px 32px rgba(10,132,255,0.22)',
+                }}
+              >
+                Start Assessment
+              </button>
+            </form>
+
+            <div
+              style={{
+                borderRadius: 24,
+                background: 'rgba(249,250,252,0.78)',
+                border: '1px solid rgba(13,26,51,0.06)',
+                padding: '16px',
+                display: 'grid',
+                gap: 10,
+              }}
+            >
+              {[
+                'Enter your details and start the assessment.',
+                'Classify each email under time pressure.',
+                'Receive your competency result and ranking.',
+              ].map((line, index) => (
+                <div
+                  key={line}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '28px minmax(0, 1fr)',
+                    gap: 10,
+                    alignItems: 'start',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      background: 'rgba(17,24,39,0.06)',
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#111827',
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 1.45,
+                      color: 'rgba(17,24,39,0.64)',
+                    }}
+                  >
+                    {line}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
     </div>
   );

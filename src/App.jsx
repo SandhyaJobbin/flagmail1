@@ -17,7 +17,7 @@ import Leaderboard      from './components/Leaderboard.jsx';
 import BadgeToast       from './components/BadgeToast.jsx';
 import ReasoningModal   from './components/ReasoningModal.jsx';
 
-const BG = 'linear-gradient(135deg, #e9e0fb 0%, #d4e8fd 28%, #fce4f1 58%, #fef6d0 82%, #fde8d0 100%)';
+const BG = 'linear-gradient(180deg, #f5f7fb 0%, #edf3fb 42%, #f7f4ef 100%)';
 
 export default function App() {
   const gs = useGameState();
@@ -84,7 +84,7 @@ export default function App() {
         name: gs.player.name,
         email: gs.player.email,
         score: sc.displayScore,
-        title: sc.displayScore >= 80 ? 'Threat Intelligence Lead' : sc.displayScore >= 50 ? 'Senior Analyst' : 'Junior Analyst',
+        title: sc.displayScore >= 80 ? 'Advanced' : sc.displayScore >= 50 ? 'Proficient' : 'Foundation',
         badges: bg.earned.length,
         zone1Score: sc.zoneScores[1],
         zone2Score: sc.zoneScores[2],
@@ -111,6 +111,7 @@ export default function App() {
       background: BG,
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
       color: '#1C1C1E',
+      position: 'relative',
     }}>
       <BadgeToast badge={bg.pendingToast} onDismiss={handleBadgeDismiss} />
 

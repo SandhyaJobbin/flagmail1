@@ -151,7 +151,7 @@ function CorrectAnswerOverlay({ points, onDone }) {
             marginBottom: 14,
           }}
         >
-          Nailed it!
+          Correct
         </motion.div>
 
         {/* Points */}
@@ -230,7 +230,7 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
   const verdict = timedOut && !l1Correct
     ? { label: '⏱ Ran out of time', color: '#FF9500', bg: 'rgba(255,149,0,0.1)' }
     : l1Correct
-    ? { label: '✓ Nailed it!', color: '#34C759', bg: 'rgba(52,199,89,0.1)' }
+    ? { label: '✓ Correct', color: '#34C759', bg: 'rgba(52,199,89,0.1)' }
     : { label: '↗ Missed it', color: '#FF3B30', bg: 'rgba(255,59,48,0.1)' };
 
   const deltaStr = points > 0 ? `+${points}` : '0';
@@ -434,7 +434,7 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
             </div>
           </motion.div>
 
-          {/* Running total */}
+          {/* Score so far */}
           <motion.div
             custom={0.24}
             variants={section}
@@ -449,7 +449,7 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
               alignItems: 'center',
             }}
           >
-            <span style={{ fontSize: 13, color: '#636366', fontWeight: 500 }}>Running total</span>
+            <span style={{ fontSize: 13, color: '#636366', fontWeight: 500 }}>Score so far</span>
             <span style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E' }}>{totalScore} pts</span>
           </motion.div>
 

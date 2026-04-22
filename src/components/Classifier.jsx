@@ -2,85 +2,74 @@ import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { L1_CATEGORIES, L2_BY_L1 } from '../data/emails.js';
 
-// ── Help content ──────────────────────────────────────────────────────────────
-
 const L1_HELP = {
-  'Legitimate': {
-    desc: 'Genuine, authorized emails from trusted senders — receipts, alerts, and internal communications you actually signed up for.',
-    signals: 'Matches expected domain, no urgency tricks, personalized & contextually relevant.',
+  Legitimate: {
+    desc: 'Genuine, authorized emails from trusted senders such as receipts, alerts, and normal account communication.',
+    signals: 'Expected domain, calm tone, realistic workflow, and context that matches recent activity.',
   },
   'Phishing & Spoofing': {
-    desc: 'Deceptive emails crafted to steal credentials or personal data by impersonating trusted entities.',
-    signals: 'Mismatched links, urgency, generic greeting, lookalike domain, suspicious sender.',
+    desc: 'Deceptive emails designed to steal credentials or trust by impersonating a brand or person.',
+    signals: 'Lookalike domain, mismatched sender, urgency, suspicious links, or a fake sign-in flow.',
   },
   'Spam & Junk': {
-    desc: 'Unsolicited bulk email — promotions, prize claims, or chain letters — with no targeted malicious intent.',
-    signals: 'Mass send, unsubscribe missing, irrelevant offers, exaggerated claims.',
+    desc: 'Unsolicited promotional or low-quality bulk email without a trustworthy relationship to the recipient.',
+    signals: 'Unrealistic offers, irrelevant promotions, strange discounts, and noisy marketing language.',
   },
   'Malicious Content': {
-    desc: 'Emails that deliver or link to malware, ransomware, or malicious downloads via files or URLs.',
-    signals: 'Unexpected attachments, unusual file types, links to unknown domains, macro prompts.',
+    desc: 'Emails that push malware, dangerous downloads, or execution of unsafe files and links.',
+    signals: 'Unexpected attachments, macro prompts, odd file types, or links to risky infrastructure.',
   },
   'Abuse & Harassment': {
-    desc: 'Harmful, threatening, or illegal content targeting an individual — hate speech, stalking, or self-harm.',
-    signals: 'Threatening language, personal details of the target, repeated contact, disturbing content.',
+    desc: 'Harmful or threatening content targeted at a person or identity group.',
+    signals: 'Threats, intimidation, doxxing, hateful language, or repeated unwanted contact.',
   },
   'High-Risk Fraud': {
-    desc: 'Sophisticated financial scams using social engineering — BEC, wire fraud, impersonation, or advance-fee schemes.',
-    signals: 'Request for money/transfer, impersonates executive or vendor, unusual urgency, wiring instructions.',
+    desc: 'High-consequence scams such as wire fraud, impersonation, and advance-fee manipulation.',
+    signals: 'Money movement, executive impersonation, banking details, or social engineering around urgency.',
   },
 };
 
 const L2_HELP = {
-  // Legitimate
-  'Subscription Billing':            'Legitimate charge or renewal notice from a service you authorized.',
-  'Security Notification':           'Real alert about account activity, password changes, or suspicious logins.',
-  'Platform Notification':           'Authentic system-generated notification from a platform or app you use.',
-  'Internal Communication':          'Genuine email from within the same organization or team.',
-  'Shipping Update':                 'Real tracking or delivery status update from a carrier or retailer.',
-  'Bank / Financial Notification':   'Legitimate transaction alert or statement from a financial institution.',
-  // Phishing & Spoofing
-  'Email Phishing':                  'Mass phishing campaign impersonating a known brand to steal credentials.',
-  'Spear Phishing':                  'Targeted phishing crafted for a specific person using personal details.',
-  'Spoofed Sender Address':          'Email disguising its true origin to appear from a trusted sender.',
-  'Clone Phishing':                  'Malicious copy of a real email with links or attachments swapped out.',
-  'Smishing Reference':              'Email referencing or redirecting to an SMS-based phishing scheme.',
-  // Spam & Junk
-  'Bulk Marketing Spam':             'Unsolicited mass marketing email sent without consent.',
-  'Prize & Lottery Spam':            'Fake prize notification designed to extract personal info or fees.',
-  'Chain Letter':                    'Email requesting forwarding to others, spreading misinformation or links.',
-  'SEO / Referral Spam':             'Fraudulent email to inflate web rankings or drive referral traffic.',
-  'Newsletter Spam':                 'Unsolicited subscription content from sources you never signed up for.',
-  // Malicious Content
-  'Malware Delivery':                'Email used to distribute malicious software via links or infected files.',
-  'Ransomware Lure':                 'Tricks the recipient into running ransomware that encrypts their data.',
-  'Credential Harvesting':           'Redirects to a fake login page to capture usernames and passwords.',
-  'Drive-by Download Link':          'URL that silently installs malware upon visiting the page.',
-  'Macro-Embedded Attachment':       'Office document with malicious macros that execute on open.',
-  // Abuse & Harassment
-  'Direct Harassment':               'Threatening or abusive content directed at a specific individual.',
-  'Hate Speech':                     'Discriminatory content targeting race, religion, gender, or identity.',
-  'Self-Harm Facilitation':          'Email promoting, encouraging, or providing methods of self-harm.',
-  'Child Safety Concern':            'Content that endangers, exploits, or targets minors.',
-  'Stalking / Doxxing':              'Reveals personal information or indicates surveillance to intimidate.',
-  // High-Risk Fraud
-  'Business Email Compromise (BEC)': 'Impersonates an executive or vendor to authorize fraudulent transfers.',
-  'Impersonation':                   'Pretends to be a trusted person or authority to manipulate the recipient.',
-  'Extortion & Sextortion':          'Threatens to release private content unless payment is made.',
-  'Romance Scam':                    'Fake romantic connection cultivated over time to eventually request money.',
-  'Job Scam':                        'Fraudulent job offer to extract personal info, fees, or unpaid labor.',
-  'Advance Fee Fraud':               'Promises a large sum in exchange for a small upfront payment.',
-  'Wire Fraud':                      'Tricks the recipient into transferring funds to a fraudulent account.',
+  'Subscription Billing': 'Legitimate billing or renewal communication from a real service you use.',
+  'Security Notification': 'A genuine alert about account activity, password changes, or sign-in events.',
+  'Platform Notification': 'Authentic system communication from a known platform or product.',
+  'Internal Communication': 'Real internal email from your team or organization.',
+  'Shipping Update': 'A normal delivery or shipment update from a known sender.',
+  'Bank / Financial Notification': 'A legitimate financial transaction, fraud, or statement alert.',
+  'Promotional Offer': 'A valid promotional or discount email from a known brand.',
+  'Email Phishing': 'A broad phishing email built to steal credentials or identity information.',
+  'Spear Phishing': 'A more targeted phishing attempt using context or organizational details.',
+  'Spoofed Sender Address': 'The sender disguises their origin to appear legitimate.',
+  'Clone Phishing': 'A copied version of a real email with the destination changed.',
+  Impersonation: 'The attacker pretends to be a trusted person, team, or authority.',
+  'Bulk Marketing Spam': 'Mass unsolicited promotional email without clear consent.',
+  'Prize & Lottery Spam': 'Fake reward or winnings designed to trigger excitement and disclosure.',
+  'Chain Letter': 'A message intended to be forwarded repeatedly with low trust value.',
+  'SEO / Referral Spam': 'Traffic-driving or search-ranking spam pretending to be useful.',
+  'Newsletter Spam': 'Subscription-style mail that the recipient did not knowingly request.',
+  'Malware Delivery': 'A message trying to deliver malware directly to the device.',
+  'Ransomware Lure': 'Content designed to trick the recipient into opening ransomware.',
+  'Credential Harvesting': 'A fake login or form crafted to steal usernames and passwords.',
+  'Drive-by Download Link': 'A link that may install malware just from visiting it.',
+  'Macro-Embedded Attachment': 'A document that becomes dangerous when macros are enabled.',
+  'Direct Harassment': 'Abusive or threatening content aimed at a specific person.',
+  'Hate Speech': 'Attacks a person or group based on identity.',
+  'Self-Harm Facilitation': 'Encourages or supports self-harm behavior.',
+  'Child Safety Concern': 'Content involving harm, exploitation, or risk to minors.',
+  'Stalking / Doxxing': 'Threatening exposure of private information or targeted intimidation.',
+  'Business Email Compromise (BEC)': 'Executive or vendor impersonation to trigger fraud or payment.',
+  'Extortion & Sextortion': 'Threatens release of sensitive material unless paid.',
+  'Romance Scam': 'Manipulative emotional trust-building for financial extraction.',
+  'Job Scam': 'A fake job flow intended to take money or sensitive information.',
+  'Advance Fee Fraud': 'Promises value in exchange for an upfront payment.',
+  'Wire Fraud': 'Attempts to move money into a fraudulent account.',
 };
 
-// ── Tooltip card ──────────────────────────────────────────────────────────────
-
-function HelpTooltip({ tooltip, color, onDismiss }) {
+function HelpTooltip({ tooltip, color }) {
   const isL1 = tooltip.type === 'l1';
   const help = isL1 ? L1_HELP[tooltip.id] : null;
   const l2Desc = !isL1 ? L2_HELP[tooltip.id] : null;
   const subs = isL1 ? (L2_BY_L1[tooltip.id] || []) : [];
-
   const { x, y, above } = tooltip.pos;
 
   return (
@@ -88,90 +77,92 @@ function HelpTooltip({ tooltip, color, onDismiss }) {
       position: 'fixed',
       left: x,
       ...(above ? { bottom: window.innerHeight - y } : { top: y }),
-      width: 288,
+      width: 296,
       zIndex: 9999,
-      background: 'rgba(255,255,255,0.96)',
+      background: 'rgba(255,255,255,0.97)',
       backdropFilter: 'blur(24px) saturate(180%)',
       WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-      border: `1.5px solid ${color}40`,
-      borderRadius: 14,
-      boxShadow: `0 12px 40px rgba(0,0,0,0.14), 0 0 0 1px rgba(255,255,255,0.6), 0 4px 0 ${color}`,
-      padding: '14px 16px 12px',
+      border: `1.5px solid ${color}36`,
+      borderRadius: 18,
+      boxShadow: '0 22px 44px rgba(18, 28, 45, 0.14)',
+      padding: '15px 16px 14px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
       animation: 'fadeSlideUp 0.18s ease',
       pointerEvents: 'none',
     }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <div style={{
-          width: 8, height: 8, borderRadius: '50%',
-          background: color, flexShrink: 0,
-        }} />
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.01em' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#111827', letterSpacing: '-0.01em' }}>
           {tooltip.id}
         </span>
         <span style={{
           marginLeft: 'auto',
-          fontSize: 9, fontWeight: 600,
-          color: 'rgba(60,60,67,0.4)',
-          letterSpacing: '0.06em',
+          fontSize: 9,
+          fontWeight: 700,
+          color: 'rgba(17,24,39,0.42)',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
         }}>
-          {isL1 ? 'L1 CATEGORY' : 'L2 SUBCATEGORY'}
+          {isL1 ? 'Primary' : 'Secondary'}
         </span>
       </div>
 
-      {/* Description */}
       <p style={{
-        fontSize: 12, color: '#3A3A3C', lineHeight: 1.55,
-        margin: '0 0 8px', fontWeight: 400,
+        fontSize: 12,
+        color: '#334155',
+        lineHeight: 1.58,
+        margin: '0 0 9px',
       }}>
         {isL1 ? help.desc : l2Desc}
       </p>
 
-      {/* Signals (L1 only) */}
-      {isL1 && help.signals && (
+      {isL1 && help?.signals && (
         <div style={{
-          fontSize: 11, color: 'rgba(60,60,67,0.6)',
+          fontSize: 11,
+          color: 'rgba(17,24,39,0.60)',
           marginBottom: subs.length ? 10 : 0,
-          lineHeight: 1.4,
+          lineHeight: 1.45,
         }}>
-          <span style={{ fontWeight: 600, color: color }}>Look for: </span>
+          <span style={{ fontWeight: 700, color }}>Look for: </span>
           {help.signals}
         </div>
       )}
 
-      {/* Subcategories (L1 only) */}
       {isL1 && subs.length > 0 && (
         <div>
           <div style={{
-            fontSize: 9, fontWeight: 700, color: 'rgba(60,60,67,0.4)',
-            letterSpacing: '0.08em', marginBottom: 5,
+            fontSize: 9,
+            fontWeight: 700,
+            color: 'rgba(17,24,39,0.42)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: 6,
           }}>
-            SUBCATEGORIES
+            Related diagnoses
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-            {subs.map(s => (
-              <span key={s} style={{
-                fontSize: 10, fontWeight: 500,
-                color: color,
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {subs.map((sub) => (
+              <span key={sub} style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color,
                 background: `${color}12`,
-                border: `1px solid ${color}28`,
-                borderRadius: 5,
-                padding: '2px 6px',
+                border: `1px solid ${color}22`,
+                borderRadius: 999,
+                padding: '4px 8px',
               }}>
-                {s}
+                {sub}
               </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* Dismiss countdown bar */}
       <div style={{
-        marginTop: 10,
+        marginTop: 12,
         height: 2,
         borderRadius: 2,
-        background: `${color}20`,
+        background: `${color}18`,
         overflow: 'hidden',
       }}>
         <div style={{
@@ -185,13 +176,10 @@ function HelpTooltip({ tooltip, color, onDismiss }) {
   );
 }
 
-// ── Main classifier ───────────────────────────────────────────────────────────
-
 export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelectL2, disabled }) {
   const l2Options = selectedL1 ? L2_BY_L1[selectedL1] || [] : [];
-
   const [tooltip, setTooltip] = useState(null);
-  const hoverTimer  = useRef(null);
+  const hoverTimer = useRef(null);
   const dismissTimer = useRef(null);
 
   function clearAll() {
@@ -202,13 +190,14 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
   function showAfterDelay(id, type, color, e) {
     clearAll();
     const rect = e.currentTarget.getBoundingClientRect();
-    const tooltipH = type === 'l1' ? 200 : 100;
+    const tooltipH = type === 'l1' ? 220 : 116;
     const above = rect.top > tooltipH + 20;
     const pos = {
-      x: Math.min(Math.max(rect.left, 8), window.innerWidth - 296),
+      x: Math.min(Math.max(rect.left, 8), window.innerWidth - 304),
       y: above ? rect.top - 8 : rect.bottom + 8,
       above,
     };
+
     hoverTimer.current = setTimeout(() => {
       setTooltip({ id, type, color, pos });
       dismissTimer.current = setTimeout(() => setTooltip(null), 5000);
@@ -222,55 +211,68 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
 
   const tooltipColor = tooltip
     ? (tooltip.type === 'l1'
-        ? L1_CATEGORIES.find(c => c.id === tooltip.id)?.color
-        : L1_CATEGORIES.find(c => c.id === selectedL1)?.color) || '#0A84FF'
+        ? L1_CATEGORIES.find((cat) => cat.id === tooltip.id)?.color
+        : L1_CATEGORIES.find((cat) => cat.id === selectedL1)?.color) || '#0A84FF'
     : '#0A84FF';
 
   return (
     <div>
       {tooltip && createPortal(
-        <HelpTooltip tooltip={tooltip} color={tooltipColor} onDismiss={() => setTooltip(null)} />,
+        <HelpTooltip tooltip={tooltip} color={tooltipColor} />,
         document.body
       )}
 
-      {/* L1 */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em' }}>
-            L1 — THREAT CATEGORY
+      <div style={{ marginBottom: 18 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          marginBottom: 10,
+          flexWrap: 'wrap',
+        }}>
+          <div style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'rgba(17,24,39,0.52)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}>
+            Primary classification
           </div>
-          <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.65)', fontStyle: 'italic' }}>
-            Hover for details
+          <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.54)' }}>
+            Choose the strongest category
           </div>
         </div>
+
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {L1_CATEGORIES.map(cat => {
+          {L1_CATEGORIES.map((cat) => {
             const isSelected = selectedL1 === cat.id;
             return (
               <button
                 key={cat.id}
                 onClick={() => !disabled && onSelectL1(cat.id)}
-                onMouseEnter={e => !disabled && showAfterDelay(cat.id, 'l1', cat.color, e)}
+                onMouseEnter={(e) => !disabled && showAfterDelay(cat.id, 'l1', cat.color, e)}
                 onMouseLeave={hide}
                 disabled={disabled}
                 style={{
-                  padding: '9px 16px',
-                  borderRadius: 12,
+                  padding: '11px 16px',
+                  borderRadius: 16,
                   fontSize: 13,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   cursor: disabled ? 'default' : 'pointer',
-                  fontFamily: 'inherit',
                   transition: 'all 0.18s ease',
                   ...(isSelected ? {
-                    background: `rgba(${hexToRgb(cat.color)},0.12)`,
+                    background: `linear-gradient(180deg, rgba(${hexToRgb(cat.color)},0.18) 0%, rgba(255,255,255,0.94) 100%)`,
                     border: `1.5px solid ${cat.color}`,
-                    boxShadow: `0 0 0 4px rgba(${hexToRgb(cat.color)},0.1)`,
+                    boxShadow: `0 10px 24px rgba(${hexToRgb(cat.color)},0.16), 0 0 0 4px rgba(${hexToRgb(cat.color)},0.08)`,
                     color: cat.color,
-                    fontWeight: 600,
+                    transform: 'translateY(-1px)',
                   } : {
-                    background: 'rgba(255,255,255,0.5)',
-                    border: '1.5px solid rgba(0,0,0,0.08)',
-                    color: '#1C1C1E',
+                    background: 'rgba(255,255,255,0.78)',
+                    border: '1.5px solid rgba(13,26,51,0.08)',
+                    color: '#111827',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.72)',
                   }),
                 }}
               >
@@ -281,45 +283,57 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
         </div>
       </div>
 
-      {/* L2 */}
       {selectedL1 && (
         <div className="anim-fadeSlideUp">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#636366', letterSpacing: '0.08em' }}>
-              L2 — SUBCATEGORY
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 10,
+            flexWrap: 'wrap',
+          }}>
+            <div style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: 'rgba(17,24,39,0.52)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+            }}>
+              Secondary diagnosis
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(60,60,67,0.65)', fontStyle: 'italic' }}>
-              Hover for details
+            <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.54)' }}>
+              Optional — refine if confident
             </div>
           </div>
+
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {l2Options.map(sub => {
+            {l2Options.map((sub) => {
               const isSelected = selectedL2 === sub;
-              const catColor = L1_CATEGORIES.find(c => c.id === selectedL1)?.color || '#0A84FF';
+              const catColor = L1_CATEGORIES.find((cat) => cat.id === selectedL1)?.color || '#0A84FF';
               return (
                 <button
                   key={sub}
                   onClick={() => !disabled && onSelectL2(sub)}
-                  onMouseEnter={e => !disabled && showAfterDelay(sub, 'l2', catColor, e)}
+                  onMouseEnter={(e) => !disabled && showAfterDelay(sub, 'l2', catColor, e)}
                   onMouseLeave={hide}
                   disabled={disabled}
                   style={{
-                    padding: '7px 14px',
-                    borderRadius: 20,
+                    padding: '9px 14px',
+                    borderRadius: 999,
                     fontSize: 12,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     cursor: disabled ? 'default' : 'pointer',
-                    fontFamily: 'inherit',
                     transition: 'all 0.18s ease',
                     ...(isSelected ? {
-                      background: `rgba(${hexToRgb(catColor)},0.12)`,
+                      background: `linear-gradient(180deg, rgba(${hexToRgb(catColor)},0.16) 0%, rgba(255,255,255,0.94) 100%)`,
                       border: `1.5px solid ${catColor}`,
                       color: catColor,
-                      fontWeight: 600,
+                      boxShadow: `0 8px 18px rgba(${hexToRgb(catColor)},0.14)`,
                     } : {
-                      background: 'rgba(255,255,255,0.5)',
-                      border: '1.5px solid rgba(0,0,0,0.08)',
-                      color: '#636366',
+                      background: 'rgba(255,255,255,0.78)',
+                      border: '1.5px solid rgba(13,26,51,0.08)',
+                      color: 'rgba(17,24,39,0.66)',
                     }),
                   }}
                 >

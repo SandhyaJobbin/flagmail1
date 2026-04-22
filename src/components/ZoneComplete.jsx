@@ -244,10 +244,35 @@ const glass = {
 };
 
 const ZONE_META = {
-  1: { color: '#0A84FF', next: 'Zone 2 – Shadow Inbox' },
-  2: { color: '#0A84FF', next: 'Zone 3 – Zero-Day Vault' },
-  3: { color: '#0A84FF', next: 'Final Results' },
+  1: { color: '#0A84FF' },
+  2: { color: '#30B0C7' },
+  3: { color: '#FF7A1A' },
 };
+
+const PERFORMANCE_MESSAGES = {
+  1: {
+    high: 'Strong start. You cut through the obvious threats cleanly.',
+    mid: 'Solid pass. A few clear threats slipped through.',
+    low: 'Some obvious flags were missed. Zone 2 demands more.',
+  },
+  2: {
+    high: 'Sharp eye. You handled the polished fakes well.',
+    mid: 'The cleaner emails created some uncertainty.',
+    low: 'The polished emails caused problems. Slow down in Zone 3.',
+  },
+  3: {
+    high: 'Specialist-level judgment. You found the subtle signals.',
+    mid: 'The edge cases tested your limits. A few key details were missed.',
+    low: 'The subtle signals in this zone proved difficult.',
+  },
+};
+
+function getPerformanceTier(correctCount) {
+  const pct = correctCount / 5;
+  if (pct >= 0.8) return 'high';
+  if (pct >= 0.4) return 'mid';
+  return 'low';
+}
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export default function ZoneComplete({
@@ -255,15 +280,18 @@ export default function ZoneComplete({
   earlyUnlocked, consecutivePerfect, onContinue,
 }) {
   const meta = ZONE_META[zone];
+  const correctCount = zoneEmails.filter(r => r.l1Correct).length;
   const accuracy = zoneEmails.length > 0
-    ? Math.round((zoneEmails.filter(r => r.l1Correct).length / zoneEmails.length) * 100)
+    ? Math.round((correctCount / zoneEmails.length) * 100)
     : 0;
   const wrongCount = zoneEmails.filter(r => !r.l1Correct).length;
   const isLast = zone === 3;
   const isFlawless = wrongCount === 0;
+  const tier = getPerformanceTier(correctCount);
+  const performanceMsg = PERFORMANCE_MESSAGES[zone]?.[tier] ?? '';
 
   const stats = [
-    { label: 'Score', value: zoneScore, suffix: `/${maxZoneScore}`, isNumeric: false },
+    { label: 'Score', value: `${zoneScore} / ${maxZoneScore}`, isNumeric: false },
     { label: 'Accuracy', value: accuracy, suffix: '%', isNumeric: true },
     { label: 'Missed', value: wrongCount, suffix: '', isNumeric: true },
   ];
@@ -349,7 +377,7 @@ export default function ZoneComplete({
               marginBottom: 8,
             }}
           >
-            ZONE {zone} COMPLETE
+            ZONE {zone} COMPLETE — SECTION {zone} OF 3
           </motion.div>
 
           <motion.h2
@@ -358,7 +386,7 @@ export default function ZoneComplete({
             transition={{ delay: 0.2, duration: 0.3 }}
             style={{ fontSize: 28, fontWeight: 800, color: '#1C1C1E', margin: '0 0 24px', letterSpacing: '-0.01em' }}
           >
-            {isFlawless ? 'Flawless!' : 'Zone cleared'}
+            {performanceMsg}
           </motion.h2>
 
           {/* Stat tiles */}
@@ -379,7 +407,7 @@ export default function ZoneComplete({
                 <div style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E' }}>
                   {s.isNumeric
                     ? <StatCounter value={s.value} suffix={s.suffix} delay={300 + i * 80} />
-                    : <span>{s.value}{s.suffix}</span>
+                    : <span>{s.value}</span>
                   }
                 </div>
                 <div style={{ fontSize: 11, color: '#636366', marginTop: 2 }}>{s.label}</div>
@@ -412,7 +440,7 @@ export default function ZoneComplete({
               boxShadow: '0 4px 16px rgba(10,132,255,0.35)',
             }}
           >
-            {isLast ? 'View Results →' : `Continue to ${meta.next} →`}
+            {isLast ? 'See Your Results' : `Enter Zone ${zone + 1}`}
           </motion.button>
         </motion.div>
       </div>

@@ -5,7 +5,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
   const maxScore = 100;
   const pct = Math.round((finalScore / maxScore) * 100);
 
-  const titleColor = finalScore >= 70 ? '#FF3B30' : finalScore >= 40 ? '#FF9500' : '#34C759';
+  const titleColor = finalScore >= 80 ? '#FF3B30' : finalScore >= 50 ? '#FF9500' : '#34C759';
 
   return (
     <div style={{
@@ -19,7 +19,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
       textAlign: 'center',
       animation: 'rankGlow 1.2s ease-in-out',
     }} className="anim-rankGlow">
-      {/* Veridian logo */}
+      {/* Flagmail badge */}
       <div style={{
         fontFamily: 'ui-monospace, "SF Mono", monospace',
         fontSize: 11,
@@ -29,7 +29,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
         textTransform: 'uppercase',
         marginBottom: 16,
       }}>
-        Veridian Security
+        Flagmail Assessment
       </div>
 
       {/* Avatar placeholder */}
@@ -45,7 +45,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
         margin: '0 auto 14px',
         fontSize: 24,
       }}>
-        {finalScore >= 70 ? '🎯' : finalScore >= 40 ? '🛡' : '🔍'}
+        {finalScore >= 80 ? '🎯' : finalScore >= 50 ? '🛡' : '🔍'}
       </div>
 
       {/* Name */}
@@ -104,7 +104,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
         color: '#AEAEB2',
         letterSpacing: '0.08em',
       }}>
-        FLAGMAIL · VERIDIAN SECURITY
+        FLAGMAIL ASSESSMENT
       </div>
     </div>
   );

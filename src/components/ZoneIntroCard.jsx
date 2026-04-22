@@ -1,257 +1,396 @@
 import { motion } from 'framer-motion';
 
 const glass = {
-  background: 'rgba(255,255,255,0.65)',
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  border: '1px solid rgba(255,255,255,0.8)',
-  borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+  background: 'rgba(255,255,255,0.74)',
+  backdropFilter: 'blur(30px) saturate(165%)',
+  WebkitBackdropFilter: 'blur(30px) saturate(165%)',
+  border: '1px solid rgba(255,255,255,0.84)',
+  boxShadow: '0 24px 80px rgba(32, 52, 89, 0.11), 0 8px 24px rgba(32, 52, 89, 0.06)',
 };
 
-const BRAND = '#0A84FF';
-
 const ZONES = [
-  { zone: 1, title: 'Flag Academy',   emails: 10, color: BRAND, desc: 'Identify common threats',  difficulty: 'Easy',   mission: 'Clear the queue. Prove your instincts.',        icon: '🔍' },
-  { zone: 2, title: 'Shadow Inbox',   emails: 10, color: BRAND, desc: 'Spot deceptive patterns',  difficulty: 'Medium', mission: 'Threats get smarter. So do you.',               icon: '🛡' },
-  { zone: 3, title: 'Zero-Day Vault', emails: 5,  color: BRAND, desc: 'Advanced threat analysis', difficulty: 'Hard',   mission: 'The hardest emails in the queue. Trust nothing.', icon: '🎯' },
+  {
+    zone: 1,
+    title: 'The Inbox',
+    subtitle: 'Section 1 of 3',
+    emails: 5,
+    icon: '✦',
+    accent: '#0A84FF',
+    mission: 'Spot the loud red flags fast and build your rhythm.',
+    contextCopy: 'Start with the obvious ones and find your footing.',
+    signals: ['Urgent asks', 'Mismatched senders', 'Low-trust promotions'],
+  },
+  {
+    zone: 2,
+    title: 'The Queue',
+    subtitle: 'Section 2 of 3',
+    emails: 5,
+    icon: '◌',
+    accent: '#30B0C7',
+    mission: 'The copy gets cleaner here. Trust the details, not the polish.',
+    contextCopy: 'Polish can hide a lot. Read slower.',
+    signals: ['Lookalike domains', 'Workflow mismatches', 'Suspicious requests'],
+  },
+  {
+    zone: 3,
+    title: 'The Escalation',
+    subtitle: 'Section 3 of 3',
+    emails: 5,
+    icon: '◎',
+    accent: '#FF7A1A',
+    mission: 'One subtle inconsistency is usually the whole story.',
+    contextCopy: 'High stakes. One detail changes everything.',
+    signals: ['Subtle social engineering', 'Operational realism', 'One decisive clue'],
+  },
 ];
 
 export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
-  const meta = ZONES.find(z => z.zone === zone);
+  const meta = ZONES.find((item) => item.zone === zone);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px 16px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 28, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-        style={{ width: '100%', maxWidth: 400 }}
-      >
+    <div
+      style={{
+        height: '100dvh',
+        padding: 'clamp(18px, 3vw, 30px)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <style>{`
+        @media (max-width: 900px) {
+          .zone-intro-shell {
+            grid-template-columns: 1fr !important;
+            overflow: auto !important;
+          }
+        }
 
-        {/* Header */}
+        @media (max-width: 640px) {
+          .zone-intro-main,
+          .zone-intro-side {
+            padding: 22px !important;
+          }
+
+          .zone-intro-stats {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: [
+            `radial-gradient(circle at 14% 18%, ${meta.accent}18, transparent 24%)`,
+            'radial-gradient(circle at 85% 14%, rgba(255,255,255,0.65), transparent 20%)',
+            'radial-gradient(circle at 50% 82%, rgba(17,24,39,0.06), transparent 28%)',
+          ].join(','),
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+        className="zone-intro-shell"
+        style={{
+          width: '100%',
+          maxWidth: 1120,
+          height: '100%',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)',
+          gap: 20,
+          alignItems: 'stretch',
+          position: 'relative',
+        }}
+      >
         <motion.div
-          initial={{ opacity: 0, y: -12 }}
+          className="zone-intro-main"
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.3, ease: 'easeOut' }}
-          style={{ textAlign: 'center', marginBottom: 24 }}
+          transition={{ delay: 0.08, duration: 0.4 }}
+          style={{
+            ...glass,
+            borderRadius: 34,
+            padding: 'clamp(24px, 3vw, 34px)',
+            display: 'grid',
+            gap: 22,
+            alignContent: 'space-between',
+            minHeight: 0,
+          }}
         >
-          <div style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: 'rgba(60,60,67,0.5)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            marginBottom: 10,
-          }}>
-            Veridian Security
+          <div style={{ display: 'grid', gap: 16 }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '8px 14px',
+                borderRadius: 999,
+                background: `${meta.accent}12`,
+                border: `1px solid ${meta.accent}24`,
+                justifySelf: 'start',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: meta.accent,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Zone {meta.zone}
+              </span>
+              <span
+                style={{
+                  width: 1,
+                  height: 14,
+                  background: `${meta.accent}35`,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: 'rgba(17,24,39,0.56)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {meta.subtitle}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gap: 12, maxWidth: 650 }}>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 'clamp(42px, 6vw, 76px)',
+                  lineHeight: 0.95,
+                  letterSpacing: '-0.055em',
+                  color: '#111827',
+                  fontWeight: 700,
+                }}
+              >
+                {meta.title}
+              </h1>
+
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 'clamp(16px, 1.8vw, 19px)',
+                  lineHeight: 1.55,
+                  color: 'rgba(17,24,39,0.66)',
+                  maxWidth: 560,
+                }}
+              >
+                {meta.mission}
+              </p>
+            </div>
+
+            <div
+              className="zone-intro-stats"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 12,
+                maxWidth: 620,
+              }}
+            >
+              {[
+                { label: 'Emails', value: 5 },
+                { label: 'Max points', value: 25 },
+                { label: 'Time each', value: '45s' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  style={{
+                    borderRadius: 22,
+                    padding: '18px 16px',
+                    background: 'rgba(255,255,255,0.82)',
+                    border: '1px solid rgba(13,26,51,0.06)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 28,
+                      lineHeight: 1,
+                      fontWeight: 700,
+                      letterSpacing: '-0.05em',
+                      color: '#111827',
+                    }}
+                  >
+                    {stat.value}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.10em',
+                      fontWeight: 700,
+                      color: 'rgba(17,24,39,0.50)',
+                    }}
+                  >
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'rgba(10,132,255,0.1)',
-            border: `1.5px solid ${meta.color}`,
-            borderRadius: 20,
-            padding: '6px 16px',
-          }}>
-            <span style={{ fontSize: 16 }}>{meta.icon}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: meta.color, letterSpacing: '0.06em' }}>
-              {meta.difficulty.toUpperCase()} · {meta.emails} EMAILS
-            </span>
+
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                color: 'rgba(17,24,39,0.50)',
+              }}
+            >
+              What to watch for
+            </div>
+
+            {meta.signals.map((signal, index) => (
+              <div
+                key={signal}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '32px minmax(0, 1fr)',
+                  gap: 10,
+                  alignItems: 'start',
+                  borderRadius: 18,
+                  padding: '12px 14px',
+                  background: 'rgba(255,255,255,0.8)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 999,
+                    background: `${meta.accent}12`,
+                    color: meta.accent,
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {index + 1}
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    color: 'rgba(17,24,39,0.66)',
+                  }}
+                >
+                  {signal}
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
 
-        {/* Early unlock banner */}
-        {earlyUnlocked && zone > 1 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 26, delay: 0.1 }}
+        <motion.div
+          className="zone-intro-side"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, type: 'spring', stiffness: 190, damping: 24 }}
+          style={{
+            ...glass,
+            borderRadius: 32,
+            padding: 'clamp(24px, 3vw, 30px)',
+            display: 'grid',
+            gap: 18,
+            alignContent: 'start',
+            minHeight: 0,
+          }}
+        >
+          <div
             style={{
-              ...glass,
-              padding: '12px 20px',
-              marginBottom: 16,
-              borderLeft: '3px solid #FFD60A',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
+              width: 72,
+              height: 72,
+              borderRadius: 22,
+              background: `${meta.accent}18`,
+              border: `1px solid ${meta.accent}24`,
+              display: 'grid',
+              placeItems: 'center',
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.75), 0 16px 32px ${meta.accent}18`,
             }}
           >
-            <motion.span
-              animate={{ rotate: [0, -12, 12, -8, 8, 0] }}
-              transition={{ delay: 0.4, duration: 0.55 }}
-              style={{ fontSize: 20, display: 'inline-block' }}
+            <span
+              style={{
+                fontSize: 36,
+                lineHeight: 1,
+                color: meta.accent,
+              }}
             >
-              ⚡
-            </motion.span>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#B8860B' }}>EARLY UNLOCK</div>
-              <div style={{ fontSize: 12, color: '#636366' }}>
-                3 consecutive perfect scores unlocked this zone early!
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* 3-column zone grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
-          {ZONES.map((zData, idx) => {
-            const isCompleted = zData.zone < zone;
-            const isLocked    = zData.zone > zone;
-
-            return (
-              <motion.div
-                key={zData.zone}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: isLocked ? 0.55 : isCompleted ? 0.80 : 1, y: 0 }}
-                transition={{ delay: 0.12 + idx * 0.07, duration: 0.3, ease: 'easeOut' }}
-                style={{
-                  ...glass,
-                  borderRadius: 14,
-                  padding: '16px 10px 14px',
-                  textAlign: 'center',
-                  borderTop: `3px solid ${isLocked ? 'rgba(0,0,0,0.10)' : zData.color}`,
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Icon badge */}
-                <div style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 14,
-                  background: isLocked ? 'rgba(0,0,0,0.05)' : `${zData.color}18`,
-                  border: `1.5px solid ${isLocked ? 'rgba(0,0,0,0.08)' : `${zData.color}40`}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 10px',
-                }}>
-                  {isLocked ? (
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                      <rect x="3" y="7" width="10" height="8" rx="2" fill="rgba(60,60,67,0.30)"/>
-                      <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="rgba(60,60,67,0.30)" strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
-                  ) : isCompleted ? (
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                      <path d="M4 8.5L7 11.5L12 5.5" stroke={zData.color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  ) : (
-                    <span style={{ fontSize: 20 }}>{zData.icon}</span>
-                  )}
-                </div>
-
-                {/* Title */}
-                <div style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: isLocked ? 'rgba(60,60,67,0.4)' : '#1C1C1E',
-                  lineHeight: 1.3,
-                  marginBottom: 6,
-                }}>
-                  {zData.title}
-                </div>
-
-                {/* Status pill */}
-                <div style={{
-                  display: 'inline-block',
-                  fontSize: 9,
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  padding: '2px 7px',
-                  borderRadius: 6,
-                  color: isLocked ? 'rgba(60,60,67,0.4)' : zData.color,
-                  background: isLocked ? 'rgba(0,0,0,0.06)' : `${zData.color}18`,
-                }}>
-                  {isLocked ? 'LOCKED' : isCompleted ? 'DONE' : 'UP NEXT'}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Mission briefing card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.32, type: 'spring', stiffness: 240, damping: 22 }}
-          style={{ ...glass, padding: '28px 28px 24px', textAlign: 'center' }}
-        >
-          <motion.h1
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.42, duration: 0.3 }}
-            style={{ fontSize: 26, fontWeight: 800, color: '#1C1C1E', margin: '0 0 6px', letterSpacing: '-0.02em' }}
-          >
-            {meta.title}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.35 }}
-            style={{ fontSize: 14, color: '#636366', margin: '0 0 24px', fontStyle: 'italic', lineHeight: 1.5 }}
-          >
-            {meta.mission}
-          </motion.p>
-
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-            {[
-              { label: 'Emails', value: meta.emails },
-              { label: 'Max Points', value: meta.emails * 4 },
-              { label: 'Time / Email', value: '45s' },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.52 + i * 0.07, duration: 0.3, ease: 'easeOut' }}
-                style={{
-                  flex: 1,
-                  background: 'rgba(0,0,0,0.04)',
-                  borderRadius: 12,
-                  padding: '14px 8px',
-                }}
-              >
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#1C1C1E' }}>{stat.value}</div>
-                <div style={{ fontSize: 11, color: '#636366', marginTop: 2 }}>{stat.label}</div>
-              </motion.div>
-            ))}
+              {meta.icon}
+            </span>
           </div>
+
+          <div style={{ display: 'grid', gap: 10 }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: 'rgba(17,24,39,0.66)',
+              }}
+            >
+              {meta.contextCopy}
+            </p>
+          </div>
+
+          {earlyUnlocked && zone > 1 && (
+            <div
+              style={{
+                padding: '10px 14px',
+                borderRadius: 999,
+                background: 'rgba(255,184,0,0.12)',
+                border: '1px solid rgba(255,184,0,0.24)',
+                color: '#A16207',
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                justifySelf: 'start',
+              }}
+            >
+              Early unlock earned
+            </div>
+          )}
 
           <motion.button
             onClick={onStart}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.3 }}
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
             style={{
               width: '100%',
-              padding: '15px',
-              borderRadius: 12,
-              border: 'none',
-              background: meta.color,
+              marginTop: 'auto',
+              padding: '16px 18px',
+              borderRadius: 18,
+              border: '1px solid rgba(255,255,255,0.5)',
+              background: `linear-gradient(135deg, ${meta.accent} 0%, ${meta.zone === 3 ? '#E56A00' : '#0066CC'} 100%)`,
+              boxShadow: `0 18px 32px ${meta.accent}2E`,
               color: '#fff',
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              boxShadow: '0 4px 16px rgba(10,132,255,0.35)',
+              letterSpacing: '0.01em',
             }}
           >
-            Start {meta.title} →
+            Start Zone {meta.zone}
           </motion.button>
         </motion.div>
-
       </motion.div>
     </div>
   );

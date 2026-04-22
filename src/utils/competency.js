@@ -37,14 +37,14 @@ export function generateCompetency(categoryCorrect) {
     ? `You have a strong foundation in ${formatList(strong)}. `
     : '';
   const weakText = weak.length > 0
-    ? `Focus on building your skills in ${formatList(weak)} to advance your analyst career at Veridian Security.`
-    : 'Keep sharpening your skills to advance your analyst career at Veridian Security.';
+    ? `Focus on building your skills in ${formatList(weak)}.`
+    : 'Keep sharpening your skills across all threat categories.';
 
   return strongText + weakText;
 }
 
 export function getProgressTitle(score) {
-  if (score >= 70) return 'Threat Intelligence Lead';
-  if (score >= 40) return 'Senior Analyst';
-  return 'Junior Analyst';
+  if (score >= 80) return 'Advanced';
+  if (score >= 50) return 'Proficient';
+  return 'Foundation';
 }

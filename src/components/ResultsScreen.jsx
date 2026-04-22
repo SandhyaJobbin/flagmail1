@@ -107,10 +107,10 @@ export default function ResultsScreen({
           letterSpacing: '0.12em',
           marginBottom: 6,
         }}>
-          MISSION COMPLETE
+          ASSESSMENT COMPLETE
         </div>
         <h1 style={{ fontSize: 32, fontWeight: 800, color: '#1C1C1E', margin: 0, letterSpacing: '-0.02em' }}>
-          Analyst Report
+          {player.name}'s Assessment Result
         </h1>
       </motion.div>
 
@@ -138,9 +138,9 @@ export default function ResultsScreen({
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {[
-            { zone: 1, score: zoneScores[1], max: 25, acc: zoneAcc(zone1Emails) },
-            { zone: 2, score: zoneScores[2], max: 25, acc: zoneAcc(zone2Emails) },
-            { zone: 3, score: zoneScores[3], max: 25, acc: zoneAcc(zone3Emails) },
+            { zone: 1, score: zoneScores[1], max: 25, acc: zoneAcc(zone1Emails), accent: '#0A84FF' },
+            { zone: 2, score: zoneScores[2], max: 25, acc: zoneAcc(zone2Emails), accent: '#30B0C7' },
+            { zone: 3, score: zoneScores[3], max: 25, acc: zoneAcc(zone3Emails), accent: '#FF7A1A' },
           ].map((z, i) => (
             <motion.div
               key={z.zone}
@@ -153,10 +153,10 @@ export default function ResultsScreen({
                 borderRadius: 12,
                 padding: '14px 10px',
                 textAlign: 'center',
-                borderTop: '3px solid #0A84FF',
+                borderTop: `3px solid ${z.accent}`,
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#0A84FF', marginBottom: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: z.accent, marginBottom: 4 }}>
                 ZONE {z.zone}
               </div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E' }}>
@@ -235,7 +235,7 @@ export default function ResultsScreen({
             boxShadow: '0 4px 16px rgba(10,132,255,0.32)',
           }}
         >
-          Play Again →
+          Retake Assessment
         </motion.button>
       </motion.div>
     </div>
