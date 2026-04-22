@@ -486,7 +486,7 @@ export default function GameRound({
                 </div>
 
                 <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.48)' }}>
-                  Each revealed hint costs one point, so use them when the evidence is genuinely unclear.
+                  Each revealed clue costs one point, so use them when the evidence is genuinely unclear.
                 </div>
               </div>
 
