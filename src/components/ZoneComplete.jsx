@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import anime from 'animejs';
 import Matter from 'matter-js';
-import { ZONE_CONFIG } from '../data/emails.js';
 
 // ─── Confetti canvas (Matter.js) — only shown on flawless runs ───────────────
 function ConfettiCanvas() {
@@ -244,13 +243,18 @@ const glass = {
   boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
 };
 
+const ZONE_META = {
+  1: { color: '#0A84FF', next: 'Zone 2 – Shadow Inbox' },
+  2: { color: '#0A84FF', next: 'Zone 3 – Zero-Day Vault' },
+  3: { color: '#0A84FF', next: 'Final Results' },
+};
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export default function ZoneComplete({
   zone, zoneScore, maxZoneScore, zoneEmails,
   earlyUnlocked, consecutivePerfect, onContinue,
 }) {
-  const meta = ZONE_CONFIG[zone];
+  const meta = ZONE_META[zone];
   const accuracy = zoneEmails.length > 0
     ? Math.round((zoneEmails.filter(r => r.l1Correct).length / zoneEmails.length) * 100)
     : 0;
@@ -340,12 +344,12 @@ export default function ZoneComplete({
               display: 'inline-block',
               fontSize: 12,
               fontWeight: 700,
-              color: '#0A84FF',
+              color: meta.color,
               letterSpacing: '0.08em',
               marginBottom: 8,
             }}
           >
-            {meta.name.toUpperCase()} COMPLETE
+            ZONE {zone} COMPLETE
           </motion.div>
 
           <motion.h2
@@ -408,7 +412,7 @@ export default function ZoneComplete({
               boxShadow: '0 4px 16px rgba(10,132,255,0.35)',
             }}
           >
-            {isLast ? 'View Results →' : `Continue to ${ZONE_CONFIG[zone + 1]?.name || 'Next Zone'} →`}
+            {isLast ? 'View Results →' : `Continue to ${meta.next} →`}
           </motion.button>
         </motion.div>
       </div>

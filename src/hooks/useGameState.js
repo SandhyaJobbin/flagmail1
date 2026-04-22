@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { shuffleEmails } from '../utils/shuffle.js';
 
 export const SCREENS = {
-  INTRO:         'intro',
   LANDING:       'landing',
   TUTORIAL:      'tutorial',
   ZONE_INTRO:    'zone_intro',
@@ -13,12 +12,13 @@ export const SCREENS = {
   LEADERBOARD:   'leaderboard',
 };
 
-const ZONE_EMAIL_COUNTS = { 1: 10, 2: 10, 3: 10 };
+const ZONE_EMAIL_COUNTS = { 1: 10, 2: 10, 3: 5 };
 
 function initialRoundState() {
   return {
-    hintRevealed: false,
+    cluesRevealed: [],
     selectedL1: null,
+    selectedL2: null,
     submitted: false,
     timedOut: false,
     lastRecord: null,
@@ -26,7 +26,7 @@ function initialRoundState() {
 }
 
 export function useGameState() {
-  const [screen, setScreen] = useState(SCREENS.INTRO);
+  const [screen, setScreen] = useState(SCREENS.LANDING);
   const [player, setPlayer] = useState({ name: '', email: '' });
   const [emailPool, setEmailPool] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,12 +36,15 @@ export function useGameState() {
   const [tutorialSeen, setTutorialSeen] = useState(false);
   const [round, setRound] = useState(initialRoundState());
 
+  // Computed helpers
   const currentEmail = emailPool[currentIndex] || null;
 
   const zoneStart = zone === 1 ? 0 : zone === 2 ? 10 : 20;
-  const zoneEnd   = zone === 1 ? 10 : zone === 2 ? 20 : 30;
+  const zoneEnd   = zone === 1 ? 10 : zone === 2 ? 20 : 25;
   const emailInZone = currentIndex - zoneStart + 1;
   const emailsInZone = ZONE_EMAIL_COUNTS[zone];
+
+  // ── Actions ──────────────────────────────────────────────────────────────
 
   const startGame = useCallback((name, email) => {
     setPlayer({ name, email });
@@ -59,10 +62,6 @@ export function useGameState() {
     }
   }, [tutorialSeen]);
 
-  const completeIntro = useCallback(() => {
-    setScreen(SCREENS.LANDING);
-  }, []);
-
   const completeTutorial = useCallback(() => {
     setTutorialSeen(true);
     setScreen(SCREENS.ZONE_INTRO);
@@ -73,12 +72,19 @@ export function useGameState() {
     setScreen(SCREENS.ROUND);
   }, []);
 
-  const revealHint = useCallback(() => {
-    setRound(prev => ({ ...prev, hintRevealed: true }));
+  const revealClue = useCallback((index) => {
+    setRound(prev => {
+      if (prev.cluesRevealed.includes(index)) return prev;
+      return { ...prev, cluesRevealed: [...prev.cluesRevealed, index] };
+    });
   }, []);
 
   const selectL1 = useCallback((l1) => {
-    setRound(prev => ({ ...prev, selectedL1: l1 }));
+    setRound(prev => ({ ...prev, selectedL1: l1, selectedL2: null }));
+  }, []);
+
+  const selectL2 = useCallback((l2) => {
+    setRound(prev => ({ ...prev, selectedL2: l2 }));
   }, []);
 
   const handleTimeout = useCallback(() => {
@@ -88,7 +94,8 @@ export function useGameState() {
   const submitRound = useCallback((record) => {
     setRound(prev => ({ ...prev, submitted: true, lastRecord: record }));
 
-    const perfect = record.points === 2;
+    // Track consecutive perfect scores
+    const perfect = record.points === 4;
     setConsecutivePerfect(prev => {
       const next = perfect ? prev + 1 : 0;
       if (next >= 3 && !earlyUnlocked) {
@@ -102,10 +109,13 @@ export function useGameState() {
 
   const nextEmail = useCallback(() => {
     const nextIndex = currentIndex + 1;
+
+    // Check if zone complete
     if (nextIndex >= zoneEnd) {
       setScreen(SCREENS.ZONE_COMPLETE);
       return;
     }
+
     setCurrentIndex(nextIndex);
     setRound(initialRoundState());
     setScreen(SCREENS.ROUND);
@@ -125,12 +135,20 @@ export function useGameState() {
     setScreen(SCREENS.ZONE_INTRO);
   }, [zone, zoneStart]);
 
-  const goToResults = useCallback(() => { setScreen(SCREENS.RESULTS); }, []);
-  const goToLeaderboard = useCallback(() => { setScreen(SCREENS.LEADERBOARD); }, []);
-  const goBackToResults = useCallback(() => { setScreen(SCREENS.RESULTS); }, []);
+  const goToResults = useCallback(() => {
+    setScreen(SCREENS.RESULTS);
+  }, []);
+
+  const goToLeaderboard = useCallback(() => {
+    setScreen(SCREENS.LEADERBOARD);
+  }, []);
+
+  const goBackToResults = useCallback(() => {
+    setScreen(SCREENS.RESULTS);
+  }, []);
 
   const resetGame = useCallback(() => {
-    setScreen(SCREENS.INTRO);
+    setScreen(SCREENS.LANDING);
     setPlayer({ name: '', email: '' });
     setEmailPool([]);
     setCurrentIndex(0);
@@ -141,12 +159,33 @@ export function useGameState() {
   }, []);
 
   return {
-    screen, player, emailPool, currentIndex, currentEmail,
-    zone, zoneStart, zoneEnd, emailInZone, emailsInZone,
-    consecutivePerfect, earlyUnlocked, round,
-    startGame, completeIntro, completeTutorial, startZone,
-    revealHint, selectL1, handleTimeout, submitRound,
-    nextEmail, advanceZone, goToResults, goToLeaderboard,
-    goBackToResults, resetGame,
+    screen,
+    player,
+    emailPool,
+    currentIndex,
+    currentEmail,
+    zone,
+    zoneStart,
+    zoneEnd,
+    emailInZone,
+    emailsInZone,
+    consecutivePerfect,
+    earlyUnlocked,
+    round,
+    // actions
+    startGame,
+    completeTutorial,
+    startZone,
+    revealClue,
+    selectL1,
+    selectL2,
+    handleTimeout,
+    submitRound,
+    nextEmail,
+    advanceZone,
+    goToResults,
+    goToLeaderboard,
+    goBackToResults,
+    resetGame,
   };
 }

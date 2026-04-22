@@ -6,7 +6,6 @@ import BadgeCollection from './BadgeCollection.jsx';
 import CompetencySummary from './CompetencySummary.jsx';
 import { getProgressTitle } from '../utils/competency.js';
 import CELEBRATION from '../assets/animation/Celebration Update Color.json';
-import { ZONE_CONFIG, MAX_SCORE } from '../data/emails.js';
 
 const glass = {
   background: 'rgba(255,255,255,0.65)',
@@ -16,6 +15,8 @@ const glass = {
   borderRadius: 20,
   boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
 };
+
+const MAX_SCORE = 100; // 40 + 40 + 20
 
 // Staggered section entry variant
 const sectionVariant = {
@@ -135,8 +136,8 @@ export default function ResultsScreen({
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {[
-            { zone: 1, score: zoneScores[1], max: 20, acc: zoneAcc(zone1Emails) },
-            { zone: 2, score: zoneScores[2], max: 20, acc: zoneAcc(zone2Emails) },
+            { zone: 1, score: zoneScores[1], max: 40, acc: zoneAcc(zone1Emails) },
+            { zone: 2, score: zoneScores[2], max: 40, acc: zoneAcc(zone2Emails) },
             { zone: 3, score: zoneScores[3], max: 20, acc: zoneAcc(zone3Emails) },
           ].map((z, i) => (
             <motion.div
@@ -154,7 +155,7 @@ export default function ResultsScreen({
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 600, color: '#0A84FF', marginBottom: 4 }}>
-                {ZONE_CONFIG[z.zone].name.toUpperCase()}
+                ZONE {z.zone}
               </div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1E' }}>
                 {z.score}/{z.max}

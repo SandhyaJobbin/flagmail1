@@ -44,7 +44,7 @@ export function generateCompetency(categoryCorrect) {
 }
 
 export function getProgressTitle(score) {
-  if (score >= 50) return 'Threat Intelligence Lead';
-  if (score >= 30) return 'Senior Analyst';
+  if (score >= 70) return 'Threat Intelligence Lead';
+  if (score >= 40) return 'Senior Analyst';
   return 'Junior Analyst';
 }

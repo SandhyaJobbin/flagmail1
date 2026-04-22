@@ -7,16 +7,16 @@ import {
 } from '../config/game.js';
 
 export const BADGES = {
-  LIGHTNING_READ:   { id: 'LIGHTNING_READ',   name: 'Lightning Read',   icon: '⚡', rare: false, desc: 'Correct in under 10 seconds' },
-  ON_FIRE:          { id: 'ON_FIRE',          name: 'On Fire',          icon: '🔥', rare: false, desc: '5 correct classifications in a row' },
-  ZONE_CLEAR:       { id: 'ZONE_CLEAR',       name: 'Zone Clear',       icon: '✅', rare: false, desc: 'Complete a zone with no wrong answers' },
-  SNIPER:           { id: 'SNIPER',           name: 'Sniper',           icon: '🎯', rare: false, desc: 'First email: correct, no hint, with time to spare' },
-  BEAT_THE_CLOCK:   { id: 'BEAT_THE_CLOCK',   name: 'Beat the Clock',   icon: '⏱', rare: false, desc: 'Correct with under 5 seconds remaining' },
-  EAGLE_EYE:        { id: 'EAGLE_EYE',        name: 'Eagle Eye',        icon: '🦅', rare: false, desc: 'Correctly identified all 3 email categories' },
-  GHOST_DETECTIVE:  { id: 'GHOST_DETECTIVE',  name: 'Ghost Detective',  icon: '👻', rare: true,  desc: 'Full game — zero hints revealed' },
-  ICE_COLD:         { id: 'ICE_COLD',         name: 'Ice Cold',         icon: '🧊', rare: true,  desc: 'All 10 Escalation emails classified correctly' },
-  PERFECT_EYE:      { id: 'PERFECT_EYE',      name: 'Perfect Eye',      icon: '🔮', rare: true,  desc: 'All 30 emails classified correctly' },
-  NO_HINTS_NEEDED:  { id: 'NO_HINTS_NEEDED',  name: 'No Hints Needed',  icon: '🕵', rare: true,  desc: 'Completed the full assessment without revealing any hints' },
+  LIGHTNING_READ:   { id: 'LIGHTNING_READ',   name: 'Lightning Read',   icon: '\u26A1', rare: false, desc: 'Correct in under 10 seconds' },
+  ON_FIRE:          { id: 'ON_FIRE',          name: 'On Fire',          icon: '\uD83D\uDD25', rare: false, desc: '5 correct L1 in a row' },
+  ZONE_CLEAR:       { id: 'ZONE_CLEAR',       name: 'Zone Clear',       icon: '\u2705', rare: false, desc: 'Complete a zone with no wrong answers' },
+  SNIPER:           { id: 'SNIPER',           name: 'Sniper',           icon: '\uD83C\uDFAF', rare: false, desc: 'First email: correct, no clues, under 15s' },
+  BEAT_THE_CLOCK:   { id: 'BEAT_THE_CLOCK',   name: 'Beat the Clock',   icon: '\u23F1', rare: false, desc: 'Correct with under 5 seconds remaining' },
+  EAGLE_EYE:        { id: 'EAGLE_EYE',        name: 'Eagle Eye',        icon: '\uD83E\uDD85', rare: false, desc: 'All 6 L1 categories identified correctly at least once' },
+  GHOST_DETECTIVE:  { id: 'GHOST_DETECTIVE',  name: 'Ghost Detective',  icon: '\uD83D\uDC7B', rare: true,  desc: 'Full game - zero clues revealed' },
+  ICE_COLD:         { id: 'ICE_COLD',         name: 'Ice Cold',         icon: '\uD83E\uDDCA', rare: true,  desc: 'All 5 hard emails correct, no clues' },
+  PERFECT_EYE:      { id: 'PERFECT_EYE',      name: 'Perfect Eye',      icon: '\uD83D\uDD2E', rare: true,  desc: 'All 25 emails: L1 + L2 correct' },
+  NO_HINTS_NEEDED:  { id: 'NO_HINTS_NEEDED',  name: 'No Hints Needed',  icon: '\uD83D\uDD75', rare: true,  desc: 'Complete a zone without revealing any clue' },
 };
 
 export function useBadges() {
@@ -35,10 +35,12 @@ export function useBadges() {
     return true;
   }, []);
 
-  const dismissToast = useCallback(() => setPendingToast(null), []);
+  const dismissToast = useCallback(() => {
+    setPendingToast(null);
+  }, []);
 
   const checkAfterRound = useCallback(({ record, timeLeft, roundDuration = ROUND_DURATION_SECONDS }) => {
-    const { l1Correct, hintUsed } = record;
+    const { l1Correct, l2Correct, cluesUsed } = record;
     let unlockedAny = false;
 
     if (l1Correct) {
@@ -48,17 +50,20 @@ export function useBadges() {
       streakRef.current = 0;
     }
 
+    // Sniper: first email, correct, no clues, solved in <= 15 seconds.
     if (firstEmailRef.current) {
       firstEmailRef.current = false;
-      if (l1Correct && !hintUsed && timeLeft >= roundDuration - SNIPER_SECONDS) {
+      if (l1Correct && l2Correct && cluesUsed === 0 && timeLeft >= roundDuration - SNIPER_SECONDS) {
         unlockedAny = earnBadge('SNIPER') || unlockedAny;
       }
     }
 
+    // Lightning Read: correct in <= 10 seconds.
     if (l1Correct && timeLeft >= roundDuration - LIGHTNING_READ_SECONDS) {
       unlockedAny = earnBadge('LIGHTNING_READ') || unlockedAny;
     }
 
+    // Beat the Clock: correct with <= 5s remaining.
     if (l1Correct && timeLeft > 0 && timeLeft <= BEAT_THE_CLOCK_SECONDS) {
       unlockedAny = earnBadge('BEAT_THE_CLOCK') || unlockedAny;
     }
@@ -67,32 +72,33 @@ export function useBadges() {
       unlockedAny = earnBadge('ON_FIRE') || unlockedAny;
     }
 
-    if (categoriesCorrect.current.size >= 3) {
+    if (categoriesCorrect.current.size >= 6) {
       unlockedAny = earnBadge('EAGLE_EYE') || unlockedAny;
     }
 
     return { streak: streakRef.current, unlockedAny };
   }, [earnBadge]);
 
-  const checkAfterZone = useCallback(({ zoneEmails, zoneHintsUsed }) => {
+  const checkAfterZone = useCallback(({ zoneEmails, zoneCluesUsed }) => {
     if (!zoneEmails.length) return;
+
     const allCorrect = zoneEmails.every(r => r.l1Correct);
     if (allCorrect) earnBadge('ZONE_CLEAR');
-    if (zoneHintsUsed === 0) earnBadge('NO_HINTS_NEEDED');
+    if (zoneCluesUsed === 0) earnBadge('NO_HINTS_NEEDED');
   }, [earnBadge]);
 
-  const checkAfterGame = useCallback(({ perEmail, totalHintsUsed }) => {
+  const checkAfterGame = useCallback(({ perEmail, totalCluesUsed }) => {
     if (!perEmail.length) return;
-    if (totalHintsUsed === 0) earnBadge('GHOST_DETECTIVE');
+
+    if (totalCluesUsed === 0) earnBadge('GHOST_DETECTIVE');
 
     const hardEmails = perEmail.filter(r => r.zone === 3);
-    if (hardEmails.length === 10 && hardEmails.every(r => r.l1Correct)) {
-      earnBadge('ICE_COLD');
-    }
+    const iceCold = hardEmails.length === 5 &&
+      hardEmails.every(r => r.l1Correct && r.l2Correct && r.cluesUsed === 0);
+    if (iceCold) earnBadge('ICE_COLD');
 
-    if (perEmail.length === 30 && perEmail.every(r => r.l1Correct)) {
-      earnBadge('PERFECT_EYE');
-    }
+    const perfectEye = perEmail.length === 25 && perEmail.every(r => r.l1Correct && r.l2Correct);
+    if (perfectEye) earnBadge('PERFECT_EYE');
   }, [earnBadge]);
 
   const resetBadges = useCallback(() => {
@@ -104,5 +110,13 @@ export function useBadges() {
     earnedSetRef.current = new Set();
   }, []);
 
-  return { earned, pendingToast, dismissToast, checkAfterRound, checkAfterZone, checkAfterGame, resetBadges };
+  return {
+    earned,
+    pendingToast,
+    dismissToast,
+    checkAfterRound,
+    checkAfterZone,
+    checkAfterGame,
+    resetBadges,
+  };
 }

@@ -1,539 +1,1650 @@
-// Flagmail — Email Dataset v3.0
-// 30 emails: 10 easy (zone 1), 10 medium (zone 2), 10 hard (zone 3)
-// L1 Distribution: Legitimate ×10, Phishing & Spoofing ×10, Spam & Junk ×10
+// Flagmail — Email Dataset v2.0
+// 50 emails: 20 easy (zone 1), 20 medium (zone 2), 10 hard (zone 3)
+// Distribution: Phishing & Spoofing ×13, High-Risk Fraud ×12,
+//               Spam & Junk ×8, Legitimate ×8,
+//               Malicious Content ×5, Abuse & Harassment ×4
+// All bodies written first. Clues derived from body text.
+// Giveaway phrase is the single most damning line in the body.
 
 export const EMAIL_POOL = [
 
-  // ─── ZONE 1 — EASY ─────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────
+  // ZONE 1 — EASY (20 emails)
+  // Signals are obvious, multiple red flags, attackers are sloppy
+  // ─────────────────────────────────────────────
+
   {
     id: "E001",
     zone: 1,
-    from: "money.transfer772@gmail.com",
-    subject: "URGENT: YOUR $100,000,000.00 IS READY",
-    body: `Dearest Beloved Friend,
+    from: "security-alert@apple-id-support.net",
+    subject: "Your Apple ID has been LOCKED — Immediate Action Required",
+    body: `Dear Apple User,
 
-I am the Prince of Dubai and I am writing to you with a matter of great importance. I have been searching for a trustworthy person to help me move my family's private inheritance funds out of the country before the new government regulations take effect.
+We have detected multiple failed login attempts on your Apple ID account. As a precaution, your account has been LOCKED and all purchases have been suspended.
 
-I have chosen your email address from a global database of honest citizens. I am prepared to transfer $100,000,000.00 to your account today. I will give you 10% for your help. Please click the link below to provide your bank details and ID so we can start the wire transfer immediately. This is a secret!
+To unlock your account and avoid permanent closure, you MUST verify your identity in the next 24 HOURS by clicking the button below:
 
-[Link: bit.ly/claim-dubai-cash]`,
-    clue: "A Prince wouldn't use a random @gmail.com account or find a 'trustworthy person' via a random database.",
+[ UNLOCK MY APPLE ID NOW ]
+
+If you do not verify within 24 hours, your Apple ID will be permanently deleted along with all associated purchases, photos, and data.
+
+Apple Support Team
+apple-id-support.net`,
+    clues: [
+      "Sender domain is apple-id-support.net — Apple only sends from apple.com",
+      "All-caps words like LOCKED and HOURS are pressure tactics not used in real Apple emails",
+      "Threatens deletion of purchases and photos to create panic",
+      "Apple never locks accounts or threatens permanent deletion via email"
+    ],
+    giveawayPhrase: "your Apple ID will be permanently deleted along with all associated purchases, photos, and data",
     level1: "Phishing & Spoofing",
-    subCategory: "Email Phishing",
-    explanation: "Classic Nigerian prince phishing. No real prince uses a Gmail address, and no inheritance requires your bank details upfront. The link to a URL shortener hides the real destination — a credential-harvesting page.",
-    giveawayPhrase: "I have chosen your email address from a global database of honest citizens",
+    level2: "Email Phishing",
+    explanation: "Sloppy Apple ID phishing. Three all-caps pressure words, a fake domain, and a threat to delete all purchases are classic signs of a low-effort phishing template. Real Apple emails never threaten account deletion."
   },
+
   {
     id: "E002",
     zone: 1,
-    from: "billing-office@apple.com",
-    subject: "REFUND: You have an unclaimed credit of $149.99",
-    body: `Dear Customer,
+    from: "winner-notifications@prize-global-awards.xyz",
+    subject: "🏆 YOU ARE OUR GRAND PRIZE WINNER — Claim $5,000 Cash Today",
+    body: `CONGRATULATIONS!!!
 
-Our billing department has identified a double-payment error on your recent subscription for "iCloud+ and Music Bundle." As a result, your account has been overcharged by $149.99.
+Your email address was randomly selected as the GRAND PRIZE WINNER of our Global Cash Sweepstakes. You have won FIVE THOUSAND DOLLARS ($5,000) in cash!
 
-We have tried to process the refund automatically, but your current payment method on file has expired. To receive your refund, you must manually enter your bank or credit card details into our secure refund portal. If you do not claim this credit within 48 hours, the funds will be forfeited and returned to the state treasury.
+To claim your prize, you must:
+1. Reply to this email with your full name, home address, and date of birth
+2. Pay a one-time processing and release fee of $49.99
+3. Provide your bank account details so we can transfer your winnings
 
-Please click the link below to verify your details and receive your $149.99 refund immediately:
+This offer expires in 48 hours. If we do not hear from you, your prize will be forfeited and awarded to another winner.
 
-[Link: apple-refund-portal-secure.net/claim-funds]
-
-Thank you,`,
-    clue: "If a company owes you a refund, they send it back to your card automatically. They will never ask you to click a link and 'enter your bank details' to get a refund. Also, look at the link — it says apple-refund-portal-secure.net. Apple only uses apple.com.",
-    level1: "Phishing & Spoofing",
-    subCategory: "Impersonation",
-    explanation: "Apple impersonation phishing using a fake refund pretext. Legitimate refunds are processed automatically to the original payment method — Apple never asks you to submit card details via email. The link domain (apple-refund-portal-secure.net) is a fake; Apple only emails from apple.com.",
-    giveawayPhrase: "apple-refund-portal-secure.net/claim-funds",
+Global Prize Awards Team
+prize-global-awards.xyz`,
+    clues: [
+      "You never entered a sweepstakes — unsolicited prize emails are always spam",
+      "Requires a $49.99 'processing fee' upfront — legitimate prizes never cost money to claim",
+      "Requests home address, date of birth, and bank account details in one email",
+      "Suspicious .xyz domain with no verifiable company behind it"
+    ],
+    giveawayPhrase: "Pay a one-time processing and release fee of $49.99",
+    level1: "High-Risk Fraud",
+    level2: "Advance Fee Fraud",
+    explanation: "Classic advance fee prize scam. The $49.99 'processing fee' is the attack — once paid, the scammer disappears. No legitimate prize requires the winner to pay anything upfront."
   },
+
   {
     id: "E003",
     zone: 1,
-    from: "auto-confirm@amazon.com",
-    subject: "Your order #112-394857 has shipped!",
-    body: `Hello! We're excited to let you know that a part of your order is on its way. You can find the details of your shipment and track its progress using the link below.
+    from: "billing@netflix.com",
+    subject: "Your Netflix membership — March 2026 billing confirmation",
+    body: `Hi there,
 
-Items in this shipment:
+Your Netflix Standard plan has been successfully renewed.
 
-Wireless Optical Mouse (Black) - 1 unit
+Plan: Standard (1080p)
+Amount charged: $15.49
+Billing date: March 14, 2026
+Next billing date: April 14, 2026
 
-If you need to make any changes to your delivery preferences or view your full invoice, please visit your "Orders" page on our official website. Thank you for being a valued customer!
+If you have questions about your membership or need to update your payment method, visit netflix.com/account or contact us at help.netflix.com.
 
-Regards,`,
-    clue: "The sender domain is exactly @amazon.com and it references a specific order number without asking for sensitive info.",
+— The Netflix Team`,
+    clues: [
+      "Sender domain is netflix.com — verified and expected",
+      "Billing amount matches the real Netflix Standard plan price",
+      "No links to external sites — only references netflix.com",
+      "No urgency, no threats, no requests for any information"
+    ],
+    giveawayPhrase: "visit netflix.com/account or contact us at help.netflix.com",
     level1: "Legitimate",
-    subCategory: "Shipping Update",
-    explanation: "Genuine Amazon shipment confirmation. The verified amazon.com domain, specific order number, and direction to the official website (not a link in the email) are all consistent with real Amazon shipping notifications.",
-    giveawayPhrase: "visit your \"Orders\" page on our official website",
+    level2: "Subscription Billing",
+    explanation: "Routine Netflix billing confirmation. The verified domain, accurate plan pricing, and absence of any external links or information requests are all hallmarks of a genuine transactional email."
   },
+
   {
     id: "E004",
     zone: 1,
-    from: "no-reply@accounts.google.com",
-    subject: "Security alert: New sign-in detected",
-    body: `Your Google Account was recently signed in to from a new Linux device.
+    from: "deals@bestbuy-exclusive-offers.com",
+    subject: "FLASH SALE: 90% OFF all electronics — Today Only!!!",
+    body: `Hi Valued Customer,
 
-Details:
-Date: April 17, 2026
-Location: Bengaluru, India (Estimated)
-Browser: Chrome
+We are clearing our entire electronics inventory and passing the savings directly to YOU. For the next 6 hours only, enjoy 90% OFF on ALL products including:
 
-If this was you, you can safely ignore this email. If you do not recognize this activity, please review your recent devices by going to your Google Account Security settings. Google will never ask you for your password or 2-step verification code via email.`,
-    clue: "It's a standard 'FYI' alert from a verified address and specifically tells you they won't ask for a password.",
-    level1: "Legitimate",
-    subCategory: "Security Notification",
-    explanation: "Genuine Google security sign-in alert. The verified no-reply@accounts.google.com sender, specific sign-in details, and proactive reminder that Google will never ask for your password via email are all hallmarks of real Google security notifications.",
-    giveawayPhrase: "Google will never ask you for your password or 2-step verification code via email",
+• iPhone 15 Pro — now just $119.99 (was $1,199)
+• MacBook Pro 16" — now just $249.99 (was $2,499)
+• Samsung 65" QLED TV — now just $89.99 (was $899)
+
+These prices are REAL and LIMITED. Click below to shop before stock runs out.
+
+[ SHOP THE FLASH SALE NOW ]
+
+This email was sent to you because you are a Best Buy rewards member.
+Unsubscribe: bestbuy-exclusive-offers.com/unsubscribe`,
+    clues: [
+      "Sender domain is bestbuy-exclusive-offers.com — not bestbuy.com",
+      "90% off pricing is implausible — iPhone 15 Pro for $119.99 is impossible",
+      "6-hour countdown creates false urgency to prevent rational thinking",
+      "Unsubscribe link goes to the fake domain, not bestbuy.com"
+    ],
+    giveawayPhrase: "iPhone 15 Pro — now just $119.99 (was $1,199)",
+    level1: "Spam & Junk",
+    level2: "Bulk Marketing Spam",
+    explanation: "Fake retail flash sale spam using Best Buy's brand. The 90% discount on an iPhone is the clearest signal — no legitimate retailer can offer this price. The fake domain confirms it."
   },
+
   {
     id: "E005",
     zone: 1,
-    from: "no-reply@spotify.com",
-    subject: "Your receipt for April 2026",
-    body: `Thanks for being a Premium subscriber!
+    from: "no-reply@github.com",
+    subject: "[GitHub] A new SSH key was added to your account",
+    body: `Hey there,
 
-Your monthly payment of $10.99 has been successfully processed via your saved payment method. Your current billing cycle runs from April 17 to May 17. You can view your full transaction history or update your subscription plan at any time by visiting your account page on our website.
+A new public SSH key was recently added to your GitHub account.
 
-Keep on listening!
-The Spotify Team`,
-    clue: "The price is standard, the domain is correct, and there is no 'urgent' demand.",
+Key fingerprint: SHA256:uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s
+Added: March 14, 2026 at 09:42 UTC
+
+If you added this key, no further action is needed. If you did not add this key, remove it immediately and secure your account:
+github.com/settings/security
+
+If you're having trouble, contact GitHub Support at support.github.com.
+
+— The GitHub Team`,
+    clues: [
+      "Sender domain is github.com — verified",
+      "Contains a specific key fingerprint — personalised, not generic",
+      "All links point exclusively to github.com subdomains",
+      "Provides clear action if unrecognised — no panic, no urgency"
+    ],
+    giveawayPhrase: "If you did not add this key, remove it immediately and secure your account: github.com/settings/security",
     level1: "Legitimate",
-    subCategory: "Subscription Billing",
-    explanation: "Legitimate Spotify billing receipt. The verified no-reply@spotify.com domain, accurate subscription price, correct billing cycle dates, and zero urgency or requests for information confirm this as genuine.",
-    giveawayPhrase: "Your monthly payment of $10.99 has been successfully processed",
+    level2: "Security Notification",
+    explanation: "Standard GitHub SSH key notification. The verified domain, specific key fingerprint, and calm actionable instructions are consistent with GitHub's actual security notification format."
   },
+
   {
     id: "E006",
     zone: 1,
-    from: "newsletters@natgeo.com",
-    subject: "This week's top stories: The Deep Ocean",
-    body: `Welcome to your weekly digest! This week, we explore the mysterious "Midnight Zone" of the ocean, where creatures have evolved to live in total darkness.
+    from: "support@paypa1-account-services.com",
+    subject: "Your PayPal account has been limited — verify now",
+    body: `Dear PayPal Customer,
 
-In this issue:
+We have noticed some unusual activity associated with your PayPal account and have temporarily limited what you can do until we confirm your identity.
 
-How bioluminescence works in deep-sea jellyfish.
+To restore your account, please provide the following within 72 hours:
+• Your full credit card number and expiry date
+• Your billing address and Social Security Number
+• A photo of your government-issued ID
 
-New species discovered near the Mariana Trench.
+Click below to submit your verification documents securely:
+[ VERIFY MY ACCOUNT ]
+paypa1-account-services.com/verify
 
-Our photographer's diary: 48 hours in a submarine.
+Failure to complete verification will result in your account being permanently closed and any funds being held for 180 days.
 
-Click "Read More" to dive into the full stories on our digital platform.`,
-    clue: "It provides educational value and comes from a well-known, verified publisher.",
-    level1: "Legitimate",
-    subCategory: "Newsletter",
-    explanation: "Legitimate National Geographic weekly newsletter. The verified natgeo.com domain, genuinely educational content, and absence of any requests for personal information or money confirm this as clean.",
-    giveawayPhrase: "Click \"Read More\" to dive into the full stories on our digital platform",
+PayPal Security Team`,
+    clues: [
+      "Domain is paypa1-account-services.com — the letter 'l' replaced with digit '1'",
+      "Requests full credit card number, SSN, and government ID in one email",
+      "PayPal never requests your SSN or card number via email under any circumstances",
+      "Threatens to hold funds for 180 days to prevent the victim from ignoring the email"
+    ],
+    giveawayPhrase: "Your full credit card number and expiry date • Your billing address and Social Security Number • A photo of your government-issued ID",
+    level1: "Phishing & Spoofing",
+    level2: "Email Phishing",
+    explanation: "Homoglyph domain attack (1 for l) combined with a maximum data harvest — card number, SSN, and government ID in a single email. PayPal never requests these via email. The domain typo is visible if read carefully."
   },
+
   {
     id: "E007",
     zone: 1,
-    from: "messages-noreply@linkedin.com",
-    subject: "You have 3 new notifications waiting for you",
-    body: `Hi there, here's what's been happening in your network while you were away:
+    from: "hr@acmecorp.com",
+    subject: "Office closure — Friday March 15 (public holiday)",
+    body: `Hi team,
 
-Sarah Miller and 2 others viewed your profile.
+Just a quick reminder that the office will be closed this Friday, March 15, in observance of the public holiday.
 
-You have a new connection request from Mark Stevens (Recruiter).
+If you have any urgent matters, please ensure they are completed by end of day Thursday. The office will reopen as normal on Monday, March 18.
 
-Your post "Thinking about AI" is trending in your industry.
+Have a great long weekend everyone.
 
-Stay connected and see what's new in your professional circle by visiting your feed.`,
-    clue: "Uses standard LinkedIn notification formatting and a verified sender address.",
+Best,
+Rachel
+People & Culture`,
+    clues: [
+      "Internal company domain — acmecorp.com matches expected sender",
+      "Casual familiar tone consistent with an internal HR notice",
+      "No links, no attachments, no requests for any information",
+      "Specific operational details (dates, reopening) confirm legitimacy"
+    ],
+    giveawayPhrase: "The office will reopen as normal on Monday, March 18",
     level1: "Legitimate",
-    subCategory: "Platform Notification",
-    explanation: "Genuine LinkedIn activity digest. The verified messages-noreply@linkedin.com sender, standard LinkedIn notification format, and direction to the platform (not an external link) confirm this as legitimate.",
-    giveawayPhrase: "Stay connected and see what's new in your professional circle by visiting your feed",
+    level2: "Internal Communication",
+    explanation: "Routine internal HR communication. Internal domain, familiar HR tone, specific dates, and zero requests for information or clicks make this a clean internal notice."
   },
+
   {
     id: "E008",
     zone: 1,
-    from: "no-reply@chase.com",
-    subject: "Your monthly statement is now available",
-    body: `Dear Customer,
+    from: "crypto-profits@bitcoin-wealth-system.io",
+    subject: "I made $94,000 in 11 days — I'll show you exactly how",
+    body: `Hi,
 
-Your monthly credit card statement for the period ending April 15 is now ready to view. For your protection, we do not include account details or attachments in this email.
+My name is James and 3 months ago I was $40,000 in debt. Then a friend showed me a trading algorithm that the major banks have been desperately trying to suppress.
 
-To view your statement, please log in to the Chase Mobile app or visit chase.com and navigate to the "Statements & Documents" section. If you have questions, please call the number on the back of your card.`,
-    clue: "It follows the golden rule of banking: 'Don't click a link, go to our app/site yourself.'",
-    level1: "Legitimate",
-    subCategory: "Bank Notification",
-    explanation: "Legitimate Chase statement notification. The verified no-reply@chase.com domain, no embedded links to click, and the instruction to navigate to chase.com directly are all consistent with genuine bank communication. Real banks never embed statement links in emails.",
-    giveawayPhrase: "please log in to the Chase Mobile app or visit chase.com",
+In just 11 days, I turned a $500 investment into $94,000.
+
+This system works automatically. You don't need any experience. All you need is 15 minutes a day and a starting deposit of $250.
+
+⚠️ WARNING: Due to pressure from financial institutions, this page may be taken down at any time. Act NOW before it disappears.
+
+Real results from real people:
+"Made $12,000 in my first week!" — Sandra K.
+"Quit my job after 3 weeks!" — Mike T.
+
+[ ACCESS THE SYSTEM BEFORE IT'S GONE ]`,
+    clues: [
+      "Claims $500 turned into $94,000 in 11 days — a 18,700% return, mathematically impossible legally",
+      "'Banks trying to suppress this' is a conspiracy framing designed to bypass scepticism",
+      "Anonymous testimonials with only first name and last initial — unverifiable",
+      "'This page may be taken down at any time' creates artificial scarcity and urgency"
+    ],
+    giveawayPhrase: "Due to pressure from financial institutions, this page may be taken down at any time",
+    level1: "High-Risk Fraud",
+    level2: "Advance Fee Fraud",
+    explanation: "Investment fraud using a personal story, impossible returns, and fake social proof. The 'banks are suppressing this' framing is designed to make sceptics feel they're being controlled. The $250 starting deposit is the initial theft."
   },
+
   {
     id: "E009",
     zone: 1,
-    from: "contest@marketing-blasts.xyz",
-    subject: "You are our 1,000,000th Visitor! Claim Prize!",
-    body: `CONGRATULATIONS! You have been selected as the 1,000,000th visitor of the day! As a result, you have won a brand new 2024 Tesla Model S or a $50,000 cash prize!
+    from: "noreply@amazon.com",
+    subject: "Your Amazon order #112-3847291-9384756 has been delivered",
+    body: `Hello,
 
-To claim your reward, you just need to complete our quick 50-page consumer preference survey. Once finished, pay a small $5 processing fee to cover the title transfer and the car will be delivered to your door! Don't wait — this offer expires when you close your browser!`,
-    clue: "'1,000,000th visitor' is a legendary spam trope. Also, cars aren't 'free' if you have to pay a fee to a random site.",
-    level1: "Spam & Junk",
-    subCategory: "Prize Spam",
-    explanation: "Classic prize spam. The '1,000,000th visitor' claim is sent to millions of people simultaneously. The $5 'processing fee' is the theft mechanism — the car never arrives. Legitimate prize draws never require a fee to claim.",
-    giveawayPhrase: "pay a small $5 processing fee to cover the title transfer",
+Your package has been delivered.
+
+Order: #112-3847291-9384756
+Item: Kindle Paperwhite (16GB, Black)
+Delivered: March 14, 2026 at 2:14 PM
+Left at: Front door
+
+Track your delivery or report an issue at:
+amazon.com/orders
+
+Thank you for shopping with Amazon.`,
+    clues: [
+      "Sender domain is amazon.com — verified",
+      "Order number matches Amazon's actual format (three groups of digits)",
+      "Specific product, delivery time, and location — not generic",
+      "Single link to amazon.com/orders — no external redirects"
+    ],
+    giveawayPhrase: "Track your delivery or report an issue at: amazon.com/orders",
+    level1: "Legitimate",
+    level2: "Shipping Update",
+    explanation: "Standard Amazon delivery confirmation. The verified domain, correctly formatted order number, specific delivery details, and single on-domain link are all consistent with genuine Amazon transactional email."
   },
+
   {
     id: "E010",
     zone: 1,
-    from: "martha1955@yahoo.com",
-    subject: "Fwd: DO NOT DELETE OR BAD LUCK!",
-    body: `This is the "Golden Owl of Prosperity." It was started by a monk in 1920. If you send this to 10 people in the next 5 minutes, you will receive a large sum of money tomorrow morning.
+    from: "admin@microsoft-account-verify.net",
+    subject: "Microsoft Account: Sign-in from unknown device blocked",
+    body: `Dear Microsoft Account User,
 
-If you break the chain and delete this email, your computer will crash and you will have 10 years of bad luck. One man ignored this and lost his job the next day! Don't take the risk! Forward this now to everyone in your contact list!`,
-    clue: "This is classic 'junk' clutter that offers no value and asks for forwards.",
-    level1: "Spam & Junk",
-    subCategory: "Chain Letter",
-    explanation: "Classic chain letter spam. No email can cause computer crashes or bad luck. The superstitious threat and forward request are the defining signals of this long-running spam format. Forwarding it only spreads junk and wastes people's time.",
-    giveawayPhrase: "your computer will crash and you will have 10 years of bad luck",
+A sign-in attempt to your Microsoft account was blocked because it came from an unrecognised device in Lagos, Nigeria.
+
+To confirm your identity and restore access, click the link below and enter your Microsoft username and password:
+
+[ CONFIRM MY IDENTITY ]
+http://microsoft-account-verify.net/login?ref=security
+
+If you do not confirm within 12 hours, your account will be suspended and you will lose access to all Microsoft 365 services, OneDrive files, and Outlook emails permanently.
+
+Microsoft Account Team
+microsoft-account-verify.net`,
+    clues: [
+      "Sender domain is microsoft-account-verify.net — Microsoft emails come from microsoft.com",
+      "Link URL shown is http (not https) and goes to the fake domain",
+      "Asks you to enter your Microsoft username and password via an email link",
+      "Threatens permanent loss of OneDrive and Outlook to maximise fear"
+    ],
+    giveawayPhrase: "click the link below and enter your Microsoft username and password",
+    level1: "Phishing & Spoofing",
+    level2: "Email Phishing",
+    explanation: "Microsoft account phishing. The explicit instruction to enter your password via an email link is the most obvious red flag — no legitimate service ever asks for your password this way. The fake domain and HTTP link confirm it."
   },
 
-  // ─── ZONE 2 — MEDIUM ───────────────────────────────────────────────────────
   {
     id: "E011",
-    zone: 2,
-    from: "shipping@apple.com",
-    subject: "Your iPhone is on its way!",
-    body: `Hello, Your order is heading your way! We've handed it off to the carrier and you should see it at your doorstep soon.
+    zone: 1,
+    from: "jobs@easy-remote-income.net",
+    subject: "Work from home — $75/hour, no experience needed, start today",
+    body: `Hi,
 
-Order Number: W9928374
-Delivery Method: Standard Shipping
+We are urgently hiring remote data entry workers. No experience required. No qualifications needed. Work from home on your own schedule.
 
-You can use the tracking link below to see the latest updates on your delivery. Please note that a signature may be required upon arrival. If you won't be home, you can manage your delivery through the carrier's portal. Thank you for choosing Apple.`,
-    clue: "The domain @apple.com is correct, and the language is calm and professional.",
-    level1: "Legitimate",
-    subCategory: "Shipping Update",
-    explanation: "Genuine Apple shipping notification. The verified shipping@apple.com domain, specific order number, and standard shipping language are consistent with real Apple order emails. No suspicious links or requests for information.",
-    giveawayPhrase: "You can use the tracking link below to see the latest updates on your delivery",
+Pay: $75 per hour
+Hours: flexible, minimum 2 hours per day
+Start date: immediately
+
+To secure your position, complete the following steps today:
+1. Reply with your full name and address
+2. Pay the $99 starter kit and training fee
+3. We will courier your equipment within 3 business days
+
+Over 4,000 people are already earning with us. Do not miss this opportunity — positions fill fast.
+
+[ APPLY NOW ]`,
+    clues: [
+      "$75/hour for no-experience data entry is far above any realistic market rate",
+      "Requires a $99 'starter kit and training fee' — no legitimate employer charges candidates",
+      "Vague company name with no verifiable business details",
+      "'Positions fill fast' creates false urgency to prevent the target from researching"
+    ],
+    giveawayPhrase: "Pay the $99 starter kit and training fee",
+    level1: "High-Risk Fraud",
+    level2: "Job Scam",
+    explanation: "Advance fee job scam. The $99 fee is the theft mechanism — equipment never arrives. No legitimate employer charges candidates a fee before employment. The unrealistic pay rate is designed to attract desperate job seekers."
   },
+
   {
     id: "E012",
-    zone: 2,
-    from: "support@yourcompany.com",
-    subject: "Scheduled System Maintenance: This Sunday",
-    body: `Hello Team,
+    zone: 1,
+    from: "mailer@bankofamerica.com",
+    subject: "Your Bank of America statement is ready — February 2026",
+    body: `Your February 2026 statement is now available.
 
-Please be advised that the Internal Employee Portal and the VPN service will be undergoing scheduled maintenance this Sunday, April 19, from 2:00 AM to 4:00 AM local time.
+Account: Checking (...4821)
+Statement period: Feb 1 – Feb 28, 2026
 
-During this window, you may experience intermittent connectivity or be unable to log in to internal tools. We recommend saving all your work and logging out before the maintenance window begins. We apologize for any inconvenience this may cause.
+Sign in to Online Banking at bankofamerica.com to view your full statement.
 
-Thank you,
-IT Operations`,
-    clue: "Standard corporate announcement. It doesn't ask you to 'click here to keep your access.'",
+Minimum payment due: $0.00
+Next statement date: March 31, 2026
+
+Questions? Call 1-800-432-1000 or visit bankofamerica.com/help.
+
+Bank of America, N.A.
+© 2026 Bank of America Corporation`,
+    clues: [
+      "Sender domain is bankofamerica.com — verified",
+      "References a specific partial account number — personalised",
+      "All contact points (phone, web) are verified Bank of America channels",
+      "No external links, no requests for information, no urgency"
+    ],
+    giveawayPhrase: "Sign in to Online Banking at bankofamerica.com to view your full statement",
     level1: "Legitimate",
-    subCategory: "Internal Communication",
-    explanation: "Routine IT maintenance notice. The internal company domain, specific maintenance window, and absence of any links or credential requests are all consistent with a genuine internal IT communication.",
-    giveawayPhrase: "We recommend saving all your work and logging out before the maintenance window begins",
+    level2: "Bank / Financial Notification",
+    explanation: "Legitimate Bank of America statement notification. Verified domain, partial account number for personalisation, and all contact links pointing to bankofamerica.com are consistent with genuine bank correspondence."
   },
+
   {
     id: "E013",
-    zone: 2,
-    from: "news@e.starbucks.com",
-    subject: "Double Star Day is tomorrow",
-    body: `Hello, Get your favorite drink and earn twice the stars! Tomorrow only, every purchase made using your registered Starbucks Card or the Starbucks app will earn you 2x Stars toward your next free reward.
+    zone: 1,
+    from: "sextortion-dept@anon-collective.cc",
+    subject: "We have recorded you. Pay $1,500 Bitcoin or we send the video.",
+    body: `Hello.
 
-Whether it's a morning latte or an afternoon refresher, make sure to scan your app at the register. See you tomorrow at your local Starbucks!
+I have been monitoring your online activity for the past 3 months using malware I installed when you visited an adult website. I have a split-screen recording of you and the content you were viewing.
 
-Offer valid at participating stores. Double stars apply to the base stars earned on the purchase.`,
-    clue: "e.starbucks.com is a legitimate marketing subdomain used by Starbucks for email campaigns.",
-    level1: "Legitimate",
-    subCategory: "Promotional Offer",
-    explanation: "Legitimate Starbucks rewards promotion. The e.starbucks.com subdomain is Starbucks' verified email marketing domain. The promotion is a standard loyalty program offer with no requests for personal information or payment.",
-    giveawayPhrase: "earn twice the stars! Tomorrow only",
+If you want me to delete this recording, transfer exactly $1,500 in Bitcoin to the wallet address below within 48 hours:
+
+BTC Wallet: 1A2B3C4D5E6F7G8H9I0J
+
+Do not reply to this email. Do not contact the police. If you do not pay within 48 hours, I will send the video to every contact in your email and social media accounts.
+
+You have been warned.`,
+    clues: [
+      "Sender is a random anonymous address — no real organisation sends extortion emails",
+      "'Do not contact the police' is a control tactic to prevent the victim from seeking help",
+      "Bitcoin wallet demand with 48-hour deadline is the standard sextortion template",
+      "The malware and recording claim is almost always a bluff sent to millions of addresses"
+    ],
+    giveawayPhrase: "Do not reply to this email. Do not contact the police.",
+    level1: "High-Risk Fraud",
+    level2: "Extortion & Sextortion",
+    explanation: "Mass sextortion email — one of the most common fraud templates. The malware and recording are almost certainly fabricated. These emails are sent to millions of addresses. The 'do not contact police' instruction is the clearest signal of criminal intent."
   },
+
   {
     id: "E014",
-    zone: 2,
-    from: "alerts@wellsfargo.com",
-    subject: "Large transaction alert on your account",
-    body: `Hello, Wells Fargo Alert: A transaction of $542.10 occurred on your credit card ending in 4492 at "Electronics Plus" on April 17.
+    zone: 1,
+    from: "newsletter@theverge.com",
+    subject: "The Verge Daily — Top stories for March 14, 2026",
+    body: `Good morning,
 
-If this was you, no action is needed. We sent this alert as part of our commitment to your account security. If you do not recognize this transaction, please do not reply to this email. Instead, call the official customer service number on the back of your physical card or log in to our secure online portal to report unauthorized activity.`,
-    clue: "It tells you to call the number on the back of your card — a very safe instruction.",
+Here are today's top stories from The Verge:
+
+• Apple announces M5 chip — what's new and what it means for the Mac lineup
+• The EU's AI Act takes effect: what changes for users today
+• Best budget laptops under $500 in 2026 — our top picks
+
+Read these stories and more at theverge.com
+
+Manage your newsletter preferences or unsubscribe at theverge.com/newsletters
+
+— The Verge`,
+    clues: [
+      "Sender domain is theverge.com — verified tech publication",
+      "Content is consistent with The Verge's coverage areas",
+      "Unsubscribe link goes to theverge.com/newsletters — on-domain",
+      "No links to external sites, no requests for information"
+    ],
+    giveawayPhrase: "Manage your newsletter preferences or unsubscribe at theverge.com/newsletters",
     level1: "Legitimate",
-    subCategory: "Bank Notification",
-    explanation: "Legitimate Wells Fargo transaction alert. The verified alerts@wellsfargo.com sender, specific transaction details, and the advice to call the number on the physical card (not a number in the email) are hallmarks of genuine bank security alerts.",
-    giveawayPhrase: "call the official customer service number on the back of your physical card",
+    level2: "Newsletter / Platform Notification",
+    explanation: "Legitimate daily newsletter from The Verge. Verified domain, relevant content, on-domain unsubscribe link, and zero requests or external redirects confirm this as clean."
   },
+
   {
     id: "E015",
-    zone: 2,
-    from: "support@netfIex-payments.com",
-    subject: "Your account is on hold",
-    body: `Hello, We're sorry to say that we're having some trouble with your current billing information. As a result, your Netflix subscription has been put on hold and you will no longer be able to stream movies and TV shows.
+    zone: 1,
+    from: "contact@irs-tax-refund-portal.com",
+    subject: "IRS: You have an unclaimed tax refund of $2,240",
+    body: `INTERNAL REVENUE SERVICE — OFFICIAL NOTICE
 
-To continue enjoying Netflix, please update your payment method by clicking the button below. You will need to provide a valid credit card to restore your service. If we do not hear from you within 48 hours, we will be forced to cancel your membership permanently.
+Dear Taxpayer,
 
-[Button: Update Payment Now]`,
-    clue: "Look at the sender address. The word 'Netflix' is spelled with a capital 'I' instead of a lowercase 'l' — netfIex-payments.com.",
+Our records show that you have an unclaimed federal tax refund of $2,240.00 for the tax year 2024.
+
+To release your refund, you must verify your identity by providing:
+• Social Security Number
+• Date of birth
+• Bank routing and account number for direct deposit
+
+Submit your information at the link below. Refunds not claimed within 14 days will be returned to the U.S. Treasury.
+
+[ CLAIM MY REFUND ]
+irs-tax-refund-portal.com/claim
+
+IRS Tax Processing Centre`,
+    clues: [
+      "The IRS domain is irs.gov — this email comes from irs-tax-refund-portal.com",
+      "The IRS never contacts taxpayers by email — only by postal mail",
+      "Requests SSN, date of birth, and bank account in a single email",
+      "'Returned to U.S. Treasury in 14 days' creates urgency around a completely fabricated deadline"
+    ],
+    giveawayPhrase: "Submit your information at the link below. Refunds not claimed within 14 days will be returned to the U.S. Treasury.",
     level1: "Phishing & Spoofing",
-    subCategory: "Spoofed Address",
-    explanation: "Netflix phishing using a capital 'I' to replace lowercase 'l' in the domain (netfIex vs netflix). This visual trick makes the domain look legitimate at a glance. The 48-hour cancellation threat creates pressure to click without inspecting the sender address carefully.",
-    giveawayPhrase: "netfIex-payments.com",
+    level2: "Impersonation",
+    explanation: "IRS impersonation phishing. The IRS exclusively uses postal mail for all taxpayer communication and never requests financial details via email. The fake domain and SSN request are definitive red flags."
   },
+
   {
     id: "E016",
-    zone: 2,
-    from: "service@pay-pal-notice.com",
-    subject: "Unusual activity: Your account has been temporarily restricted",
-    body: `Dear Member, we have noticed some unusual activity on your PayPal account that suggests an unauthorized third party may have accessed your funds.
+    zone: 1,
+    from: "abuse@harass-target.net",
+    subject: "I know where you live. You should be scared.",
+    body: `I know your name. I know your address at 14 Maple Drive. I know what car you drive. I know your daily routine.
 
-Dear Customer,
+I have been watching you for weeks. You made a mistake when you posted that comment online and I have not forgotten.
 
-We noticed some unusual activity on your PayPal account that suggests an unauthorized third party may have accessed your personal information. For your protection, we have temporarily restricted access to your account until you can verify your identity.
+Keep looking over your shoulder. I will be in touch.
 
-While your account is restricted, you will be unable to send money, withdraw funds, or make online purchases. To lift this restriction and secure your account, please visit our secure verification portal immediately at the address below:
-
-Link: www.paypal.security-updates.com/login-verify
-
-Please complete the verification process within 24 hours to avoid a permanent account suspension. We apologize for any inconvenience this may cause, but your security is our top priority.
-
-Thank you,`,
-    clue: "Look at the link provided. In a web address, the 'real' website is the part right before the .com. Here, the real website is security-updates.com, not PayPal. A real PayPal link would always be paypal.com/something.",
-    level1: "Phishing & Spoofing",
-    subCategory: "Clone Phishing",
-    explanation: "PayPal clone phishing. The login link goes to paypal.security-updates.com — which is a subdomain of security-updates.com, not PayPal. The sender domain pay-pal-notice.com is also fake. Real PayPal links always use paypal.com as the base domain.",
-    giveawayPhrase: "www.paypal.security-updates.com/login-verify",
+Don't bother going to the police. They can't help you.`,
+    clues: [
+      "Contains a specific home address — demonstrates the sender has personal information",
+      "Explicit threat: 'Keep looking over your shoulder'",
+      "References online activity as the trigger — targeted harassment",
+      "'Don't bother going to the police' is a control tactic used in genuine threat emails"
+    ],
+    giveawayPhrase: "I know your address at 14 Maple Drive. I know what car you drive. I know your daily routine.",
+    level1: "Abuse & Harassment",
+    level2: "Stalking / Doxxing",
+    explanation: "Targeted stalking and doxxing threat. The inclusion of a specific home address indicates personal information has been obtained. The instruction not to contact police is a red flag for genuine criminal intent."
   },
+
   {
     id: "E017",
-    zone: 2,
-    from: "Microsoft-Support-Cloud@outlook-mail.co",
-    subject: "Your mailbox is full: Action Required",
-    body: `Hello, Your Outlook mailbox has reached 99.5% of its 15GB storage limit. Because of this, you will no longer be able to send or receive new emails. Important messages from your contacts may be bounced back to the sender.
+    zone: 1,
+    from: "promo@chase-exclusive-rewards.com",
+    subject: "Chase Sapphire: You've earned a $500 bonus — claim in 24 hours",
+    body: `Dear Chase Cardmember,
 
-To avoid any service interruption, please click the button below to add 50GB of extra storage to your account for free as part of our loyalty program. You must sign in to confirm your upgrade.
+Congratulations! As one of our most valued Sapphire cardmembers, you have been selected to receive a $500 cash bonus.
 
-[Button: Get More Storage]`,
-    clue: "The sender domain is outlook-mail.co — Microsoft uses microsoft.com and outlook.com, not outlook-mail.co.",
+To claim your bonus, sign in using the link below and confirm your card details:
+
+[ CLAIM YOUR $500 BONUS ]
+chase-exclusive-rewards.com/sapphire-bonus
+
+This offer expires in 24 hours. Chase is unable to extend this deadline. If you do not claim your bonus today, it will be permanently forfeited.
+
+Chase Rewards Team`,
+    clues: [
+      "Sender domain is chase-exclusive-rewards.com — Chase emails come from chase.com",
+      "Chase never sends bonus offers that expire in 24 hours via email",
+      "Link goes to chase-exclusive-rewards.com — a fake domain",
+      "'Permanently forfeited' deadline pressure is not used in legitimate bank communications"
+    ],
+    giveawayPhrase: "sign in using the link below and confirm your card details: chase-exclusive-rewards.com/sapphire-bonus",
     level1: "Phishing & Spoofing",
-    subCategory: "Impersonation",
-    explanation: "Microsoft impersonation phishing. The domain outlook-mail.co mimics Microsoft's branding but is a fake. Microsoft and Outlook only send from microsoft.com and outlook.com. The 'free 50GB upgrade' requiring a sign-in is a credential harvesting trap.",
-    giveawayPhrase: "outlook-mail.co",
+    level2: "Email Phishing",
+    explanation: "Chase impersonation phishing using a fake rewards offer. The off-domain link asking for card details is the attack vector. Legitimate Chase bonus communications always direct to chase.com."
   },
+
   {
     id: "E018",
-    zone: 2,
-    from: "deals@daily-discount.net",
-    subject: "RE: Your 90% discount (Expires Midnight!)",
-    body: `Hey there! We noticed you were browsing our site recently and left a few items in your shopping cart. We didn't want you to miss out, so we're giving you a secret 90% discount on all designer knock-off sunglasses!
+    zone: 1,
+    from: "offers@spotify.com",
+    subject: "3 months of Spotify Premium — on us",
+    body: `Hi there,
 
-Whether you're hitting the beach or just want to look cool, our glasses are the perfect fit. Prices start at just $5.99. Use the code "CHEAP90" at checkout. Hurry, this offer is only valid for the next few hours!`,
-    clue: "It uses 'RE:' in the subject to trick you into thinking you've talked to them before.",
-    level1: "Spam & Junk",
-    subCategory: "Bulk Marketing",
-    explanation: "Deceptive marketing spam. The 'RE:' subject line prefix is designed to make the email look like a reply to a prior conversation, bypassing spam filters and tricking recipients into opening it. The sender domain daily-discount.net has no brand affiliation.",
-    giveawayPhrase: "RE: Your 90% discount",
+We'd like to give you 3 months of Spotify Premium, on us.
+
+As a free plan listener, we're offering you a chance to experience Premium with no commitment. No credit card required for the first 3 months.
+
+Redeem this offer at spotify.com/premium/offer
+
+After 3 months, your plan will revert to free unless you choose to upgrade.
+
+— Spotify`,
+    clues: [
+      "Sender domain is spotify.com — verified",
+      "Spotify does run this type of free trial promotion regularly",
+      "No credit card required — reduces the risk of a scam signal",
+      "Offer redemption at spotify.com — on-domain, no external redirect"
+    ],
+    giveawayPhrase: "Redeem this offer at spotify.com/premium/offer",
+    level1: "Legitimate",
+    level2: "Promotional Offer",
+    explanation: "Legitimate Spotify Premium trial offer. The verified domain, absence of a credit card requirement, and on-domain redemption link are all consistent with Spotify's actual free trial promotions."
   },
+
   {
     id: "E019",
-    zone: 2,
-    from: "news@healthy-life.me",
-    subject: "One weird trick to lose weight",
-    body: `Hello, Are you tired of spending hours at the gym with no results? Doctors and fitness gurus are stunned by this one simple trick that helps you burn fat while you sleep!
+    zone: 1,
+    from: "security@dropbox.com",
+    subject: "New sign-in to your Dropbox account",
+    body: `Hi,
 
-It's not a diet, it's not a pill, and it's not surgery. It's a secret fruit discovered in the Amazon jungle that naturally boosts your metabolism by 400%. Watch the free video below to see how thousands of people are changing their lives in just 7 days!`,
-    clue: "'One weird trick' and 'doctors hate this' are classic clickbait spam markers.",
-    level1: "Spam & Junk",
-    subCategory: "Newsletter Spam",
-    explanation: "Health misinformation spam. The 'one weird trick', '400% metabolism boost', and 'doctors are stunned' phrases are documented spam copywriting patterns. The .me domain has no medical credibility and the claims are scientifically impossible.",
-    giveawayPhrase: "naturally boosts your metabolism by 400%",
+We noticed a new sign-in to your Dropbox account.
+
+Device: Chrome on Windows
+Location: Chicago, IL, USA
+Time: March 14, 2026 at 10:22 AM CT
+
+If this was you, no action is needed.
+
+If you don't recognise this sign-in, secure your account at dropbox.com/account/security
+
+— The Dropbox Security Team`,
+    clues: [
+      "Sender domain is dropbox.com — verified",
+      "Contains specific sign-in details: device type, OS, city, time",
+      "Link goes to dropbox.com/account/security — on-domain",
+      "No request for any credentials or personal information"
+    ],
+    giveawayPhrase: "If you don't recognise this sign-in, secure your account at dropbox.com/account/security",
+    level1: "Legitimate",
+    level2: "Security Notification",
+    explanation: "Legitimate Dropbox sign-in notification. The verified domain, specific sign-in details, and on-domain security link are all consistent with genuine security notification emails."
   },
+
   {
     id: "E020",
-    zone: 2,
-    from: "marketing@rank-first.biz",
-    subject: "I found 5 critical errors on your website",
-    body: `Hi, I was browsing your website this morning and I noticed several technical errors that are preventing you from appearing on the first page of Google.
+    zone: 1,
+    from: "noreply@fedex-parcel-redelivery.com",
+    subject: "FedEx: Delivery failed — pay $2.99 to reschedule",
+    body: `Dear Customer,
 
-If you don't fix these issues, you are losing out on thousands of potential customers every month. My agency specializes in ranking businesses #1 in less than 3 days. Would you be open to a 5-minute phone call tomorrow so I can show you exactly how to crush your competitors?`,
-    clue: "Unsolicited business offers that promise 'instant' results are almost always low-quality spam.",
-    level1: "Spam & Junk",
-    subCategory: "SEO Spam",
-    explanation: "SEO cold-outreach spam. The claim of finding 'critical errors' is automated and sent to millions of domains. No agency can guarantee Google #1 rankings in 3 days — that's not how search algorithms work. The goal is to get you on a call to sell overpriced services.",
-    giveawayPhrase: "ranking businesses #1 in less than 3 days",
+We attempted to deliver your FedEx parcel today but were unable to complete delivery as no one was home.
+
+To reschedule your delivery, you must pay a $2.99 redelivery handling fee within 24 hours:
+
+[ PAY $2.99 AND RESCHEDULE ]
+fedex-parcel-redelivery.com/reschedule
+
+After 24 hours, your parcel will be returned to the sender and the redelivery fee will increase to $14.99.
+
+FedEx Customer Service
+fedex-parcel-redelivery.com`,
+    clues: [
+      "Domain is fedex-parcel-redelivery.com — FedEx only sends from fedex.com",
+      "FedEx does not charge redelivery fees — this is completely fabricated",
+      "$2.99 is deliberately small to seem trivial — the real goal is capturing card details",
+      "The escalating fee (to $14.99 after 24 hours) is a pressure tactic to force quick action"
+    ],
+    giveawayPhrase: "you must pay a $2.99 redelivery handling fee within 24 hours",
+    level1: "Phishing & Spoofing",
+    level2: "Email Phishing",
+    explanation: "Package redelivery fee phishing — one of the most common scam formats. FedEx redelivery is always free and managed at fedex.com. The small fee is intentionally trivial to reduce hesitation while capturing card details."
   },
 
-  // ─── ZONE 3 — HARD ─────────────────────────────────────────────────────────
+
+  // ─────────────────────────────────────────────
+  // ZONE 2 — MEDIUM (20 emails)
+  // One or two signals, requires careful reading, attackers are competent
+  // ─────────────────────────────────────────────
+
   {
     id: "E021",
-    zone: 3,
-    from: "hr-portal@yourcompany.com",
-    subject: "IMPORTANT: Action Required - Annual Benefits Enrollment",
-    body: `Hi Team,
+    zone: 2,
+    from: "security@apple.com.account-services.net",
+    subject: "Sign-in to your Apple ID from iPhone 15 Pro — Paris, France",
+    body: `Your Apple ID was used to sign in on a new device.
 
-It is officially time for our Annual Open Enrollment period! Between now and Friday, you must review and select your health, dental, and vision insurance plans for the 2026 calendar year.
+Device: iPhone 15 Pro
+Location: Paris, France
+Time: March 14, 2026 at 15:47 CET
 
-To make your selections, please log in to our internal portal via the company SSO (Single Sign-On) dashboard and navigate to the "Workday" application. If you have any questions regarding plan changes or premiums, please attend one of our virtual Q&A sessions tomorrow at 10 AM.
+If this was you signing in to a new device, you can dismiss this notification.
 
-Best,
-HR Team`,
-    clue: "It uses the term 'SSO', which is a sign of a real corporate secure login process.",
-    level1: "Legitimate",
-    subCategory: "Internal Communication",
-    explanation: "Legitimate HR benefits enrollment notice. The internal company domain, SSO reference (a real enterprise security practice), named internal system (Workday), and specific enrollment deadline are all consistent with genuine corporate HR communications.",
-    giveawayPhrase: "log in to our internal portal via the company SSO (Single Sign-On) dashboard",
+If you do not recognise this sign-in, your account may be at risk. Review your Apple ID account activity to secure it:
+
+[ Review Account Activity ]
+
+Apple ID | Privacy Policy | Terms & Conditions`,
+    clues: [
+      "The sender domain reads apple.com.account-services.net — 'apple.com' is a subdomain of 'account-services.net'",
+      "Real Apple sign-in notifications come only from appleid.apple.com",
+      "The email deliberately looks clean and professional to avoid suspicion",
+      "The 'Review Account Activity' link goes off-domain despite appearing legitimate"
+    ],
+    giveawayPhrase: "security@apple.com.account-services.net",
+    level1: "Phishing & Spoofing",
+    level2: "Spear Phishing",
+    explanation: "Advanced subdomain spoofing — the most deceptive phishing technique. The domain 'apple.com.account-services.net' makes 'apple.com' appear as part of the sender, but it is actually a subdomain of the attacker's domain 'account-services.net'."
   },
+
   {
     id: "E022",
-    zone: 3,
-    from: "mail@adobe.com",
-    subject: "Your invoice for April 2026",
-    body: `Hello, Thank you for your continued subscription to Adobe Creative Cloud.
+    zone: 2,
+    from: "david.chen@veridian-consulting.co",
+    subject: "Re: March retainer — updated payment details",
+    body: `Hi,
 
-This is a notification that your monthly payment of $52.99 has been charged to your credit card ending in 1234. Your invoice is now available for download in the "Billing" section of your Adobe ID account.
+Hope you're well. Following on from our call last week, just wanted to confirm our updated banking details for the March retainer payment:
 
-If you have any questions about this charge or need to update your payment info, please visit our official support page. Thank you for being a part of the creative community.`,
-    clue: "The domain @adobe.com is correct, and it correctly shows only the last 4 digits of a card.",
-    level1: "Legitimate",
-    subCategory: "Subscription Billing",
-    explanation: "Genuine Adobe Creative Cloud invoice. The verified mail@adobe.com domain, accurate subscription pricing, partial card number (last 4 digits only — a security best practice), and direction to the official Adobe portal confirm this as legitimate.",
-    giveawayPhrase: "your credit card ending in 1234",
+Bank: HSBC
+Account name: Veridian Consulting Ltd
+Account number: 29384710
+Sort code: 40-47-84
+
+Please use these details going forward. Our old account is being phased out so please don't use the previous details.
+
+Let me know once the transfer is done.
+
+Thanks,
+David`,
+    clues: [
+      "Sender domain is veridian-consulting.co — the real company uses veridian-consulting.com (subtle .co vs .com change)",
+      "Mid-relationship bank detail change sent via email is the hallmark of BEC fraud",
+      "'Please don't use the previous details' is designed to prevent verification against known records",
+      "The casual tone is intentional — formal invoices attract more scrutiny than friendly emails"
+    ],
+    giveawayPhrase: "Our old account is being phased out so please don't use the previous details.",
+    level1: "High-Risk Fraud",
+    level2: "Business Email Compromise (BEC)",
+    explanation: "Highly sophisticated BEC using a near-identical domain (.co vs .com). The casual tone bypasses scrutiny a formal invoice would attract. The 'don't use previous details' line prevents victims from verifying against known records."
   },
+
   {
     id: "E023",
-    zone: 3,
-    from: "exec-office@company-internal-hr.com",
-    subject: "Quick Request - Are you at your desk?",
-    body: `Hi, I'm currently stuck in a back-to-back board meeting and I can't take any calls right now. I need a huge favor.
+    zone: 2,
+    from: "noreply@paypal.com",
+    subject: "You sent $750.00 to Marcus Webb",
+    body: `You sent a payment of $750.00 to Marcus Webb (marcus.webb92@gmail.com).
 
-I was supposed to send gift cards to a client for their anniversary today, but I've just realized my corporate card is being declined. Can you please head to the store and purchase five $100 Apple Gift Cards? Just scratch the back, take a photo of the codes, and email them to me here. I will reimburse you by the end of the day. Please keep this quiet as it's a surprise for the client.`,
-    clue: "This is a 'CEO scam.' Bosses do not ask employees to buy gift cards with their own personal money.",
+Transaction ID: 5KX29841ND621
+Date: March 14, 2026
+
+If you did not authorise this payment, call our fraud team immediately at 1-888-221-1161 to dispute the charge and receive a full refund.
+
+PayPal, Inc.`,
+    clues: [
+      "The sender domain appears to be paypal.com — this is the deceptive element",
+      "The phone number 1-888-221-1161 is not PayPal's real support number (real number: 1-888-221-1161 — verify this yourself)",
+      "PayPal never asks you to call a number from an email — always log in at paypal.com directly",
+      "The specific dollar amount and unknown recipient name create panic to trigger an immediate call"
+    ],
+    giveawayPhrase: "call our fraud team immediately at 1-888-221-1161 to dispute the charge",
     level1: "Phishing & Spoofing",
-    subCategory: "Spear Phishing",
-    explanation: "CEO gift card scam (Business Email Compromise). The request to buy gift cards personally and 'keep it quiet' is the defining signal. The sender domain company-internal-hr.com mimics an internal address but is not the company's real domain. This scam costs businesses millions annually.",
-    giveawayPhrase: "purchase five $100 Apple Gift Cards? Just scratch the back, take a photo of the codes, and email them to me",
+    level2: "Clone Phishing",
+    explanation: "Vishing (voice phishing) via email. The email is designed to make you call a scammer posing as PayPal support. Always navigate to paypal.com directly rather than calling numbers from emails — even if the sender looks legitimate."
   },
+
   {
     id: "E024",
-    zone: 3,
-    from: "account-security@mircosoft.com",
-    subject: "Unusual Sign-in Activity Detected",
-    body: `Hello, Microsoft account security alert.
+    zone: 2,
+    from: "billing@internal-hr-payroll.net",
+    subject: "Payroll update: Re-confirm your bank account by Friday",
+    body: `Dear Employee,
 
-We detected an unusual sign-in to your account from an IP address located in Beijing, China. If this was not you, your account may have been compromised.
+Due to a scheduled migration of our payroll processing system this weekend, all employees are required to re-confirm their direct deposit bank account details by end of day Friday.
 
-To secure your account and prevent unauthorized access to your files and emails, please click the button below to verify your identity. You will be asked to confirm your current password and your recovery phone number.
+If you do not re-confirm your details, we cannot guarantee your salary will be deposited on the next pay date. Employees who miss the deadline may experience a payment delay of up to two pay periods.
 
-[Button: Secure Account Now]`,
-    clue: "Look at the spelling in the 'From' field: 'mircosoft' instead of 'microsoft'.",
-    level1: "Phishing & Spoofing",
-    subCategory: "Typosquatting",
-    explanation: "Microsoft typosquatting phishing. The domain mircosoft.com swaps the 'c' and 'r' in 'microsoft' — easy to miss at a glance, especially in a small font. The Beijing sign-in is chosen to trigger alarm. Microsoft security alerts come from microsoft.com only.",
-    giveawayPhrase: "mircosoft.com",
+Please complete the verification form here:
+[ CONFIRM MY BANK DETAILS ]
+
+If you have any questions, contact payroll@internal-hr-payroll.net
+
+HR & Payroll Team`,
+    clues: [
+      "Sender domain is internal-hr-payroll.net — not your employer's actual domain",
+      "No legitimate payroll system requires employees to re-submit bank details via email",
+      "The threat of a two pay period delay creates high emotional and financial pressure",
+      "The reply address payroll@internal-hr-payroll.net is the same fake domain"
+    ],
+    giveawayPhrase: "Employees who miss the deadline may experience a payment delay of up to two pay periods.",
+    level1: "High-Risk Fraud",
+    level2: "Business Email Compromise (BEC)",
+    explanation: "BEC payroll diversion attack. The fake HR domain, fabricated system migration pretext, and threat of delayed pay are the three signals. No real payroll system collects banking details via email link."
   },
+
   {
     id: "E025",
-    zone: 3,
-    from: "dse@docusıgn.net",
-    subject: "Action Required: Your 2026 Annual Bonus & Performance Review.pdf",
-    body: `Hello,
+    zone: 2,
+    from: "no-reply@linkedin.com",
+    subject: "You appeared in 34 searches this week",
+    body: `Hi,
 
-You have a new document waiting for your electronic signature from the Finance & Payroll Department.
+Your LinkedIn profile is gaining attention.
 
-This document contains your confidential performance evaluation and the final calculation for your 2026 annual bonus. To ensure your bonus is included in the next pay cycle, please review the document and provide your digital signature by 5:00 PM today.
+34 people searched for and found your profile this week, including professionals from Deloitte, McKinsey & Company, and Goldman Sachs.
 
-Document: Performance_Bonus_2026.pdf
-Access Code: BX-992
+See who's looking at your profile and grow your professional network.
 
-[Button: VIEW DOCUMENT]
+[ View Your Profile Analytics ]
 
-This is an automated message from the DocuSign Secure System. Do not reply to this email. For assistance, please contact your internal HR representative.`,
-    clue: "Look extremely closely at the sender's email: dse@docusıgn.net. The 'i' in docusıgn is a Turkish 'dotless i' character — it looks identical to a normal 'i' but it is a completely different domain.",
-    level1: "Phishing & Spoofing",
-    subCategory: "Spoofed Sender Address",
-    explanation: "Unicode homoglyph attack — one of the most sophisticated phishing techniques. The 'i' in docusıgn is a Turkish dotless-i (ı), making it visually identical to docusign.net but a completely different domain. The annual bonus subject matter creates urgency that bypasses careful reading.",
-    giveawayPhrase: "dse@docusıgn.net",
+You're receiving this email because you're a LinkedIn member.
+Unsubscribe from these notifications: linkedin.com/settings/email`,
+    clues: [
+      "Sender domain is linkedin.com — verified",
+      "LinkedIn sends this exact type of weekly profile view notification",
+      "Unsubscribe link goes to linkedin.com/settings/email — on-domain",
+      "No personal information requested, no external links"
+    ],
+    giveawayPhrase: "Unsubscribe from these notifications: linkedin.com/settings/email",
+    level1: "Legitimate",
+    level2: "Newsletter / Platform Notification",
+    explanation: "Legitimate LinkedIn profile analytics notification. The verified domain, standard LinkedIn notification format, and on-domain unsubscribe link confirm this as clean platform communication."
   },
+
   {
     id: "E026",
-    zone: 3,
-    from: "helpdesk@yourcompany-portal.com",
-    subject: "URGENT: Password Expiration Notice",
-    body: `Hi, According to our security policy, your network password is set to expire in exactly 2 hours. If you do not update your password before the deadline, you will be locked out of the system and will lose access to your email, the VPN, and all internal files.
+    zone: 2,
+    from: "attachment-scan@docusign-secure-portal.com",
+    subject: "DocuSign: Document ready for your signature",
+    body: `You have a document waiting for your electronic signature.
 
-To avoid a service lockout, please click the link below to go to our password reset portal. You must enter your old password and then choose a new one.
+Document title: NDA — Service Agreement 2026
+Sent by: James Harrington (james.harrington@partnerfirm.com)
+Expires: March 21, 2026
 
-[Link: reset-portal-login.com/secure]`,
-    clue: "Creating 'False Urgency' (2 hours left!) is a classic trick to make you panic and not check the URL.",
+[ REVIEW AND SIGN DOCUMENT ]
+docusign-secure-portal.com/sign?doc=NDA2026
+
+Please do not share this link. If you were not expecting this document, contact James Harrington directly at the email above.`,
+    clues: [
+      "Sender domain is docusign-secure-portal.com — DocuSign only sends from docusign.com or docusign.net",
+      "The signing link goes to docusign-secure-portal.com — a fake domain",
+      "The document title and sender name create plausibility but the domain is the tell",
+      "DocuSign sign links always use docusign.com/signing-complete format"
+    ],
+    giveawayPhrase: "docusign-secure-portal.com/sign?doc=NDA2026",
     level1: "Phishing & Spoofing",
-    subCategory: "Spoofed Address",
-    explanation: "Internal IT impersonation phishing. The domain yourcompany-portal.com mimics an internal IT address and the reset link goes to reset-portal-login.com — a completely unrelated domain. Real corporate password resets always use the company's own domain. The 2-hour countdown prevents calm analysis.",
-    giveawayPhrase: "reset-portal-login.com/secure",
+    level2: "Email Phishing",
+    explanation: "DocuSign impersonation phishing. The document and sender name are plausible, but the signing link goes to a fake domain. Always verify that DocuSign links use docusign.com before entering credentials."
   },
+
   {
     id: "E027",
-    zone: 3,
-    from: "mark@biz-solutions.net",
-    subject: "Question about your business",
-    body: `Hi, I was looking at your LinkedIn profile earlier and I was very impressed with your background.
+    zone: 2,
+    from: "emma.richardson1987@gmail.com",
+    subject: "Hi — hope this isn't too forward",
+    body: `Hi,
 
-I work with several companies in your industry and we've been able to help them get 500 new high-quality leads every single week using our proprietary software. I'll actually be in your city next week for a conference — do you have 15 minutes to grab a coffee so I can show you how we can do the same for you?`,
-    clue: "This is a 'cold outreach' bot. It feels personal, but it's an automated sales pitch.",
-    level1: "Spam & Junk",
-    subCategory: "Referral Spam",
-    explanation: "Cold-outreach spam designed to feel personal. The LinkedIn reference, the '500 leads per week' promise, and the local meeting offer are all automated scripts sent to thousands of addresses. The biz-solutions.net domain has no verifiable company behind it.",
-    giveawayPhrase: "500 new high-quality leads every single week",
+I hope this doesn't come across as too forward — I found your email through a mutual connection and felt compelled to reach out.
+
+My name is Emma Richardson. I'm 36, based in London, and I work for a humanitarian NGO in West Africa. It's meaningful work but it gets lonely out here.
+
+I've been through a difficult year personally and I'm looking for genuine connection with someone kind and thoughtful.
+
+I know this is unusual, but sometimes you just have a feeling about someone. I'd love to chat if you're open to it.
+
+Warmly,
+Emma`,
+    clues: [
+      "Unsolicited email from a stranger — you have no mutual connection who would share your email",
+      "Humanitarian aid worker in West Africa is one of the most documented romance scam personas",
+      "'Sometimes you just have a feeling about someone' is scripted emotional manipulation",
+      "Personal Gmail with a full name — designed to seem like a real individual, not a company"
+    ],
+    giveawayPhrase: "I work for a humanitarian NGO in West Africa. It's meaningful work but it gets lonely out here.",
+    level1: "High-Risk Fraud",
+    level2: "Romance Scam",
+    explanation: "Romance scam opening gambit. The humanitarian worker in Africa persona, unsolicited emotional appeal, and 'feeling about someone' line are all documented in the FTC's romance scam playbook. Financial requests follow once trust is established."
   },
+
   {
     id: "E028",
-    zone: 3,
-    from: "cleanup@unsubscriber.app",
-    subject: "You have 4,302 unread junk emails in your inbox",
-    body: `Hello, Are you tired of waking up to a messy inbox full of spam and advertisements?
+    zone: 2,
+    from: "security@google.com",
+    subject: "Critical security alert — sign-in blocked",
+    body: `We blocked a sign-in attempt to your Google account.
 
-Our new "Clean-Sweep" app can automatically unsubscribe you from thousands of mailing lists with just one click. To get started, simply click the button below to connect your email account to our secure server. We will analyze your inbox and clean it up for just a $1 monthly fee. Say goodbye to spam forever!`,
-    clue: "Fake 'unsubscriber' services are actually used to verify your email is active so they can send you more spam.",
-    level1: "Spam & Junk",
-    subCategory: "Newsletter Spam",
-    explanation: "Anti-spam spam — a meta-scam. Connecting your email account to an unknown 'unsubscriber' service gives the operator full access to your inbox. These services typically harvest active email addresses and sell them to other spammers, making your spam problem worse, not better.",
-    giveawayPhrase: "simply click the button below to connect your email account to our secure server",
+google.account.security.alert@gmail.com
+
+Device: Android phone
+Location: Bucharest, Romania
+Date & time: March 14, 2026, 08:14 AM UTC
+
+We blocked this sign-in because it seemed suspicious. Check your account now.
+
+[ CHECK ACTIVITY ]
+
+You can also review your account at myaccount.google.com
+
+Google Security Team`,
+    clues: [
+      "The sender address listed in the email body is a Gmail address — not google.com",
+      "Google security alerts come from no-reply@accounts.google.com, not security@google.com",
+      "The 'Check Activity' link destination must be verified — Google links go to accounts.google.com",
+      "Bucharest location is chosen to trigger alarm — but the email itself is the threat"
+    ],
+    giveawayPhrase: "google.account.security.alert@gmail.com",
+    level1: "Phishing & Spoofing",
+    level2: "Spoofed Sender Address",
+    explanation: "Google account phishing with a spoofed sender. The body inadvertently reveals a Gmail address rather than a google.com address. Real Google security alerts come from no-reply@accounts.google.com with links to accounts.google.com."
   },
+
   {
     id: "E029",
-    zone: 3,
-    from: "deals@daily-deals-inbox.com",
-    subject: "Open for a massive surprise!",
-    body: `Hello, You have been selected as a preferred customer for our exclusive 24-hour "Flash Sale"!
+    zone: 2,
+    from: "hr@techcorp.com",
+    subject: "Confidential: Your performance review outcome — Q4 2025",
+    body: `Hi,
 
-Inside this email, you will find a hidden coupon for an extra 20% off our already discounted prices. We have everything from home electronics to designer clothing. Don't let someone else grab your deals — click the link below to browse our catalog before the sale ends at midnight!`,
-    clue: "Unsolicited marketing from a random 'Daily Deals' sender you never signed up for.",
-    level1: "Spam & Junk",
-    subCategory: "Bulk Marketing",
-    explanation: "Generic bulk marketing spam. The 'preferred customer' claim is false — this is a mass send to purchased email lists. The '24-hour flash sale' is a manufactured urgency tactic. The daily-deals-inbox.com domain has no brand affiliation.",
-    giveawayPhrase: "You have been selected as a preferred customer",
+Your Q4 2025 performance review has been completed and the outcome is available.
+
+Unfortunately, your results place you in the bottom 15% of your peer group. As outlined in our performance management policy, continued underperformance may impact your year-end compensation and employment status.
+
+This is confidential — please do not discuss this with colleagues.
+
+To view your full review and respond to the assessment, please sign in with your company credentials using the link below:
+[ VIEW MY REVIEW ]
+
+This link expires in 48 hours.
+
+HR & People Operations`,
+    clues: [
+      "'Please do not discuss this with colleagues' — isolation is a social engineering tactic",
+      "Company HR systems do not send review access via time-limited email links",
+      "The 'sign in with your company credentials' link harvests corporate login details",
+      "The threat to employment creates high emotional pressure to click without thinking"
+    ],
+    giveawayPhrase: "please sign in with your company credentials using the link below",
+    level1: "Phishing & Spoofing",
+    level2: "Spear Phishing",
+    explanation: "Internal spear phishing targeting corporate credentials. The isolation instruction, job threat, and 48-hour credential harvesting link are all engineered to bypass rational thinking. Real HR performance reviews are never delivered via email links."
   },
+
   {
     id: "E030",
-    zone: 3,
-    from: "marketing@seo-experts.io",
-    subject: "Your website is slow and losing money!",
-    body: `Hello, I ran a performance test on your website this morning and the results were shocking. Your site is failing 3 major Google Core Web Vitals, which means Google is pushing you down in the search results.
+    zone: 2,
+    from: "invoices@acme-partners-billing.co",
+    subject: "Invoice #INV-2026-1142 — $12,400.00 due March 20",
+    body: `Dear Finance Team,
 
-If you don't fix this immediately, your competitors will take all your traffic. Reply to this email with the word "REPORT" and I will send you a free 20-page audit of your site and a plan to fix it.`,
-    clue: "Fear-mongering about technical performance is a common tactic used by low-quality spam agencies to find victims.",
-    level1: "Spam & Junk",
-    subCategory: "SEO Spam",
-    explanation: "SEO fear-mongering spam. The '3 failing Core Web Vitals' claim is generic and sent to every domain on a purchased list — no one has checked your specific site. The 'reply with REPORT' mechanism confirms your email is active for further targeting.",
-    giveawayPhrase: "Reply to this email with the word \"REPORT\"",
+Please find this invoice for professional services rendered in February 2026.
+
+Invoice number: INV-2026-1142
+Services: Strategic consulting — Q1 2026 retainer
+Amount due: $12,400.00
+Due date: March 20, 2026
+
+Important: We have recently updated our banking details. Please use the following account for this payment only:
+
+Citibank NA
+Account name: Acme Partners LLC
+Account number: 4827391047
+Routing: 021000089
+
+Please discard our previous banking details. Contact us at billing@acme-partners-billing.co if you need anything.`,
+    clues: [
+      "Domain is acme-partners-billing.co — a billing subdomain on a .co domain, not acmepartners.com",
+      "'We have recently updated our banking details' mid-invoice is the defining BEC signal",
+      "'Please discard our previous banking details' prevents the victim from cross-referencing",
+      "The reply address is also the fake domain — no legitimate contact information provided"
+    ],
+    giveawayPhrase: "Important: We have recently updated our banking details. Please use the following account for this payment only.",
+    level1: "High-Risk Fraud",
+    level2: "Wire Fraud",
+    explanation: "Invoice BEC wire fraud. The 'updated banking details' line redirects payment to the attacker's account. This single phrase is responsible for billions in annual business losses globally. Always verify bank detail changes via a known phone number."
   },
-];
 
-// ─── L1 Categories (trimmed to 3) ─────────────────────────────────────────────
+  {
+    id: "E031",
+    zone: 2,
+    from: "noreply@apple.com",
+    subject: "Your receipt from the App Store — March 14, 2026",
+    body: `Dear Customer,
+
+Thank you for your purchase.
+
+App: ProVPN — Secure & Fast
+Developer: SecureApps Ltd
+Amount: $4.99
+Date: March 14, 2026
+Order ID: MG4B2K9R7X
+
+If you didn't make this purchase, you can request a refund or report a problem at reportaproblem.apple.com
+
+Apple`,
+    clues: [
+      "Sender domain is apple.com — verified",
+      "Order ID format matches Apple's actual receipt format",
+      "Refund link goes to reportaproblem.apple.com — Apple's real refund portal",
+      "No urgency, no personal information requested"
+    ],
+    giveawayPhrase: "you can request a refund or report a problem at reportaproblem.apple.com",
+    level1: "Legitimate",
+    level2: "Subscription Billing",
+    explanation: "Genuine Apple App Store receipt. The verified domain, correctly formatted Order ID, and refund link to Apple's actual portal (reportaproblem.apple.com) are all consistent with real Apple purchase receipts."
+  },
+
+  {
+    id: "E032",
+    zone: 2,
+    from: "alert@wellsfargo.com",
+    subject: "Unusual activity detected on your Wells Fargo account",
+    body: `We detected unusual activity on your account and have temporarily placed a hold on outgoing transactions as a precaution.
+
+Account: Checking (...7291)
+Activity flagged: 3 consecutive failed PIN attempts
+Date: March 14, 2026
+
+To restore full account access, please call us at 1-800-869-3557 or sign in at wellsfargo.com.
+
+For your security, do not share your PIN, password, or one-time passcode with anyone — including Wells Fargo employees.
+
+Wells Fargo Bank, N.A.`,
+    clues: [
+      "Sender domain is wellsfargo.com — verified",
+      "Phone number 1-800-869-3557 is Wells Fargo's real customer service number",
+      "Explicitly states 'do not share your PIN — including with Wells Fargo employees'",
+      "Sign-in link references wellsfargo.com — on-domain"
+    ],
+    giveawayPhrase: "do not share your PIN, password, or one-time passcode with anyone — including Wells Fargo employees",
+    level1: "Legitimate",
+    level2: "Bank / Financial Notification",
+    explanation: "Legitimate Wells Fargo security alert. The verified domain, real customer service number, and the proactive security reminder to never share credentials (even with bank staff) are hallmarks of genuine bank security communication."
+  },
+
+  {
+    id: "E033",
+    zone: 2,
+    from: "malware-dropper@file-share-cdn.net",
+    subject: "Important document shared with you — open immediately",
+    body: `A document has been shared with you by your colleague.
+
+Document: Q4_Financial_Summary_CONFIDENTIAL.exe
+Size: 2.4MB
+Shared by: Mike Johnson
+
+[ OPEN DOCUMENT ]
+file-share-cdn.net/download/Q4_Financial_Summary_CONFIDENTIAL.exe
+
+This link expires in 6 hours. Please open before it expires.`,
+    clues: [
+      "The 'document' has a .exe file extension — executable files are not documents",
+      "Sender domain is a generic CDN with no company affiliation",
+      "No legitimate file sharing service asks you to run an .exe called a 'document'",
+      "The 6-hour expiry creates urgency to open a potentially dangerous executable"
+    ],
+    giveawayPhrase: "Q4_Financial_Summary_CONFIDENTIAL.exe",
+    level1: "Malicious Content",
+    level2: "Malware Delivery",
+    explanation: "Malware delivery via disguised executable. Naming a .exe file as a financial document is a classic social engineering technique. No legitimate document sharing service delivers .exe files. Opening this file installs malware."
+  },
+
+  {
+    id: "E034",
+    zone: 2,
+    from: "admin@microsoft365-license-renewal.com",
+    subject: "Microsoft 365 Business — your licence expires in 3 days",
+    body: `Dear Administrator,
+
+Your Microsoft 365 Business licence is due to expire in 3 days. If you do not renew before expiry, your team will immediately lose access to Outlook, Teams, SharePoint, and all Office applications.
+
+Current licences: 47 users
+Renewal cost: $1,410.00/year
+
+Renew now to avoid disruption:
+[ RENEW MICROSOFT 365 LICENCE ]
+microsoft365-license-renewal.com/renew
+
+For billing questions, contact admin@microsoft365-license-renewal.com
+
+Microsoft 365 Billing Team`,
+    clues: [
+      "Domain is microsoft365-license-renewal.com — Microsoft billing comes from microsoft.com",
+      "Microsoft licence renewals go through the Microsoft 365 admin centre at admin.microsoft.com",
+      "Threatening loss of access to 47 users' Outlook and Teams creates high organisational pressure",
+      "Reply address is also the fake domain — no legitimate Microsoft contact information"
+    ],
+    giveawayPhrase: "your team will immediately lose access to Outlook, Teams, SharePoint, and all Office applications",
+    level1: "Phishing & Spoofing",
+    level2: "Email Phishing",
+    explanation: "Microsoft 365 licence phishing targeting businesses. The threat of organisation-wide service disruption is engineered to pressure IT administrators into acting without verifying the domain. All Microsoft licence renewals are managed at admin.microsoft.com."
+  },
+
+  {
+    id: "E035",
+    zone: 2,
+    from: "ransom@darkweb-crypto.onion.to",
+    subject: "Your files have been encrypted — pay to recover them",
+    body: `YOUR NETWORK HAS BEEN COMPROMISED.
+
+All files on your system have been encrypted using AES-256 military-grade encryption. Your backups have been deleted.
+
+To receive the decryption key, you must transfer 0.45 BTC (approximately $14,000) to the following wallet within 72 hours:
+
+BTC: 3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5
+
+After 72 hours, the ransom amount will double. After 7 days, your decryption key will be permanently deleted.
+
+Do not contact law enforcement. Do not attempt to decrypt files yourself.`,
+    clues: [
+      "Sender is from a .onion.to address — anonymised routing used by criminal infrastructure",
+      "Claims files are encrypted and backups deleted — the hallmarks of ransomware notification",
+      "Bitcoin wallet demand with escalating deadline is the ransomware standard",
+      "'Do not contact law enforcement' is a control instruction to prevent victim from getting help"
+    ],
+    giveawayPhrase: "All files on your system have been encrypted using AES-256 military-grade encryption. Your backups have been deleted.",
+    level1: "Malicious Content",
+    level2: "Ransomware Lure",
+    explanation: "Ransomware notification email. The specific encryption claim, Bitcoin demand, escalating deadline, and law enforcement warning are the four defining signals of ransomware. Contact your IT security team and law enforcement immediately — do not pay."
+  },
+
+  {
+    id: "E036",
+    zone: 2,
+    from: "noreply@notion.so",
+    subject: "Sarah Park shared a page with you: 2026 Roadmap",
+    body: `Sarah Park shared a Notion page with you.
+
+Page: 2026 Product Roadmap
+Workspace: Acme Corp
+
+[ Open in Notion ]
+
+If you don't know Sarah Park or weren't expecting this, you can safely ignore this email.
+
+— Notion`,
+    clues: [
+      "Sender domain is notion.so — Notion's verified sending domain",
+      "Page share notifications are standard Notion behaviour",
+      "Link destination goes to notion.so — on-domain",
+      "'If you don't know this person, ignore it' — standard Notion language for unsolicited shares"
+    ],
+    giveawayPhrase: "If you don't know Sarah Park or weren't expecting this, you can safely ignore this email.",
+    level1: "Legitimate",
+    level2: "Newsletter / Platform Notification",
+    explanation: "Legitimate Notion page share notification. The verified notion.so domain, standard sharing format, and appropriate guidance for unknown senders are all consistent with genuine Notion notification emails."
+  },
+
+  {
+    id: "E037",
+    zone: 2,
+    from: "threats@hacker-collective.xyz",
+    subject: "You have 48 hours to remove your post or face consequences",
+    body: `We have identified you as the author of the post published on March 10 targeting our community.
+
+You are hereby given 48 hours to remove this post and issue a public apology. If you fail to comply, we will:
+
+1. Publish your full name, address, and workplace online
+2. Contact your employer with evidence of your online activity
+3. File coordinated reports against all your social media accounts
+
+This is a final warning. We are watching.`,
+    clues: [
+      "Threatens to publish personal information including home address and workplace — doxxing",
+      "Coordinated reporting campaign threat targets social media accounts",
+      "Sender is an anonymous collective with no verifiable identity",
+      "'We are watching' combined with specific personal threat signals organised harassment"
+    ],
+    giveawayPhrase: "Publish your full name, address, and workplace online",
+    level1: "Abuse & Harassment",
+    level2: "Stalking / Doxxing",
+    explanation: "Coordinated harassment and doxxing threat. The explicit plan to publish home address and workplace, combined with coordinated reporting, constitutes organised harassment. This should be reported to law enforcement and platform trust & safety teams."
+  },
+
+  {
+    id: "E038",
+    zone: 2,
+    from: "no-reply@accounts.google.com",
+    subject: "Security alert: New sign-in on Mac",
+    body: `New sign-in to sarah.jones@gmail.com
+
+Your account was just signed in to from a new Mac.
+
+Chrome on macOS
+United States (your usual location)
+
+If this was you, you don't need to do anything.
+
+If you don't recognise this sign-in, check your account activity at myaccount.google.com/notifications
+
+Google`,
+    clues: [
+      "Sender is no-reply@accounts.google.com — Google's verified security notification address",
+      "Sign-in is from the user's usual location — not a foreign country alarm",
+      "Link goes to myaccount.google.com — Google's real account management domain",
+      "No urgency, no threats, no information requested"
+    ],
+    giveawayPhrase: "United States (your usual location)",
+    level1: "Legitimate",
+    level2: "Security Notification",
+    explanation: "Genuine Google security sign-in notification. The verified accounts.google.com sender, usual location flag (reducing alarm), and myaccount.google.com link are all consistent with Google's actual security notification format."
+  },
+
+  {
+    id: "E039",
+    zone: 2,
+    from: "support@coinbase.com",
+    subject: "Your Coinbase account — withdrawal confirmation",
+    body: `A withdrawal has been processed from your Coinbase account.
+
+Amount: 0.42 BTC ($13,860.00)
+Destination wallet: 1A2B3C4D5E6F7G8H9I0J
+Date: March 14, 2026 at 11:09 AM UTC
+Transaction ID: TXN-847291
+
+If you initiated this withdrawal, no action is needed.
+
+If you did not authorise this withdrawal, contact Coinbase Support immediately at coinbase.com/support. Do not call any phone numbers listed in other emails — always use coinbase.com directly.
+
+Coinbase Security`,
+    clues: [
+      "Sender domain is coinbase.com — appears verified",
+      "Coinbase does send withdrawal confirmation emails in this format",
+      "The warning 'do not call phone numbers in other emails' is a genuine Coinbase security practice",
+      "The link goes to coinbase.com/support — on-domain, no redirect"
+    ],
+    giveawayPhrase: "Do not call any phone numbers listed in other emails — always use coinbase.com directly.",
+    level1: "Legitimate",
+    level2: "Bank / Financial Notification",
+    explanation: "Legitimate Coinbase withdrawal confirmation. The verified domain, accurate notification format, on-domain support link, and proactive anti-vishing warning ('do not call numbers from other emails') are all consistent with genuine Coinbase security emails."
+  },
+
+  {
+    id: "E040",
+    zone: 2,
+    from: "macro-payload@trusted-docs-share.com",
+    subject: "Shared with you: Updated contract terms — please review",
+    body: `Hi,
+
+Please find attached the updated contract terms document for your review.
+
+[ Download: Contract_Terms_Updated_March2026.docm ]
+trusted-docs-share.com/download/contract_terms.docm
+
+Note: This document contains macros required to display correctly. If prompted, please click "Enable Content" when opening the file.
+
+Please review and sign by end of week.
+
+Thanks`,
+    clues: [
+      "The file extension is .docm — a macro-enabled Word document, not a standard .docx",
+      "'Click Enable Content when opening the file' — enabling macros in unknown documents runs malicious code",
+      "Sender domain is trusted-docs-share.com — a generic file hosting domain with no identity",
+      "No sender name, no company name — anonymous sender requesting urgent document action"
+    ],
+    giveawayPhrase: "This document contains macros required to display correctly. If prompted, please click 'Enable Content' when opening the file.",
+    level1: "Malicious Content",
+    level2: "Macro-Embedded Attachment",
+    explanation: "Macro malware delivery. The .docm extension and explicit instruction to enable macros are the attack. Enabling macros in documents from unknown sources executes malicious code silently. Microsoft disabled auto-macro execution precisely because of this attack vector."
+  },
+
+
+  // ─────────────────────────────────────────────
+  // ZONE 3 — HARD (10 emails)
+  // Almost completely legitimate-looking, single subtle signal,
+  // some emails are borderline by design
+  // ─────────────────────────────────────────────
+
+  {
+    id: "E041",
+    zone: 3,
+    from: "no-reply@dropbox.com",
+    subject: "James Wilson shared a folder with you: 'Q1 Financials'",
+    body: `Hi,
+
+James Wilson (james.wilson@partnerco.com) has shared a folder with you on Dropbox.
+
+Folder: Q1 Financials
+Items: 14 files
+
+[ Open folder in Dropbox ]
+
+If you weren't expecting this share, you can report it at dropbox.com/help.
+
+— Dropbox`,
+    clues: [
+      "Sender domain is dropbox.com — verified",
+      "The sharing notification format is consistent with real Dropbox emails",
+      "The 'Open folder' link destination must be verified — it should go to dropbox.com",
+      "The folder name 'Q1 Financials' and sender name are plausible but unverifiable"
+    ],
+    giveawayPhrase: "James Wilson (james.wilson@partnerco.com) has shared a folder with you on Dropbox.",
+    level1: "Legitimate",
+    level2: "Newsletter / Platform Notification",
+    explanation: "Legitimate Dropbox share notification. This is a genuinely clean email — the verified domain, correct notification format, and on-domain report link confirm it. Hard zone players must resist over-flagging clean emails from legitimate platforms."
+  },
+
+  {
+    id: "E042",
+    zone: 3,
+    from: "hr@globaltech.com",
+    subject: "Salary review outcomes — your updated compensation package",
+    body: `Hi,
+
+I'm pleased to share that following the annual salary review, your compensation has been updated effective April 1, 2026.
+
+Your new package details are available in the HR portal. Please log in using your company SSO at hr.globaltech.com/portal to view the breakdown.
+
+This is confidential information. Please do not discuss specific figures with colleagues.
+
+Best,
+Karen Mitchell
+Head of People`,
+    clues: [
+      "Sender domain is globaltech.com — matches a plausible employer domain",
+      "'Please do not discuss specific figures with colleagues' is reasonable confidentiality for salary info",
+      "Link goes to hr.globaltech.com/portal — a subdomain of the company domain, not external",
+      "The tone and format are consistent with a genuine HR communication"
+    ],
+    giveawayPhrase: "Please log in using your company SSO at hr.globaltech.com/portal",
+    level1: "Legitimate",
+    level2: "Internal Communication",
+    explanation: "Legitimate internal HR salary notification. This is a clean email — the company domain, SSO login to a company subdomain, and appropriate salary confidentiality request are all consistent with genuine HR communication. Hard zone players must not flag this."
+  },
+
+  {
+    id: "E043",
+    zone: 3,
+    from: "security@paypal.com",
+    subject: "We've limited your account",
+    body: `We've noticed some unusual activity on your PayPal account and have temporarily limited what you can do until we hear from you.
+
+To help us restore your full access, we need to verify some information.
+
+[ Go to Resolution Centre ]
+
+Your case reference is PP-2026-003847291.
+
+This won't take long. Once we've confirmed your details, we'll remove the limitation immediately.
+
+PayPal`,
+    clues: [
+      "Sender domain is paypal.com — appears verified",
+      "PayPal does send account limitation emails in almost exactly this format",
+      "The 'Go to Resolution Centre' link must be inspected — does it go to paypal.com?",
+      "The case reference number adds legitimacy but can be fabricated"
+    ],
+    giveawayPhrase: "To help us restore your full access, we need to verify some information.",
+    level1: "Phishing & Spoofing",
+    level2: "Clone Phishing",
+    explanation: "High-quality PayPal clone phishing. The email is almost indistinguishable from a real PayPal limitation notice. The only reliable signal is inspecting where the 'Resolution Centre' link actually points. Real PayPal links always go to paypal.com. This is a borderline hard email by design."
+  },
+
+  {
+    id: "E044",
+    zone: 3,
+    from: "noreply@github.com",
+    subject: "Two-factor authentication disabled on your account",
+    body: `Hi,
+
+Two-factor authentication has been disabled on your GitHub account.
+
+If you made this change, no further action is needed.
+
+If you did not make this change, your account may be compromised. Secure your account immediately:
+github.com/settings/security
+
+GitHub`,
+    clues: [
+      "Sender domain is github.com — verified",
+      "GitHub sends exactly this type of 2FA change notification",
+      "The security link goes to github.com/settings/security — on-domain",
+      "No personal information requested — directs to GitHub directly"
+    ],
+    giveawayPhrase: "Two-factor authentication has been disabled on your GitHub account.",
+    level1: "Legitimate",
+    level2: "Security Notification",
+    explanation: "Legitimate GitHub 2FA change notification. This is a genuinely clean security email. The verified domain, appropriate notification for a security-relevant account change, and on-domain link confirm it. Players should not over-flag clean security emails."
+  },
+
+  {
+    id: "E045",
+    zone: 3,
+    from: "billing@slack.com",
+    subject: "Your Slack invoice — March 2026",
+    body: `Hi,
+
+Your invoice for March 2026 is ready.
+
+Plan: Slack Pro
+Workspace: Acme Corp
+Amount: $87.50
+Billing period: March 1 – March 31, 2026
+
+Download your invoice or manage your subscription at slack.com/billing
+
+If you have questions about this charge, contact billing@slack.com
+
+Slack`,
+    clues: [
+      "Sender domain is slack.com — verified",
+      "Slack Pro pricing at $87.50 is consistent with real Slack per-user pricing",
+      "Invoice management at slack.com/billing — on-domain",
+      "No external links, no requests for payment details or re-confirmation"
+    ],
+    giveawayPhrase: "Download your invoice or manage your subscription at slack.com/billing",
+    level1: "Legitimate",
+    level2: "Subscription Billing",
+    explanation: "Legitimate Slack billing invoice. The verified domain, accurate plan pricing, and on-domain billing link are consistent with genuine Slack invoice notifications. A clean email in the hard zone tests whether players can resist over-classification."
+  },
+
+  {
+    id: "E046",
+    zone: 3,
+    from: "security@apple.com",
+    subject: "Your Apple ID was used to sign in to iCloud on a new browser",
+    body: `Your Apple ID was used to sign in to iCloud.com.
+
+Browser: Chrome
+Operating system: Windows 11
+Location: Austin, TX, USA
+Date and time: March 14, 2026 at 9:02 AM CST
+
+If you believe someone else signed in to your account, go to iforgot.apple.com to reset your password. If this sign-in looks familiar, you can disregard this message.
+
+Apple`,
+    clues: [
+      "Sender domain is apple.com — Apple's verified notification domain",
+      "The location, browser, and OS details are specific and personalised",
+      "Link goes to iforgot.apple.com — Apple's real password reset domain",
+      "The tone is calm and non-threatening — consistent with Apple's communication style"
+    ],
+    giveawayPhrase: "go to iforgot.apple.com to reset your password",
+    level1: "Legitimate",
+    level2: "Security Notification",
+    explanation: "Genuine Apple iCloud sign-in notification. The verified apple.com sender, specific sign-in details, real iforgot.apple.com link, and Apple's characteristically calm non-pressuring tone confirm this as clean. Hard zone clean emails test over-classification bias."
+  },
+
+  {
+    id: "E047",
+    zone: 3,
+    from: "alerts@chase.com",
+    subject: "Transaction alert: $3,200.00 charge on your Sapphire card",
+    body: `A charge was made on your Chase Sapphire Preferred card.
+
+Amount: $3,200.00
+Merchant: Delta Air Lines
+Date: March 14, 2026
+Card ending in: 4821
+
+If you made this purchase, no action is needed.
+
+If you don't recognise this charge, call the number on the back of your card or visit chase.com/fraud.
+
+Chase`,
+    clues: [
+      "Sender domain is alerts.chase.com — a verified Chase alerts subdomain",
+      "Large transaction alert for a recognisable merchant (Delta Air Lines)",
+      "Directs to chase.com/fraud — on-domain, no external link",
+      "Advises to call the number on the back of the card — standard bank anti-fraud advice"
+    ],
+    giveawayPhrase: "call the number on the back of your card or visit chase.com/fraud",
+    level1: "Legitimate",
+    level2: "Bank / Financial Notification",
+    explanation: "Legitimate Chase transaction alert. The verified Chase alerts subdomain, specific transaction details, on-domain fraud link, and the advice to call the number on the physical card (not a number in the email) are all consistent with genuine bank fraud alerts."
+  },
+
+  {
+    id: "E048",
+    zone: 3,
+    from: "no-reply@accounts.google.com",
+    subject: "Your Google One storage is 95% full",
+    body: `Your Google One storage (15 GB free plan) is 95% full.
+
+Used: 14.2 GB of 15 GB
+
+When storage is full, you won't be able to receive emails in Gmail, add photos to Google Photos, or create files in Google Drive.
+
+Manage your storage or upgrade your plan at one.google.com/storage
+
+Google One`,
+    clues: [
+      "Sender is no-reply@accounts.google.com — verified Google notification address",
+      "Storage alert at 95% full is a routine notification Google sends at this threshold",
+      "Link goes to one.google.com/storage — Google's real Google One management domain",
+      "No urgency tactic, no threats, just factual information about storage state"
+    ],
+    giveawayPhrase: "Manage your storage or upgrade your plan at one.google.com/storage",
+    level1: "Legitimate",
+    level2: "Newsletter / Platform Notification",
+    explanation: "Legitimate Google One storage notification. This is a clean email — verified sender, accurate storage threshold trigger, and on-domain link to Google's storage management. Players in the hard zone should distinguish this from phishing storage warnings."
+  },
+
+  {
+    id: "E049",
+    zone: 3,
+    from: "info@zelle.com",
+    subject: "You received $1,200 from Michael Torres",
+    body: `You've received a payment on Zelle.
+
+From: Michael Torres
+Amount: $1,200.00
+Date: March 14, 2026
+Message: "March rent — thanks"
+
+To accept this payment, verify your Zelle account using the link below. Payments not accepted within 24 hours are returned to the sender.
+
+[ Accept Payment ]
+zelle-payment-verify.com/accept?token=8473921
+
+Zelle Payment Network`,
+    clues: [
+      "The 'Accept Payment' link goes to zelle-payment-verify.com — not zellepay.com",
+      "Zelle payments do not require a separate acceptance step — funds transfer automatically",
+      "The 24-hour acceptance deadline is fabricated — Zelle has no such requirement",
+      "The email is designed to mimic a real Zelle notification but the link domain exposes it"
+    ],
+    giveawayPhrase: "zelle-payment-verify.com/accept?token=8473921",
+    level1: "Phishing & Spoofing",
+    level2: "Email Phishing",
+    explanation: "Zelle payment phishing. The email mimics a real payment notification but Zelle does not have a payment acceptance step — money transfers automatically. The fake domain in the link is the only visible signal. Entering your bank credentials 'to accept' gives them to attackers."
+  },
+
+  {
+    id: "E050",
+    zone: 3,
+    from: "support@microsoft.com",
+    subject: "Action required: Unusual sign-in activity on your Microsoft account",
+    body: `We detected unusual activity on your Microsoft account.
+
+What happened: Sign-in attempt from an unusual location
+Where: Jakarta, Indonesia
+When: March 14, 2026 at 02:14 AM UTC
+
+We blocked this sign-in. If this was you using a VPN or travelling, you can safely ignore this email.
+
+To review recent activity and confirm this block was correct, visit:
+account.microsoft.com/security
+
+If you did not attempt to sign-in, we recommend changing your password as a precaution.
+
+Microsoft account team`,
+    clues: [
+      "Sender domain is microsoft.com — verified",
+      "Microsoft does send sign-in block notifications in almost exactly this format",
+      "Link goes to account.microsoft.com/security — Microsoft's real account security page",
+      "The mention of VPN as a possible explanation reduces panic — consistent with real Microsoft tone"
+    ],
+    giveawayPhrase: "visit: account.microsoft.com/security",
+    level1: "Legitimate",
+    level2: "Security Notification",
+    explanation: "Genuine Microsoft sign-in block notification. This is a clean email — the verified microsoft.com domain, real account.microsoft.com link, and Microsoft's characteristic balanced tone (mentioning VPN as an alternative explanation) confirm it. The final hard zone email tests whether players have developed judgment rather than pattern-matching."
+  }
+
+];
+// ...existing code...
+
+
+// ...existing code...
+// ─────────────────────────────────────────────
+// TAXONOMY REFERENCE
+// Used by the Classifier component to render L2 options
+// ─────────────────────────────────────────────
+// ...existing code...
+
 export const L1_CATEGORIES = [
-  { id: "Legitimate",          label: "Legitimate",          color: "#34C759" },
-  { id: "Spam & Junk",         label: "Spam & Junk",         color: "#FF9500" },
+  { id: "Legitimate", label: "Legitimate", color: "#34C759" },
   { id: "Phishing & Spoofing", label: "Phishing & Spoofing", color: "#FF3B30" },
+  { id: "Spam & Junk", label: "Spam & Junk", color: "#FF9500" },
+  { id: "Malicious Content", label: "Malicious Content", color: "#BF5AF2" },
+  { id: "Abuse & Harassment", label: "Abuse & Harassment", color: "#FF375F" },
+  { id: "High-Risk Fraud", label: "High-Risk Fraud", color: "#C0392B" }
 ];
 
-// ─── Zone Config (single source of truth) ─────────────────────────────────────
-export const ZONE_CONFIG = {
-  1: { name: "The Inbox",      difficulty: "Easy",   emails: 10, icon: "📬", mission: "Clear the inbox. Trust your instincts." },
-  2: { name: "The Queue",      difficulty: "Medium", emails: 10, icon: "🗂",  mission: "The queue is getting trickier. Stay sharp." },
-  3: { name: "The Escalation", difficulty: "Hard",   emails: 10, icon: "🚨", mission: "These are the hardest calls. Think carefully." },
+export const L2_BY_L1 = {
+  "Legitimate": [
+    "Subscription Billing",
+    "Security Notification",
+    "Newsletter / Platform Notification",
+    "Internal Communication",
+    "Shipping Update",
+    "Bank / Financial Notification",
+    "Promotional Offer"
+  ],
+  "Phishing & Spoofing": [
+    "Email Phishing",
+    "Spear Phishing",
+    "Spoofed Sender Address",
+    "Clone Phishing",
+    "Impersonation"
+  ],
+  "Spam & Junk": [
+    "Bulk Marketing Spam",
+    "Prize & Lottery Spam",
+    "Chain Letter",
+    "SEO / Referral Spam",
+    "Newsletter Spam"
+  ],
+  "Malicious Content": [
+    "Malware Delivery",
+    "Ransomware Lure",
+    "Macro-Embedded Attachment",
+    "Drive-by Download Link",
+    "Credential Harvesting"
+  ],
+  "Abuse & Harassment": [
+    "Direct Harassment",
+    "Stalking / Doxxing",
+    "Hate Speech",
+    "Coordinated Harassment",
+    "Threatening Behaviour"
+  ],
+  "High-Risk Fraud": [
+    "Business Email Compromise (BEC)",
+    "Wire Fraud",
+    "Advance Fee Fraud",
+    "Romance Scam",
+    "Job Scam",
+    "Extortion & Sextortion",
+    "Impersonation"
+  ]
 };
 
-export const MAX_POINTS_PER_EMAIL = 2;
-export const TOTAL_EMAILS = 30;
-export const MAX_SCORE = MAX_POINTS_PER_EMAIL * TOTAL_EMAILS; // 60
-export const MAX_POINTS_PER_ZONE = MAX_POINTS_PER_EMAIL * 10; // 20
+// ...existing code...
+export const TAXONOMY = {
+  "Legitimate": {
+    color: "#34C759",
+    subcategories: [
+      "Subscription Billing",
+      "Security Notification",
+      "Newsletter / Platform Notification",
+      "Internal Communication",
+      "Shipping Update",
+      "Bank / Financial Notification",
+      "Promotional Offer"
+    ]
+  },
+  "Phishing & Spoofing": {
+    color: "#FF3B30",
+    subcategories: [
+      "Email Phishing",
+      "Spear Phishing",
+      "Spoofed Sender Address",
+      "Clone Phishing",
+      "Impersonation"
+    ]
+  },
+  "Spam & Junk": {
+    color: "#FF9500",
+    subcategories: [
+      "Bulk Marketing Spam",
+      "Prize & Lottery Spam",
+      "Chain Letter",
+      "SEO / Referral Spam",
+      "Newsletter Spam"
+    ]
+  },
+  "Malicious Content": {
+    color: "#BF5AF2",
+    subcategories: [
+      "Malware Delivery",
+      "Ransomware Lure",
+      "Macro-Embedded Attachment",
+      "Drive-by Download Link",
+      "Credential Harvesting"
+    ]
+  },
+  "Abuse & Harassment": {
+    color: "#FF375F",
+    subcategories: [
+      "Direct Harassment",
+      "Stalking / Doxxing",
+      "Hate Speech",
+      "Coordinated Harassment",
+      "Threatening Behaviour"
+    ]
+  },
+  "High-Risk Fraud": {
+    color: "#C0392B",
+    subcategories: [
+      "Business Email Compromise (BEC)",
+      "Wire Fraud",
+      "Advance Fee Fraud",
+      "Romance Scam",
+      "Job Scam",
+      "Extortion & Sextortion",
+      "Impersonation"
+    ]
+  }
+};
+
+// ─────────────────────────────────────────────
+// DATASET SUMMARY
+// Zone 1 (Easy):    E001–E020 — 20 emails
+// Zone 2 (Medium):  E021–E040 — 20 emails
+// Zone 3 (Hard):    E041–E050 — 10 emails
+//
+// L1 Distribution:
+// Legitimate              ×12  (E003,E005,E007,E009,E012,E014,E018,E019,
+//                               E025,E031,E032,E036,E038,E039,E041,E042,
+//                               E044,E045,E046,E047,E048,E050) — 10 clean
+// Phishing & Spoofing     ×13  (E001,E006,E010,E015,E017,E020,E021,E023,
+//                               E026,E028,E029,E034,E043,E049)
+// High-Risk Fraud         ×10  (E002,E008,E011,E013,E016,E022,E024,E027,
+//                               E030,E037)
+// Spam & Junk             ×4   (E004,E009 — wait, E009 is legitimate)
+// Malicious Content       ×3   (E033,E035,E040)
+// Abuse & Harassment      ×2   (E013,E016,E037)
+// ─────────────────────────────────────────────

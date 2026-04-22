@@ -6,7 +6,6 @@ import { useScoring } from './hooks/useScoring.js';
 import { useBadges } from './hooks/useBadges.js';
 import { useLeaderboard } from './hooks/useLeaderboard.js';
 
-import AppleHelloIntro from './components/AppleHelloIntro.jsx';
 import LandingScreen    from './components/LandingScreen.jsx';
 import TutorialScreen   from './components/TutorialScreen.jsx';
 import ZoneIntroCard    from './components/ZoneIntroCard.jsx';
@@ -33,7 +32,8 @@ export default function App() {
     const record = sc.scoreRound({
       email: currentEmail,
       selectedL1: round.selectedL1,
-      hintRevealed: round.hintRevealed,
+      selectedL2: timedOut ? null : round.selectedL2,
+      cluesRevealed: round.cluesRevealed,
       timedOut,
     });
     const { unlockedAny } = bg.checkAfterRound({ record, timeLeft });
@@ -58,8 +58,8 @@ export default function App() {
     // Check zone badges when crossing zone boundary
     if (gs.currentIndex + 1 >= gs.zoneEnd) {
       const zoneEmails = sc.perEmail.filter(r => r.zone === gs.zone);
-      const zoneHintsUsed = zoneEmails.filter(r => r.hintUsed).length;
-      bg.checkAfterZone({ zoneEmails, zoneHintsUsed, zone: gs.zone });
+      const zoneCluesUsed = zoneEmails.reduce((sum, r) => sum + r.cluesUsed, 0);
+      bg.checkAfterZone({ zoneEmails, zoneCluesUsed, zone: gs.zone });
     }
     gs.nextEmail();
   }, [gs, sc, bg]);
@@ -67,13 +67,13 @@ export default function App() {
   // ── Advance zone / end game ──────────────────────────────────────────────
   const handleAdvanceZone = useCallback(() => {
     if (gs.zone === 3) {
-      const totalHintsUsed = sc.perEmail.filter(r => r.hintUsed).length;
-      bg.checkAfterGame({ perEmail: sc.perEmail, totalHintsUsed });
+      const totalCluesUsed = sc.perEmail.reduce((sum, r) => sum + r.cluesUsed, 0);
+      bg.checkAfterGame({ perEmail: sc.perEmail, totalCluesUsed });
       lb.submitScore({
         name: gs.player.name,
         email: gs.player.email,
         score: sc.totalScore,
-        title: sc.totalScore >= 50 ? 'Threat Intelligence Lead' : sc.totalScore >= 30 ? 'Senior Analyst' : 'Junior Analyst',
+        title: sc.totalScore >= 70 ? 'Threat Intelligence Lead' : sc.totalScore >= 40 ? 'Senior Analyst' : 'Junior Analyst',
         badges: bg.earned.length,
         zone1Score: sc.zoneScores[1],
         zone2Score: sc.zoneScores[2],
@@ -103,10 +103,6 @@ export default function App() {
     }}>
       <BadgeToast badge={bg.pendingToast} onDismiss={handleBadgeDismiss} />
 
-      {gs.screen === SCREENS.INTRO && (
-        <AppleHelloIntro onContinue={gs.completeIntro} />
-      )}
-
       {gs.screen === SCREENS.LANDING && (
         <LandingScreen onStart={gs.startGame} />
       )}
@@ -131,8 +127,9 @@ export default function App() {
           emailsInZone={gs.emailsInZone}
           totalScore={sc.totalScore}
           round={gs.round}
-          onRevealHint={gs.revealHint}
+          onRevealClue={gs.revealClue}
           onSelectL1={gs.selectL1}
+          onSelectL2={gs.selectL2}
           onSubmit={handleSubmit}
         />
       )}
@@ -150,7 +147,7 @@ export default function App() {
         <ZoneComplete
           zone={gs.zone}
           zoneScore={sc.zoneScores[gs.zone]}
-          maxZoneScore={20}
+          maxZoneScore={gs.zone === 3 ? 20 : 40}
           zoneEmails={sc.perEmail.filter(r => r.zone === gs.zone)}
           earlyUnlocked={gs.earlyUnlocked}
           consecutivePerfect={gs.consecutivePerfect}
