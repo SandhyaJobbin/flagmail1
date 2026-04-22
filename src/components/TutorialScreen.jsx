@@ -535,7 +535,7 @@ export default function TutorialScreen({ onSkip }) {
                 color: 'rgba(17,24,39,0.68)',
               }}
             >
-              You will get 15 scenarios across 3 zones, with 120 seconds per round. Your score reflects accuracy across all three zones.
+              You will get 15 scenarios across 3 zones, with 180 seconds per round. Your score reflects accuracy across all three zones.
             </div>
           </div>
 

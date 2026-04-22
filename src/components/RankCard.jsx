@@ -1,9 +1,8 @@
 import { getProgressTitle } from '../utils/competency.js';
 
-export default function RankCard({ player, finalScore, badgeCount }) {
+export default function RankCard({ player, finalScore }) {
   const safePlayer = player ?? { name: 'Analyst' };
   const safeScore = Number.isFinite(finalScore) ? finalScore : 0;
-  const safeBadgeCount = Number.isFinite(badgeCount) ? badgeCount : 0;
   const title = getProgressTitle(safeScore);
   const accent = safeScore >= 80 ? '#FF3B30' : safeScore >= 50 ? '#FF9500' : '#34C759';
   const eyebrow = safeScore >= 80 ? 'Advanced analyst' : safeScore >= 50 ? 'Developing analyst' : 'Foundation analyst';
@@ -102,45 +101,19 @@ export default function RankCard({ player, finalScore, badgeCount }) {
 
         <div
           style={{
+            borderRadius: 18,
+            padding: '14px',
+            background: 'rgba(255,255,255,0.84)',
+            border: '1px solid rgba(13,26,51,0.06)',
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: 10,
+            gap: 6,
           }}
         >
-          <div
-            style={{
-              borderRadius: 18,
-              padding: '14px',
-              background: 'rgba(255,255,255,0.84)',
-              border: '1px solid rgba(13,26,51,0.06)',
-              display: 'grid',
-              gap: 6,
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
-              Badges earned
-            </div>
-            <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, letterSpacing: '-0.04em', color: '#111827' }}>
-              {safeBadgeCount}
-            </div>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
+            Assessment
           </div>
-
-          <div
-            style={{
-              borderRadius: 18,
-              padding: '14px',
-              background: 'rgba(255,255,255,0.84)',
-              border: '1px solid rgba(13,26,51,0.06)',
-              display: 'grid',
-              gap: 6,
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
-              Assessment
-            </div>
-            <div style={{ fontSize: 18, lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', color: '#111827' }}>
-              Flagmail
-            </div>
+          <div style={{ fontSize: 18, lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', color: '#111827' }}>
+            Flagmail
           </div>
         </div>
       </div>

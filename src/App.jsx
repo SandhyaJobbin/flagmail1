@@ -1,9 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import './styles/animations.css';
 
 import { useGameState, SCREENS } from './hooks/useGameState.js';
 import { useScoring } from './hooks/useScoring.js';
-import { useBadges } from './hooks/useBadges.js';
 import { useLeaderboard } from './hooks/useLeaderboard.js';
 
 import LandingScreen    from './components/LandingScreen.jsx';
@@ -14,7 +13,6 @@ import ExplanationCard  from './components/ExplanationCard.jsx';
 import ZoneComplete     from './components/ZoneComplete.jsx';
 import ResultsScreen    from './components/ResultsScreen.jsx';
 import Leaderboard      from './components/Leaderboard.jsx';
-import BadgeToast       from './components/BadgeToast.jsx';
 import ReasoningModal   from './components/ReasoningModal.jsx';
 
 const BG = 'linear-gradient(180deg, #f5f7fb 0%, #edf3fb 42%, #f7f4ef 100%)';
@@ -22,9 +20,7 @@ const BG = 'linear-gradient(180deg, #f5f7fb 0%, #edf3fb 42%, #f7f4ef 100%)';
 export default function App() {
   const gs = useGameState();
   const sc = useScoring();
-  const bg = useBadges();
   const lb = useLeaderboard();
-  const pendingRoundRecordRef = useRef(null);
 
   // ── Submit a round ───────────────────────────────────────────────────────
   // timedOut=true is passed by GameRound when the timer fires (auto-submit)
@@ -37,22 +33,8 @@ export default function App() {
       cluesRevealed: round.cluesRevealed,
       timedOut,
     });
-    const { unlockedAny } = bg.checkAfterRound({ record, timeLeft });
-    if (unlockedAny) {
-      pendingRoundRecordRef.current = record;
-      return;
-    }
     gs.submitRound(record);
-  }, [gs, sc, bg]);
-
-  const handleBadgeDismiss = useCallback(() => {
-    bg.dismissToast();
-    if (pendingRoundRecordRef.current) {
-      const record = pendingRoundRecordRef.current;
-      pendingRoundRecordRef.current = null;
-      gs.submitRound(record);
-    }
-  }, [bg, gs]);
+  }, [gs, sc]);
 
   // ── Reasoning complete ────────────────────────────────────────────────────
   const handleReasoningComplete = useCallback(({ skipped, selectedIndex, correct }) => {
@@ -66,26 +48,18 @@ export default function App() {
 
   // ── Move to next email ───────────────────────────────────────────────────
   const handleNext = useCallback(() => {
-    // Check zone badges when crossing zone boundary
-    if (gs.currentIndex + 1 >= gs.zoneEnd) {
-      const zoneEmails = sc.perEmail.filter(r => r.zone === gs.zone);
-      const zoneCluesUsed = zoneEmails.reduce((sum, r) => sum + r.cluesUsed, 0);
-      bg.checkAfterZone({ zoneEmails, zoneCluesUsed, zone: gs.zone });
-    }
     gs.nextEmail();
-  }, [gs, sc, bg]);
+  }, [gs]);
 
   // ── Advance zone / end game ──────────────────────────────────────────────
   const handleAdvanceZone = useCallback(() => {
     if (gs.zone === 3) {
-      const totalCluesUsed = sc.perEmail.reduce((sum, r) => sum + r.cluesUsed, 0);
-      bg.checkAfterGame({ perEmail: sc.perEmail, totalCluesUsed });
       lb.submitScore({
         name: gs.player.name,
         email: gs.player.email,
         score: sc.displayScore,
         title: sc.displayScore >= 80 ? 'Advanced' : sc.displayScore >= 50 ? 'Proficient' : 'Foundation',
-        badges: bg.earned.length,
+        badges: 0,
         zone1Score: sc.zoneScores[1],
         zone2Score: sc.zoneScores[2],
         zone3Score: sc.zoneScores[3],
@@ -94,15 +68,13 @@ export default function App() {
     } else {
       gs.advanceZone();
     }
-  }, [gs, sc, bg, lb]);
+  }, [gs, sc, lb]);
 
   // ── Play again ───────────────────────────────────────────────────────────
   const handlePlayAgain = useCallback(() => {
-    pendingRoundRecordRef.current = null;
     sc.resetScoring();
-    bg.resetBadges();
     gs.resetGame();
-  }, [gs, sc, bg]);
+  }, [gs, sc]);
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -113,8 +85,6 @@ export default function App() {
       color: '#1C1C1E',
       position: 'relative',
     }}>
-      <BadgeToast badge={bg.pendingToast} onDismiss={handleBadgeDismiss} />
-
       {gs.screen === SCREENS.LANDING && (
         <LandingScreen onStart={gs.startGame} />
       )}
@@ -182,7 +152,6 @@ export default function App() {
           displayScore={sc.displayScore}
           zoneScores={sc.zoneScores}
           categoryCorrect={sc.categoryCorrect}
-          earned={bg.earned}
           perEmail={sc.perEmail}
           onLeaderboard={gs.goToLeaderboard}
           onPlayAgain={handlePlayAgain}
