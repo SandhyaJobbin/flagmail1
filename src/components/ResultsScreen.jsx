@@ -5,6 +5,7 @@ import BadgeCollection from './BadgeCollection.jsx';
 import CompetencySummary from './CompetencySummary.jsx';
 import { getProgressTitle } from '../utils/competency.js';
 import CELEBRATION from '../assets/animation/Celebration Update Color.json';
+import { MAX_SCORE, ZONE_MAX_SCORE } from '../styles/tokens.js';
 
 const surface = {
   background: 'rgba(255,255,255,0.76)',
@@ -14,8 +15,6 @@ const surface = {
   boxShadow: '0 24px 80px rgba(32, 52, 89, 0.10), 0 8px 24px rgba(32, 52, 89, 0.05)',
 };
 
-const MAX_SCORE = 75;
-
 const zoneMeta = {
   1: { label: 'Zone 1', name: 'Inbox', accent: '#0A84FF' },
   2: { label: 'Zone 2', name: 'Queue', accent: '#30B0C7' },
@@ -23,9 +22,9 @@ const zoneMeta = {
 };
 
 function titleTone(score) {
-  if (score >= 80) return { accent: '#0A84FF', bg: 'rgba(10,132,255,0.10)' };
+  if (score >= 80) return { accent: '#34C759', bg: 'rgba(52,199,89,0.10)' };
   if (score >= 50) return { accent: '#FF9500', bg: 'rgba(255,149,0,0.12)' };
-  return { accent: '#34C759', bg: 'rgba(52,199,89,0.10)' };
+  return { accent: '#8E8E93', bg: 'rgba(142,142,147,0.10)' };
 }
 
 export default function ResultsScreen({
@@ -52,7 +51,7 @@ export default function ResultsScreen({
   const zones = [1, 2, 3].map((zone) => ({
     ...zoneMeta[zone],
     score: zoneScores[zone],
-    max: 25,
+    max: ZONE_MAX_SCORE,
     accuracy: zoneAcc(zone),
   }));
 
@@ -137,7 +136,7 @@ export default function ResultsScreen({
                 {player.name}&apos;s final judgment score.
               </h1>
               <p style={{ margin: '14px 0 0', fontSize: 16, lineHeight: 1.6, color: 'rgba(17,24,39,0.64)', maxWidth: 560 }}>
-                Your performance is normalized to 100 and reflects how consistently you identified the correct threat category under pressure.
+                Based on how accurately you classified each email across all three zones, under real time pressure.
               </p>
             </div>
 
@@ -156,7 +155,7 @@ export default function ResultsScreen({
                 <span style={{ fontSize: 'clamp(64px, 9vw, 92px)', lineHeight: 0.9, fontWeight: 800, letterSpacing: '-0.07em' }}>
                   {normalized}
                 </span>
-                <span style={{ fontSize: 26, fontWeight: 600, color: 'rgba(17,24,39,0.30)' }}>/100</span>
+                <span style={{ fontSize: 22, fontWeight: 500, color: 'rgba(17,24,39,0.48)' }}>/100</span>
               </div>
               <div
                 style={{
@@ -239,7 +238,7 @@ export default function ResultsScreen({
           </motion.div>
         )}
 
-        <div className="results-actions" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 12 }}>
+        <div className="results-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <motion.button
             onClick={onLeaderboard}
             whileHover={{ scale: 1.01 }}
