@@ -10,24 +10,9 @@ const glass = {
 };
 
 const ZONE_CARDS = [
-  {
-    zone: '01',
-    title: 'Inbox',
-    detail: 'Spot the loud red flags fast and build your rhythm.',
-    accent: '#0A84FF',
-  },
-  {
-    zone: '02',
-    title: 'Queue',
-    detail: 'The copy gets cleaner here. Trust the details, not the polish.',
-    accent: '#30B0C7',
-  },
-  {
-    zone: '03',
-    title: 'Escalation',
-    detail: 'One subtle inconsistency is usually the whole story.',
-    accent: '#FF7A1A',
-  },
+  { zone: 1, title: 'Inbox',      detail: 'Spot the loud red flags fast and build your rhythm.',               accent: '#0A84FF' },
+  { zone: 2, title: 'Queue',      detail: 'The copy gets cleaner here. Trust the details, not the polish.',   accent: '#30B0C7' },
+  { zone: 3, title: 'Escalation', detail: 'One subtle inconsistency is usually the whole story.',             accent: '#FF7A1A' },
 ];
 
 const STATS = [
@@ -215,14 +200,15 @@ export default function LandingScreen({ onStart }) {
                   style={{
                     margin: 0,
                     fontSize: 'clamp(42px, 5.4vw, 68px)',
-                    lineHeight: 0.92,
-                    letterSpacing: '-0.06em',
+                    lineHeight: 0.96,
+                    letterSpacing: '-0.05em',
                     color: '#111827',
                     fontWeight: 700,
-                    maxWidth: '8.5ch',
+                    maxWidth: '13.5ch',
+                    textWrap: 'balance',
                   }}
                 >
-                  Prove your judgment on real email threats.
+                  Prove your judgment against real email threats.
                 </h1>
 
                 <p
@@ -231,7 +217,7 @@ export default function LandingScreen({ onStart }) {
                     fontSize: 'clamp(15px, 1.5vw, 18px)',
                     lineHeight: 1.55,
                     color: 'rgba(17,24,39,0.68)',
-                    maxWidth: 540,
+                    maxWidth: 620,
                   }}
                 >
                   15 timed scenarios across 3 escalating zones. Each decision is scored, reviewed, and translated into a competency tier.
@@ -244,7 +230,6 @@ export default function LandingScreen({ onStart }) {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
                   gap: 12,
-                  maxWidth: 560,
                 }}
               >
                 {STATS.map((stat) => (
@@ -323,7 +308,9 @@ export default function LandingScreen({ onStart }) {
                         position: 'absolute',
                         inset: '0 auto 0 0',
                         width: 4,
-                        background: `linear-gradient(180deg, ${card.accent} 0%, rgba(255,255,255,0) 100%)`,
+                        background: card.accent,
+                        opacity: 0.7,
+                        borderRadius: '4px 0 0 4px',
                       }}
                     />
                     <div
@@ -387,7 +374,7 @@ export default function LandingScreen({ onStart }) {
                   color: 'rgba(17,24,39,0.52)',
                 }}
               >
-                Candidate Access
+                Your Details
               </div>
               <div
                 style={{
@@ -517,7 +504,7 @@ export default function LandingScreen({ onStart }) {
               </div>
               {[
                 'Enter your details and start the assessment.',
-                'Classify each email under time pressure.',
+                'Classify each email in a timed round.',
                 'Receive your competency result and ranking.',
               ].map((line, index) => (
                 <div
