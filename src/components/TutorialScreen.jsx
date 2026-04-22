@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import img1 from '../assets/images/images_page-0001.jpg';
 import img2 from '../assets/images/images_page-0002.jpg';
@@ -40,15 +40,39 @@ const shell = {
 
 export default function TutorialScreen({ onSkip }) {
   const [activeStep, setActiveStep] = useState(0);
+  const [stepProgress, setStepProgress] = useState(0);
+  const stepStartRef = useRef(Date.now());
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    stepStartRef.current = Date.now();
+    setStepProgress(0);
+
+    const timer = setTimeout(() => {
       setActiveStep((step) => (step + 1) % STEPS.length);
     }, STEP_DURATION);
-    return () => clearInterval(timer);
-  }, []);
+
+    let frameId;
+
+    const updateProgress = () => {
+      const elapsed = Date.now() - stepStartRef.current;
+      setStepProgress(Math.min(elapsed / STEP_DURATION, 1));
+      frameId = window.requestAnimationFrame(updateProgress);
+    };
+
+    frameId = window.requestAnimationFrame(updateProgress);
+
+    return () => {
+      clearTimeout(timer);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [activeStep]);
 
   const current = STEPS[activeStep];
+  const secondsRemaining = Math.max(1, Math.ceil((1 - stepProgress) * STEP_DURATION / 1000));
+
+  function handleSelectStep(index) {
+    setActiveStep(index);
+  }
 
   return (
     <div
@@ -321,21 +345,74 @@ export default function TutorialScreen({ onSkip }) {
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {STEPS.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveStep(index)}
+                  <div
+                    style={{
+                      minWidth: 220,
+                      display: 'grid',
+                      gap: 10,
+                      justifyItems: 'end',
+                      flex: '1 1 220px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'rgba(17,24,39,0.62)',
+                      }}
+                    >
+                      Next step in {secondsRemaining}s
+                    </div>
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        width: '100%',
+                        maxWidth: 220,
+                        height: 8,
+                        borderRadius: 999,
+                        overflow: 'hidden',
+                        background: 'rgba(17,24,39,0.10)',
+                        boxShadow: 'inset 0 1px 2px rgba(17,24,39,0.08)',
+                      }}
+                    >
+                      <div
                         style={{
-                          width: index === activeStep ? 26 : 8,
-                          height: 8,
+                          width: `${Math.max(stepProgress * 100, 4)}%`,
+                          height: '100%',
                           borderRadius: 999,
-                          border: 'none',
-                          background: index === activeStep ? '#0A84FF' : 'rgba(17,24,39,0.16)',
-                          transition: 'all 0.18s ease',
+                          background: 'linear-gradient(90deg, #0A84FF 0%, #30B0C7 100%)',
+                          transition: stepProgress === 0 ? 'none' : 'width 0.1s linear',
                         }}
                       />
-                    ))}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: 'rgba(17,24,39,0.52)',
+                      }}
+                    >
+                      Moves automatically unless you choose a step.
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {STEPS.map((_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectStep(index)}
+                          aria-label={`Go to tutorial step ${index + 1}`}
+                          aria-pressed={index === activeStep}
+                          title={`Go to step ${index + 1}`}
+                          style={{
+                            width: index === activeStep ? 26 : 8,
+                            height: 8,
+                            borderRadius: 999,
+                            border: 'none',
+                            background: index === activeStep ? '#0A84FF' : 'rgba(17,24,39,0.16)',
+                            transition: 'all 0.18s ease',
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -399,7 +476,8 @@ export default function TutorialScreen({ onSkip }) {
                 <button
                   key={step.title}
                   className="tutorial-step-button"
-                  onClick={() => setActiveStep(index)}
+                  onClick={() => handleSelectStep(index)}
+                  type="button"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '34px minmax(0, 1fr)',

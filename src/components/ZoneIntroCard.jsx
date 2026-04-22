@@ -110,7 +110,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
   return (
     <div
       style={{
-        height: '100dvh',
+        minHeight: '100dvh',
         padding: 'clamp(18px, 3vw, 30px)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
         position: 'relative',
@@ -119,14 +119,26 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
     >
       <style>{`
         .zone-intro-shell {
+          height: calc(100dvh - (2 * clamp(18px, 3vw, 30px)));
           min-height: calc(100dvh - (2 * clamp(18px, 3vw, 30px)));
+        }
+
+        .zone-intro-main,
+        .zone-intro-side {
+          overflow: auto;
+          scrollbar-gutter: stable;
         }
 
         @media (max-width: 900px) {
           .zone-intro-shell {
             grid-template-columns: 1fr !important;
-            overflow: auto !important;
+            height: auto !important;
             min-height: auto !important;
+          }
+
+          .zone-intro-main,
+          .zone-intro-side {
+            overflow: visible !important;
           }
         }
 
@@ -170,7 +182,6 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
         style={{
           width: '100%',
           maxWidth: 1240,
-          height: '100%',
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1.12fr) minmax(360px, 0.88fr)',
@@ -192,7 +203,6 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             gap: 24,
             minHeight: 0,
             minWidth: 0,
-            overflow: 'hidden',
           }}
         >
           <div
@@ -575,6 +585,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             gap: 18,
             alignContent: 'start',
             minHeight: 0,
+            overflow: 'auto',
           }}
         >
           <div
