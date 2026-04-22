@@ -49,7 +49,7 @@ export function useGameState() {
 
   const startGame = useCallback((name, email) => {
     setPlayer({ name, email });
-    const pool = shuffleEmails();
+    const pool = shuffleEmails({ name, email });
     setEmailPool(pool);
     setCurrentIndex(0);
     setZone(1);
