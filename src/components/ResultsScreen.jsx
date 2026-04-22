@@ -5,6 +5,7 @@ import BadgeCollection from './BadgeCollection.jsx';
 import CompetencySummary from './CompetencySummary.jsx';
 import { getProgressTitle } from '../utils/competency.js';
 import CELEBRATION from '../assets/animation/Celebration Update Color.json';
+import { MAX_SCORE, ZONE_MAX_SCORE } from '../styles/tokens.js';
 
 const surface = {
   background: 'rgba(255,255,255,0.76)',
@@ -14,8 +15,6 @@ const surface = {
   boxShadow: '0 24px 80px rgba(32, 52, 89, 0.10), 0 8px 24px rgba(32, 52, 89, 0.05)',
 };
 
-const MAX_SCORE = 75;
-
 const zoneMeta = {
   1: { label: 'Zone 1', name: 'Inbox', accent: '#0A84FF' },
   2: { label: 'Zone 2', name: 'Queue', accent: '#30B0C7' },
@@ -23,36 +22,39 @@ const zoneMeta = {
 };
 
 function titleTone(score) {
-  if (score >= 80) return { accent: '#0A84FF', bg: 'rgba(10,132,255,0.10)' };
+  if (score >= 80) return { accent: '#34C759', bg: 'rgba(52,199,89,0.10)' };
   if (score >= 50) return { accent: '#FF9500', bg: 'rgba(255,149,0,0.12)' };
-  return { accent: '#34C759', bg: 'rgba(52,199,89,0.10)' };
+  return { accent: '#8E8E93', bg: 'rgba(142,142,147,0.10)' };
 }
 
 export default function ResultsScreen({
   player,
-  finalScore,
+  finalScore = 0,
   displayScore,
-  zoneScores,
-  categoryCorrect,
-  earned,
-  perEmail,
+  zoneScores = {},
+  categoryCorrect = {},
+  earned = [],
+  perEmail = [],
   onLeaderboard,
   onPlayAgain,
 }) {
+  const safePlayer = player ?? { name: 'Analyst' };
+  const safeEarned = Array.isArray(earned) ? earned : [];
+  const safePerEmail = Array.isArray(perEmail) ? perEmail : [];
   const normalized = displayScore ?? Math.round((finalScore / MAX_SCORE) * 100);
   const title = getProgressTitle(normalized);
   const perfect = normalized >= 100;
   const tone = titleTone(normalized);
 
   const zoneAcc = (zone) => {
-    const emails = perEmail.filter((record) => record.zone === zone);
+    const emails = safePerEmail.filter((record) => record.zone === zone);
     return emails.length ? Math.round((emails.filter((record) => record.l1Correct).length / emails.length) * 100) : 0;
   };
 
   const zones = [1, 2, 3].map((zone) => ({
     ...zoneMeta[zone],
-    score: zoneScores[zone],
-    max: 25,
+    score: zoneScores[zone] ?? 0,
+    max: ZONE_MAX_SCORE,
     accuracy: zoneAcc(zone),
   }));
 
@@ -134,10 +136,10 @@ export default function ResultsScreen({
                 Assessment complete
               </div>
               <h1 style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 58px)', lineHeight: 0.94, letterSpacing: '-0.06em', color: '#111827' }}>
-                {player.name}&apos;s final judgment score.
+                {safePlayer.name}&apos;s final judgment score.
               </h1>
               <p style={{ margin: '14px 0 0', fontSize: 16, lineHeight: 1.6, color: 'rgba(17,24,39,0.64)', maxWidth: 560 }}>
-                Your performance is normalized to 100 and reflects how consistently you identified the correct threat category under pressure.
+                Based on how accurately you classified each email across all three zones, under real time pressure.
               </p>
             </div>
 
@@ -156,7 +158,7 @@ export default function ResultsScreen({
                 <span style={{ fontSize: 'clamp(64px, 9vw, 92px)', lineHeight: 0.9, fontWeight: 800, letterSpacing: '-0.07em' }}>
                   {normalized}
                 </span>
-                <span style={{ fontSize: 26, fontWeight: 600, color: 'rgba(17,24,39,0.30)' }}>/100</span>
+                <span style={{ fontSize: 22, fontWeight: 500, color: 'rgba(17,24,39,0.48)' }}>/100</span>
               </div>
               <div
                 style={{
@@ -175,7 +177,7 @@ export default function ResultsScreen({
                 {title}
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(17,24,39,0.62)' }}>
-                {earned.length} badge{earned.length !== 1 ? 's' : ''} earned across the full assessment.
+                {safeEarned.length} badge{safeEarned.length !== 1 ? 's' : ''} earned across the full assessment.
               </div>
             </div>
           </div>
@@ -215,7 +217,7 @@ export default function ResultsScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16, duration: 0.26, ease: 'easeOut' }}
           >
-            <RankCard player={player} finalScore={normalized} badgeCount={earned.length} />
+            <RankCard player={safePlayer} finalScore={normalized} badgeCount={safeEarned.length} />
           </motion.div>
 
           <motion.div
@@ -228,18 +230,18 @@ export default function ResultsScreen({
           </motion.div>
         </div>
 
-        {earned.length > 0 && (
+        {safeEarned.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.24, duration: 0.26, ease: 'easeOut' }}
             style={{ ...surface, borderRadius: 28, padding: 20 }}
           >
-            <BadgeCollection earned={earned} />
+            <BadgeCollection earned={safeEarned} />
           </motion.div>
         )}
 
-        <div className="results-actions" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 12 }}>
+        <div className="results-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <motion.button
             onClick={onLeaderboard}
             whileHover={{ scale: 1.01 }}

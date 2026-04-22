@@ -1,0 +1,89 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "bodyScrollHeight": 900,
+      "htmlScrollHeight": 900,
+      "overflowY": "fits",
+      "extraPixels": 0
+    },
+    "rootBox": {
+      "top": 0,
+      "left": 0,
+      "width": 1440,
+      "height": 900,
+      "bottom": 900
+    },
+    "mainGridBox": {
+      "top": 0,
+      "left": 0,
+      "width": 0,
+      "height": 0,
+      "bottom": 0
+    },
+    "leftColumnBox": null,
+    "rightColumnBox": null,
+    "rightColumnText": null
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "scroll": {
+      "bodyScrollHeight": 720,
+      "htmlScrollHeight": 720,
+      "overflowY": "fits",
+      "extraPixels": 0
+    },
+    "rootBox": {
+      "top": 0,
+      "left": 0,
+      "width": 1280,
+      "height": 720,
+      "bottom": 720
+    },
+    "mainGridBox": {
+      "top": 0,
+      "left": 0,
+      "width": 0,
+      "height": 0,
+      "bottom": 0
+    },
+    "leftColumnBox": null,
+    "rightColumnBox": null,
+    "rightColumnText": null
+  },
+  {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scroll": {
+      "bodyScrollHeight": 1389,
+      "htmlScrollHeight": 1389,
+      "overflowY": "scrolling",
+      "extraPixels": 621
+    },
+    "rootBox": {
+      "top": 0,
+      "left": 0,
+      "width": 1024,
+      "height": 1389,
+      "bottom": 1389
+    },
+    "mainGridBox": {
+      "top": 0,
+      "left": 0,
+      "width": 0,
+      "height": 0,
+      "bottom": 0
+    },
+    "leftColumnBox": null,
+    "rightColumnBox": null,
+    "rightColumnText": null
+  }
+]

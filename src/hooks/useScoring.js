@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { MAX_SCORE } from '../styles/tokens.js';
 
 export function useScoring() {
   const [totalScore, setTotalScore] = useState(0);
@@ -98,7 +99,7 @@ export function useScoring() {
     });
   }, []);
 
-  const displayScore = Math.round((totalScore / 75) * 100);
+  const displayScore = Math.round((totalScore / MAX_SCORE) * 100);
 
   return { totalScore, displayScore, perEmail, zoneScores, categoryCorrect, scoreRound, scoreReasoning, resetScoring };
 }

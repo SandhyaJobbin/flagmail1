@@ -331,21 +331,6 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
                   </span>
                   <span>{cat.label}</span>
                 </span>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    padding: '5px 8px',
-                    borderRadius: 999,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    background: isSelected ? `${cat.color}18` : 'rgba(17,24,39,0.06)',
-                    color: isSelected ? cat.color : 'rgba(17,24,39,0.62)',
-                    border: isSelected ? `1px solid ${cat.color}28` : '1px solid rgba(13,26,51,0.08)',
-                    flexShrink: 0,
-                  }}
-                >
-                  {isSelected ? 'Selected' : 'Select'}
-                </span>
               </button>
             );
           })}
@@ -440,20 +425,6 @@ export default function Classifier({ selectedL1, selectedL2, onSelectL1, onSelec
                     }}
                   />
                   <span>{sub}</span>
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      marginLeft: 'auto',
-                      padding: '3px 7px',
-                      borderRadius: 999,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      background: isSelected ? `${catColor}18` : 'rgba(17,24,39,0.06)',
-                      color: isSelected ? catColor : 'rgba(17,24,39,0.56)',
-                    }}
-                  >
-                    {isSelected ? 'Selected' : 'Select'}
-                  </span>
                 </button>
               );
             })}

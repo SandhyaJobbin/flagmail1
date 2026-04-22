@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import img1 from '../assets/images/images_page-0001.jpg';
 import img2 from '../assets/images/images_page-0002.jpg';
@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     src: img2,
-    title: 'Use hints deliberately',
-    caption: 'Clues can save a round, but each one reduces the score you keep.',
+    title: 'Use hints only when needed',
+    caption: 'Clues can rescue a tough round, but each one costs a point from your score.',
   },
   {
     src: img3,
@@ -40,15 +40,39 @@ const shell = {
 
 export default function TutorialScreen({ onSkip }) {
   const [activeStep, setActiveStep] = useState(0);
+  const [stepProgress, setStepProgress] = useState(0);
+  const stepStartRef = useRef(Date.now());
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    stepStartRef.current = Date.now();
+    setStepProgress(0);
+
+    const timer = setTimeout(() => {
       setActiveStep((step) => (step + 1) % STEPS.length);
     }, STEP_DURATION);
-    return () => clearInterval(timer);
-  }, []);
+
+    let frameId;
+
+    const updateProgress = () => {
+      const elapsed = Date.now() - stepStartRef.current;
+      setStepProgress(Math.min(elapsed / STEP_DURATION, 1));
+      frameId = window.requestAnimationFrame(updateProgress);
+    };
+
+    frameId = window.requestAnimationFrame(updateProgress);
+
+    return () => {
+      clearTimeout(timer);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [activeStep]);
 
   const current = STEPS[activeStep];
+  const secondsRemaining = Math.max(1, Math.ceil((1 - stepProgress) * STEP_DURATION / 1000));
+
+  function handleSelectStep(index) {
+    setActiveStep(index);
+  }
 
   return (
     <div
@@ -102,20 +126,21 @@ export default function TutorialScreen({ onSkip }) {
         onClick={onSkip}
         style={{
           position: 'absolute',
-          top: 16,
-          right: 18,
+          top: 20,
+          right: 22,
           zIndex: 2,
-          padding: '10px 16px',
-          borderRadius: 999,
-          border: '1px solid rgba(13,26,51,0.08)',
-          background: 'rgba(255,255,255,0.82)',
-          color: 'rgba(17,24,39,0.62)',
+          padding: '4px 0',
+          border: 'none',
+          background: 'transparent',
+          color: 'rgba(17,24,39,0.44)',
           fontSize: 13,
-          fontWeight: 600,
-          boxShadow: '0 10px 24px rgba(32, 52, 89, 0.08)',
+          fontWeight: 500,
+          cursor: 'pointer',
+          textDecoration: 'underline',
+          textUnderlineOffset: 3,
         }}
       >
-        Skip
+        Skip tutorial
       </button>
 
       <motion.div
@@ -193,18 +218,6 @@ export default function TutorialScreen({ onSkip }) {
               >
                 A fast briefing before the first zone.
               </h1>
-              <p
-                style={{
-                  margin: '14px 0 0',
-                  fontSize: 17,
-                  lineHeight: 1.6,
-                  color: 'rgba(17,24,39,0.64)',
-                  maxWidth: 560,
-                }}
-              >
-                Flagmail works best when the instructions feel brief and operational. Review the flow,
-                then move straight into the inbox.
-              </p>
             </div>
           </div>
 
@@ -308,34 +321,68 @@ export default function TutorialScreen({ onSkip }) {
                     >
                       {current.title}
                     </div>
-                    <p
-                      style={{
-                        margin: '8px 0 0',
-                        fontSize: 14,
-                        lineHeight: 1.55,
-                        color: 'rgba(17,24,39,0.62)',
-                        maxWidth: 520,
-                      }}
-                    >
-                      {current.caption}
-                    </p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {STEPS.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveStep(index)}
+                  <div
+                    style={{
+                      minWidth: 220,
+                      display: 'grid',
+                      gap: 10,
+                      justifyItems: 'end',
+                      flex: '1 1 220px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'rgba(17,24,39,0.62)',
+                      }}
+                    >
+                      Next step in {secondsRemaining}s
+                    </div>
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        width: '100%',
+                        maxWidth: 220,
+                        height: 8,
+                        borderRadius: 999,
+                        overflow: 'hidden',
+                        background: 'rgba(17,24,39,0.10)',
+                        boxShadow: 'inset 0 1px 2px rgba(17,24,39,0.08)',
+                      }}
+                    >
+                      <div
                         style={{
-                          width: index === activeStep ? 26 : 8,
-                          height: 8,
+                          width: `${Math.max(stepProgress * 100, 4)}%`,
+                          height: '100%',
                           borderRadius: 999,
-                          border: 'none',
-                          background: index === activeStep ? '#0A84FF' : 'rgba(17,24,39,0.16)',
-                          transition: 'all 0.18s ease',
+                          background: 'linear-gradient(90deg, #0A84FF 0%, #30B0C7 100%)',
+                          transition: stepProgress === 0 ? 'none' : 'width 0.1s linear',
                         }}
                       />
-                    ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {STEPS.map((_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectStep(index)}
+                          aria-label={`Go to tutorial step ${index + 1}`}
+                          aria-pressed={index === activeStep}
+                          title={`Go to step ${index + 1}`}
+                          style={{
+                            width: index === activeStep ? 26 : 8,
+                            height: 8,
+                            borderRadius: 999,
+                            border: 'none',
+                            background: index === activeStep ? '#0A84FF' : 'rgba(17,24,39,0.16)',
+                            transition: 'all 0.18s ease',
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -370,9 +417,9 @@ export default function TutorialScreen({ onSkip }) {
             <div
               style={{
                 fontSize: 30,
-                lineHeight: 0.98,
+                lineHeight: 1.1,
                 fontWeight: 700,
-                letterSpacing: '-0.05em',
+                letterSpacing: '-0.04em',
                 color: '#111827',
                 marginBottom: 10,
               }}
@@ -399,7 +446,8 @@ export default function TutorialScreen({ onSkip }) {
                 <button
                   key={step.title}
                   className="tutorial-step-button"
-                  onClick={() => setActiveStep(index)}
+                  onClick={() => handleSelectStep(index)}
+                  type="button"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '34px minmax(0, 1fr)',
@@ -487,7 +535,7 @@ export default function TutorialScreen({ onSkip }) {
                 color: 'rgba(17,24,39,0.68)',
               }}
             >
-              You will get 15 scenarios across 3 zones, with 120 seconds per round and a score normalized to 100.
+              You will get 15 scenarios across 3 zones, with 120 seconds per round. Your score reflects accuracy across all three zones.
             </div>
           </div>
 

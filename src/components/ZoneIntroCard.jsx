@@ -16,6 +16,7 @@ const ZONES = [
     emails: 5,
     difficulty: 'Foundation',
     accent: '#0A84FF',
+    endColor: '#0055CC',
     mission: 'Spot the loud red flags fast and build your rhythm.',
     contextCopy: 'Start with the obvious ones and find your footing.',
     signals: [
@@ -32,11 +33,6 @@ const ZONES = [
         detail: 'Noisy offers, weak credibility, and incentives that feel slightly off.',
       },
     ],
-    prep: [
-      'Move quickly on obvious tells.',
-      'Use sender and tone as your first filter.',
-      'Build momentum before the harder zones.',
-    ],
   },
   {
     zone: 2,
@@ -45,6 +41,7 @@ const ZONES = [
     emails: 5,
     difficulty: 'Intermediate',
     accent: '#30B0C7',
+    endColor: '#1A8FA8',
     mission: 'The copy gets cleaner here. Trust the details, not the polish.',
     contextCopy: 'Polish can hide a lot. Read slower.',
     signals: [
@@ -61,11 +58,6 @@ const ZONES = [
         detail: 'Seemingly routine asks that quietly push for risky action.',
       },
     ],
-    prep: [
-      'Slow down and compare details.',
-      'Check whether the workflow feels real.',
-      'Treat polished writing with healthy skepticism.',
-    ],
   },
   {
     zone: 3,
@@ -74,6 +66,7 @@ const ZONES = [
     emails: 5,
     difficulty: 'Advanced',
     accent: '#FF7A1A',
+    endColor: '#E56A00',
     mission: 'One subtle inconsistency is usually the whole story.',
     contextCopy: 'High stakes. One detail changes everything.',
     signals: [
@@ -90,17 +83,11 @@ const ZONES = [
         detail: 'A single overlooked inconsistency usually decides the classification.',
       },
     ],
-    prep: [
-      'Read for what feels slightly wrong.',
-      'Expect only one or two decisive clues.',
-      'Accuracy matters more than speed here.',
-    ],
   },
 ];
 
 export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
   const meta = ZONES.find((item) => item.zone === zone);
-  const progressWidth = `${(meta.zone / ZONES.length) * 100}%`;
   const statCards = [
     { label: 'Emails', value: meta.emails, helper: 'Short burst' },
     { label: 'Max points', value: meta.emails * 5, helper: '5 each' },
@@ -110,7 +97,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
   return (
     <div
       style={{
-        height: '100dvh',
+        minHeight: '100dvh',
         padding: 'clamp(18px, 3vw, 30px)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
         position: 'relative',
@@ -125,8 +112,13 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
         @media (max-width: 900px) {
           .zone-intro-shell {
             grid-template-columns: 1fr !important;
-            overflow: auto !important;
+            height: auto !important;
             min-height: auto !important;
+          }
+
+          .zone-intro-main,
+          .zone-intro-side {
+            overflow: visible !important;
           }
         }
 
@@ -144,6 +136,10 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
           }
 
           .zone-intro-stats {
+            grid-template-columns: 1fr !important;
+          }
+
+          .zone-intro-signals {
             grid-template-columns: 1fr !important;
           }
         }
@@ -170,7 +166,6 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
         style={{
           width: '100%',
           maxWidth: 1240,
-          height: '100%',
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1.12fr) minmax(360px, 0.88fr)',
@@ -190,9 +185,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             padding: 'clamp(24px, 3vw, 34px)',
             display: 'grid',
             gap: 24,
-            minHeight: 0,
             minWidth: 0,
-            overflow: 'hidden',
           }}
         >
           <div
@@ -320,38 +313,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
               >
                 {meta.contextCopy}
               </div>
-              <div
-                style={{
-                  marginTop: 2,
-                  height: 8,
-                  borderRadius: 999,
-                  background: 'rgba(17,24,39,0.08)',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    width: progressWidth,
-                    height: '100%',
-                    borderRadius: 999,
-                    background: `linear-gradient(90deg, ${meta.accent} 0%, rgba(255,255,255,0.9) 140%)`,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                  fontSize: 11,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(17,24,39,0.48)',
-                }}
-              >
-                <span>Start here</span>
-                <span>{meta.subtitle}</span>
-              </div>
+              <div style={{ height: 1, background: `${meta.accent}18`, borderRadius: 1 }} />
             </div>
           </div>
 
@@ -425,7 +387,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             className="zone-intro-bottom"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1.05fr) minmax(260px, 0.95fr)',
+              gridTemplateColumns: '1fr',
               gap: 16,
               minHeight: 0,
               minWidth: 0,
@@ -444,120 +406,66 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
                 What to watch for
               </div>
 
-              {meta.signals.map((signal, index) => (
-                <div
-                  key={signal.title}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '38px minmax(0, 1fr)',
-                    gap: 12,
-                    alignItems: 'start',
-                    borderRadius: 20,
-                    padding: '14px 16px',
-                    background: 'rgba(255,255,255,0.8)',
-                    border: '1px solid rgba(13,26,51,0.06)',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 999,
-                      background: `${meta.accent}12`,
-                      color: meta.accent,
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: 13,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {index + 1}
-                  </div>
-                  <div style={{ display: 'grid', gap: 4 }}>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        lineHeight: 1.35,
-                        fontWeight: 700,
-                        letterSpacing: '-0.02em',
-                        color: '#111827',
-                      }}
-                    >
-                      {signal.title}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        lineHeight: 1.55,
-                        color: 'rgba(17,24,39,0.62)',
-                      }}
-                    >
-                      {signal.detail}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                borderRadius: 28,
-                padding: '18px',
-                background: 'rgba(249,250,252,0.82)',
-                border: '1px solid rgba(13,26,51,0.06)',
-                display: 'grid',
-                gap: 12,
-                alignContent: 'start',
-                minWidth: 0,
-              }}
-            >
               <div
+                className="zone-intro-signals"
                 style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.12em',
-                  color: 'rgba(17,24,39,0.50)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 12,
+                  alignItems: 'stretch',
+                  minWidth: 0,
                 }}
               >
-                Quick prep
+                {meta.signals.map((signal) => (
+                  <div
+                    key={signal.title}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12,
+                      borderRadius: 20,
+                      padding: '14px 16px',
+                      background: 'rgba(255,255,255,0.8)',
+                      border: '1px solid rgba(13,26,51,0.06)',
+                      width: '100%',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        background: meta.accent,
+                        opacity: 0.7,
+                        marginTop: 6,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ display: 'grid', gap: 4 }}>
+                      <div
+                        style={{
+                          fontSize: 16,
+                          lineHeight: 1.35,
+                          fontWeight: 700,
+                          letterSpacing: '-0.02em',
+                          color: '#111827',
+                        }}
+                      >
+                        {signal.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          lineHeight: 1.55,
+                          color: 'rgba(17,24,39,0.62)',
+                        }}
+                      >
+                        {signal.detail}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              {meta.prep.map((item, index) => (
-                <div
-                  key={item}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '24px minmax(0, 1fr)',
-                    gap: 10,
-                    alignItems: 'start',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: 999,
-                      background: 'rgba(17,24,39,0.06)',
-                      color: '#111827',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: 11,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {index + 1}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 1.5,
-                      color: 'rgba(17,24,39,0.64)',
-                    }}
-                  >
-                    {item}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </motion.div>
@@ -574,7 +482,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
             display: 'grid',
             gap: 18,
             alignContent: 'start',
-            minHeight: 0,
+            minHeight: '100%',
           }}
         >
           <div
@@ -598,33 +506,27 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '56px minmax(0, 1fr)',
+                  gridTemplateColumns: '48px minmax(0, 1fr)',
                   gap: 12,
                   alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 18,
-                    background: 'rgba(255,255,255,0.7)',
-                    border: `1px solid ${meta.accent}22`,
-                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.75), 0 12px 24px ${meta.accent}14`,
-                    position: 'relative',
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: `${meta.accent}14`,
+                    border: `1px solid ${meta.accent}30`,
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontSize: 20,
+                    fontWeight: 800,
+                    color: meta.accent,
+                    letterSpacing: '-0.04em',
                   }}
                 >
-                  <span
-                    style={{
-                      position: 'absolute',
-                      inset: '50% auto auto 50%',
-                      width: 18,
-                      height: 18,
-                      transform: 'translate(-50%, -50%) rotate(45deg)',
-                      borderRadius: 6,
-                      background: meta.accent,
-                    }}
-                  />
+                  {meta.zone}
                 </div>
 
                 <div style={{ display: 'grid', gap: 4 }}>
@@ -661,7 +563,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
                   color: 'rgba(17,24,39,0.66)',
                 }}
               >
-                {meta.contextCopy}
+                {meta.mission}
               </p>
             </div>
 
@@ -852,7 +754,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
                 padding: '16px 18px',
                 borderRadius: 18,
                 border: '1px solid rgba(255,255,255,0.5)',
-                background: `linear-gradient(135deg, ${meta.accent} 0%, ${meta.zone === 3 ? '#E56A00' : '#0066CC'} 100%)`,
+                background: `linear-gradient(135deg, ${meta.accent} 0%, ${meta.endColor} 100%)`,
                 boxShadow: `0 18px 32px ${meta.accent}2E`,
                 color: '#fff',
                 fontSize: 15,

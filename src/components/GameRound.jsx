@@ -35,6 +35,8 @@ const ZONE_META = {
   3: { name: 'The Escalation', accent: '#FF7A1A', tone: 'The final calls need specialist eyes.' },
 };
 
+const ZONE_END_COLOR = { 1: '#0055CC', 2: '#1A8FA8', 3: '#E56A00' };
+
 function formatClock(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -68,7 +70,10 @@ export default function GameRound({
     const to = totalScore;
     if (from === to) return;
 
+    const scoreProxy = { val: from };
+
     gsap.fromTo(
+      scoreProxy,
       { val: from },
       {
         val: to,
@@ -76,7 +81,7 @@ export default function GameRound({
         ease: 'power2.out',
         onUpdate() {
           if (scoreDisplayRef.current) {
-            scoreDisplayRef.current.textContent = Math.round(this.targets()[0].val);
+            scoreDisplayRef.current.textContent = Math.round(scoreProxy.val);
           }
         },
       }
@@ -227,18 +232,17 @@ export default function GameRound({
               >
                 <div
                   style={{
-                    width: 58,
-                    height: 58,
-                    borderRadius: 18,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
                     background: `${meta.accent}14`,
                     border: `1px solid ${meta.accent}24`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: meta.accent,
-                    fontSize: 22,
+                    fontSize: 16,
                     fontWeight: 700,
-                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.6), 0 12px 28px ${meta.accent}18`,
                   }}
                 >
                   {zone}
@@ -452,7 +456,7 @@ export default function GameRound({
                     flexWrap: 'wrap',
                   }}
                 >
-                  <div style={sectionLabelStyle}>Hints</div>
+                  <div style={sectionLabelStyle}>Clues</div>
                   <div
                     style={{
                       padding: '3px 10px',
@@ -485,7 +489,7 @@ export default function GameRound({
                 </div>
 
                 <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.48)' }}>
-                  Each revealed hint costs one point, so use them when the evidence is genuinely unclear.
+                  Each revealed clue costs one point, so use them when the evidence is genuinely unclear.
                 </div>
               </div>
 
@@ -504,7 +508,9 @@ export default function GameRound({
                     Ready to submit
                   </div>
                   <div style={{ fontSize: 13, color: 'rgba(17,24,39,0.60)' }}>
-                    {round.selectedL1 ? `${round.selectedL1} selected` : 'Pick a primary category to unlock submission.'}
+                    {round.selectedL1
+                      ? 'Add a secondary diagnosis for a bonus point.'
+                      : 'Pick a primary category to unlock submission.'}
                   </div>
                 </div>
 
@@ -517,11 +523,11 @@ export default function GameRound({
                     width: '100%',
                     padding: '16px 18px',
                     borderRadius: 18,
-                    border: '1px solid rgba(255,255,255,0.45)',
+                    border: canSubmit ? '1px solid rgba(255,255,255,0.45)' : '1px solid rgba(17,24,39,0.10)',
                     background: canSubmit
-                      ? `linear-gradient(135deg, ${meta.accent} 0%, ${zone === 3 ? '#E56A00' : '#0066CC'} 100%)`
-                      : 'rgba(17,24,39,0.08)',
-                    color: canSubmit ? '#fff' : 'rgba(17,24,39,0.36)',
+                      ? `linear-gradient(135deg, ${meta.accent} 0%, ${ZONE_END_COLOR[zone]} 100%)`
+                      : 'rgba(17,24,39,0.06)',
+                    color: canSubmit ? '#fff' : 'rgba(17,24,39,0.50)',
                     fontSize: 15,
                     fontWeight: 700,
                     letterSpacing: '0.01em',

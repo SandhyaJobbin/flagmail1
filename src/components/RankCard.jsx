@@ -1,9 +1,12 @@
 import { getProgressTitle } from '../utils/competency.js';
 
 export default function RankCard({ player, finalScore, badgeCount }) {
-  const title = getProgressTitle(finalScore);
-  const accent = finalScore >= 80 ? '#FF3B30' : finalScore >= 50 ? '#FF9500' : '#34C759';
-  const eyebrow = finalScore >= 80 ? 'Advanced analyst' : finalScore >= 50 ? 'Developing analyst' : 'Foundation analyst';
+  const safePlayer = player ?? { name: 'Analyst' };
+  const safeScore = Number.isFinite(finalScore) ? finalScore : 0;
+  const safeBadgeCount = Number.isFinite(badgeCount) ? badgeCount : 0;
+  const title = getProgressTitle(safeScore);
+  const accent = safeScore >= 80 ? '#FF3B30' : safeScore >= 50 ? '#FF9500' : '#34C759';
+  const eyebrow = safeScore >= 80 ? 'Advanced analyst' : safeScore >= 50 ? 'Developing analyst' : 'Foundation analyst';
 
   return (
     <div
@@ -49,7 +52,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
 
         <div>
           <div style={{ fontSize: 32, lineHeight: 0.98, fontWeight: 700, letterSpacing: '-0.05em', color: '#111827', marginBottom: 8 }}>
-            {player.name}
+            {safePlayer.name}
           </div>
           <div style={{ fontSize: 14, color: 'rgba(17,24,39,0.60)', lineHeight: 1.55 }}>
             Final score based on classification accuracy, subcategory precision, and clue usage.
@@ -74,7 +77,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, color: '#111827' }}>
-            <span style={{ fontSize: 62, lineHeight: 0.92, fontWeight: 800, letterSpacing: '-0.06em' }}>{finalScore}</span>
+            <span style={{ fontSize: 62, lineHeight: 0.92, fontWeight: 800, letterSpacing: '-0.06em' }}>{safeScore}</span>
             <span style={{ fontSize: 22, fontWeight: 600, color: 'rgba(17,24,39,0.30)' }}>/100</span>
           </div>
         </div>
@@ -89,7 +92,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
         >
           <div
             style={{
-              width: `${Math.max(0, Math.min(100, finalScore))}%`,
+              width: `${Math.max(0, Math.min(100, safeScore))}%`,
               height: '100%',
               borderRadius: 999,
               background: `linear-gradient(90deg, ${accent} 0%, ${accent}AA 100%)`,
@@ -118,7 +121,7 @@ export default function RankCard({ player, finalScore, badgeCount }) {
               Badges earned
             </div>
             <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, letterSpacing: '-0.04em', color: '#111827' }}>
-              {badgeCount}
+              {safeBadgeCount}
             </div>
           </div>
 

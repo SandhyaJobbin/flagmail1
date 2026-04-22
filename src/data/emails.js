@@ -618,7 +618,7 @@ Zelle Payment Network`,
 
 export const L1_CATEGORIES = [
   { id: "Legitimate", label: "Legitimate", color: "#34C759" },
-  { id: "Phishing & Spoofing", label: "Phishing & Spoofing", color: "#FF3B30" },
+  { id: "Phishing & Spoofing", label: "Phishing & Spoofing", color: "#0F7A8A" },
   { id: "Spam & Junk", label: "Spam & Junk", color: "#FF9500" },
   { id: "Malicious Content", label: "Malicious Content", color: "#BF5AF2" },
   { id: "Abuse & Harassment", label: "Abuse & Harassment", color: "#FF375F" },
@@ -688,7 +688,7 @@ export const TAXONOMY = {
     ],
   },
   "Phishing & Spoofing": {
-    color: "#FF3B30",
+    color: "#0F7A8A",
     subcategories: [
       "Email Phishing",
       "Spear Phishing",
