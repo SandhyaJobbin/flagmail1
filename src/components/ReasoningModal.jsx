@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const modalSurface = {
+  background: 'rgba(255,255,255,0.92)',
+  backdropFilter: 'blur(24px) saturate(150%)',
+  WebkitBackdropFilter: 'blur(24px) saturate(150%)',
+  border: '1px solid rgba(255,255,255,0.82)',
+  boxShadow: '0 28px 90px rgba(17, 24, 39, 0.26)',
+};
+
 export default function ReasoningModal({ email, l1WasCorrect, onComplete }) {
   const [selected, setSelected] = useState(null);
   const [showPlus, setShowPlus] = useState(false);
@@ -17,9 +25,9 @@ export default function ReasoningModal({ email, l1WasCorrect, onComplete }) {
     if (correct) {
       setShowPlus(true);
       setTimeout(() => onComplete({ skipped: false, selectedIndex: selected, correct }), 600);
-    } else {
-      onComplete({ skipped: false, selectedIndex: selected, correct });
+      return;
     }
+    onComplete({ skipped: false, selectedIndex: selected, correct });
   }
 
   return (
@@ -27,48 +35,58 @@ export default function ReasoningModal({ email, l1WasCorrect, onComplete }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
+      transition={{ duration: 0.18 }}
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 1500,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(0,0,0,0.55)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        display: 'grid',
+        placeItems: 'center',
         padding: '24px 16px',
+        background: 'rgba(17,24,39,0.42)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
       }}
     >
       <motion.div
-        initial={{ scale: 0.92, opacity: 0, y: 16 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.94, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        initial={{ opacity: 0, y: 20, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         style={{
-          background: '#FFFFFF',
-          borderRadius: 20,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.22)',
-          padding: '28px 24px 24px',
+          ...modalSurface,
           width: '100%',
-          maxWidth: 480,
+          maxWidth: 620,
+          borderRadius: 30,
+          padding: '24px',
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {/* +1 flash */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: [
+              'radial-gradient(circle at 14% 18%, rgba(10,132,255,0.10), transparent 24%)',
+              'radial-gradient(circle at 84% 16%, rgba(52,199,89,0.08), transparent 20%)',
+            ].join(','),
+          }}
+        />
+
         <AnimatePresence>
           {showPlus && (
             <motion.div
               initial={{ opacity: 1, y: 0, scale: 1 }}
-              animate={{ opacity: 0, y: -28, scale: 1.3 }}
+              animate={{ opacity: 0, y: -30, scale: 1.2 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.48, ease: 'easeOut' }}
               style={{
                 position: 'absolute',
-                top: 16,
-                right: 24,
-                fontSize: 22,
+                top: 18,
+                right: 22,
+                fontSize: 24,
                 fontWeight: 800,
                 color: '#34C759',
                 pointerEvents: 'none',
@@ -79,109 +97,127 @@ export default function ReasoningModal({ email, l1WasCorrect, onComplete }) {
           )}
         </AnimatePresence>
 
-        {/* Label */}
-        <div style={{
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.1em',
-          color: '#AEAEB2',
-          marginBottom: 10,
-        }}>
-          REASONING CHECK · +1 PT
-        </div>
+        <div style={{ position: 'relative', display: 'grid', gap: 18 }}>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'rgba(17,24,39,0.46)',
+              }}
+            >
+              Reasoning Check · +1 pt
+            </div>
+            <div
+              style={{
+                fontSize: 'clamp(24px, 3vw, 32px)',
+                lineHeight: 1.08,
+                letterSpacing: '-0.04em',
+                fontWeight: 700,
+                color: '#111827',
+                maxWidth: 520,
+              }}
+            >
+              {question}
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                lineHeight: 1.55,
+                color: 'rgba(17,24,39,0.62)',
+                maxWidth: 470,
+              }}
+            >
+              Pick the best explanation for the category call. This adds one point only if your reasoning is correct.
+            </p>
+          </div>
 
-        {/* Question */}
-        <div style={{
-          fontSize: 16,
-          fontWeight: 700,
-          color: '#1C1C1E',
-          lineHeight: 1.4,
-          marginBottom: 20,
-        }}>
-          {question}
-        </div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {options.map((option, index) => {
+              const isSelected = selected === index;
+              return (
+                <button
+                  key={option}
+                  onClick={() => setSelected(index)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '14px 16px',
+                    borderRadius: 18,
+                    border: isSelected ? '1.5px solid rgba(10,132,255,0.42)' : '1px solid rgba(13,26,51,0.08)',
+                    background: isSelected
+                      ? 'linear-gradient(180deg, rgba(10,132,255,0.10) 0%, rgba(255,255,255,0.96) 100%)'
+                      : 'rgba(255,255,255,0.82)',
+                    boxShadow: isSelected ? '0 14px 28px rgba(10,132,255,0.10)' : 'none',
+                    display: 'grid',
+                    gridTemplateColumns: '20px minmax(0, 1fr)',
+                    gap: 12,
+                    alignItems: 'start',
+                    color: '#111827',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      border: isSelected ? '6px solid #0A84FF' : '1.5px solid rgba(17,24,39,0.22)',
+                      marginTop: 1,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 15,
+                      lineHeight: 1.5,
+                      fontWeight: isSelected ? 600 : 500,
+                    }}
+                  >
+                    {option}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Options */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {options.map((opt, i) => {
-            const isSelected = selected === i;
-            return (
-              <button
-                key={i}
-                onClick={() => setSelected(i)}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '12px 14px',
-                  borderRadius: 12,
-                  border: isSelected
-                    ? '2px solid #0A84FF'
-                    : '1.5px solid rgba(0,0,0,0.10)',
-                  background: isSelected ? 'rgba(10,132,255,0.07)' : '#FAFAFA',
-                  fontSize: 14,
-                  color: '#1C1C1E',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontWeight: isSelected ? 600 : 400,
-                  transition: 'all 0.12s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-              >
-                <span style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: '50%',
-                  border: isSelected ? '5px solid #0A84FF' : '1.5px solid #C7C7CC',
-                  flexShrink: 0,
-                  transition: 'all 0.12s',
-                }} />
-                {opt}
-              </button>
-            );
-          })}
-        </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.1fr', gap: 10 }}>
+            <button
+              onClick={() => onComplete({ skipped: true })}
+              style={{
+                padding: '14px 16px',
+                borderRadius: 16,
+                border: '1px solid rgba(13,26,51,0.08)',
+                background: 'rgba(255,255,255,0.78)',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'rgba(17,24,39,0.68)',
+              }}
+            >
+              Skip reasoning
+            </button>
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => onComplete({ skipped: true })}
-            style={{
-              flex: 1,
-              padding: '13px',
-              borderRadius: 12,
-              border: '1.5px solid rgba(0,0,0,0.10)',
-              background: 'transparent',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#636366',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
-            Skip
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={selected === null}
-            style={{
-              flex: 2,
-              padding: '13px',
-              borderRadius: 12,
-              border: 'none',
-              background: selected === null ? '#D1D1D6' : '#0A84FF',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: selected === null ? 'default' : 'pointer',
-              fontFamily: 'inherit',
-              transition: 'background 0.15s',
-              boxShadow: selected !== null ? '0 4px 14px rgba(10,132,255,0.3)' : 'none',
-            }}
-          >
-            Confirm
-          </button>
+            <button
+              onClick={handleConfirm}
+              disabled={selected === null}
+              style={{
+                padding: '14px 16px',
+                borderRadius: 16,
+                border: '1px solid rgba(10,132,255,0.22)',
+                background: selected === null
+                  ? 'rgba(17,24,39,0.10)'
+                  : 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                boxShadow: selected === null ? 'none' : '0 16px 28px rgba(10,132,255,0.24)',
+                cursor: selected === null ? 'default' : 'pointer',
+              }}
+            >
+              Confirm answer
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>

@@ -16,11 +16,30 @@ const surface = {
   boxShadow: '0 24px 80px rgba(32, 52, 89, 0.11), 0 8px 24px rgba(32, 52, 89, 0.06)',
 };
 
+const sectionLabelStyle = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: 'rgba(17,24,39,0.52)',
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+};
+
+const helperStyle = {
+  fontSize: 11,
+  color: 'rgba(17,24,39,0.54)',
+};
+
 const ZONE_META = {
   1: { name: 'The Inbox', accent: '#0A84FF', tone: 'Clean out the obvious noise.' },
   2: { name: 'The Queue', accent: '#30B0C7', tone: 'Trust the details, not the polish.' },
   3: { name: 'The Escalation', accent: '#FF7A1A', tone: 'The final calls need specialist eyes.' },
 };
+
+function formatClock(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
 
 export default function GameRound({
   email,
@@ -99,7 +118,7 @@ export default function GameRound({
   return (
     <div
       style={{
-        height: '100dvh',
+        minHeight: '100dvh',
         padding: '18px clamp(12px, 2.5vw, 24px)',
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
         position: 'relative',
@@ -109,19 +128,45 @@ export default function GameRound({
       <style>{`
         @media (max-width: 1200px) {
           .game-round-main {
-            grid-template-columns: minmax(0, 1fr) 360px !important;
+            grid-template-columns: minmax(0, 1fr) 380px !important;
           }
         }
 
         @media (max-width: 980px) {
+          .game-round-shell {
+            gap: 12px !important;
+          }
+
+          .game-round-topbar {
+            grid-template-columns: 1fr !important;
+          }
+
           .game-round-main {
             grid-template-columns: 1fr !important;
-            overflow: auto !important;
+            min-height: auto !important;
           }
 
           .game-round-email-wrap,
           .game-round-side {
-            min-height: fit-content !important;
+            min-height: auto !important;
+            max-height: none !important;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .game-round-screen {
+            padding-inline: 12px !important;
+            padding-block: 12px !important;
+          }
+
+          .game-round-topbar-card,
+          .game-round-email-wrap,
+          .game-round-side {
+            border-radius: 24px !important;
+          }
+
+          .game-round-side {
+            padding: 16px !important;
           }
         }
       `}</style>
@@ -140,273 +185,353 @@ export default function GameRound({
       />
 
       <div
+        className="game-round-screen"
         style={{
           maxWidth: 1400,
           margin: '0 auto',
-          display: 'grid',
-          gap: 14,
           position: 'relative',
-          height: '100%',
-          minHeight: 0,
+          minHeight: '100%',
         }}
       >
         <div
+          className="game-round-shell"
           style={{
-            ...surface,
-            borderRadius: 30,
-            padding: '16px 18px',
+            display: 'grid',
+            gap: 14,
           }}
         >
           <div
+            className="game-round-topbar-card"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: 14,
-              alignItems: 'center',
+              ...surface,
+              borderRadius: 30,
+              padding: '16px 18px',
             }}
           >
             <div
+              className="game-round-topbar"
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'auto minmax(0, 1fr)',
+                gridTemplateColumns: 'minmax(0, 1.2fr) minmax(260px, 1fr) minmax(180px, 0.6fr)',
                 gap: 14,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  width: 58,
-                  height: 58,
-                  borderRadius: 18,
-                  background: `${meta.accent}14`,
-                  border: `1px solid ${meta.accent}24`,
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: 'auto minmax(0, 1fr)',
+                  gap: 14,
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  color: meta.accent,
-                  fontSize: 22,
-                  fontWeight: 700,
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.6), 0 12px 28px ${meta.accent}18`,
                 }}
               >
-                {zone}
-              </div>
-
-              <div>
                 <div
                   style={{
+                    width: 58,
+                    height: 58,
+                    borderRadius: 18,
+                    background: `${meta.accent}14`,
+                    border: `1px solid ${meta.accent}24`,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                    marginBottom: 4,
+                    justifyContent: 'center',
+                    color: meta.accent,
+                    fontSize: 22,
+                    fontWeight: 700,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.6), 0 12px 28px ${meta.accent}18`,
                   }}
                 >
-                  <span
+                  {zone}
+                </div>
+
+                <div style={{ minWidth: 0 }}>
+                  <div
                     style={{
-                      fontSize: 28,
-                      fontWeight: 700,
-                      letterSpacing: '-0.04em',
-                      color: '#111827',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                      marginBottom: 4,
                     }}
                   >
-                    {meta.name}
-                  </span>
-                  <span
+                    <span
+                      style={{
+                        fontSize: 28,
+                        fontWeight: 700,
+                        letterSpacing: '-0.04em',
+                        color: '#111827',
+                      }}
+                    >
+                      {meta.name}
+                    </span>
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        background: `${meta.accent}12`,
+                        color: meta.accent,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      Email {emailInZone} of {emailsInZone}
+                    </span>
+                  </div>
+                  <div
                     style={{
-                      padding: '4px 10px',
-                      borderRadius: 999,
-                      background: `${meta.accent}12`,
-                      color: meta.accent,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
+                      fontSize: 13,
+                      color: 'rgba(17,24,39,0.58)',
                     }}
                   >
-                    Email {emailInZone} of {emailsInZone}
-                  </span>
+                    {meta.tone}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              style={{
-                padding: '12px 14px',
-                borderRadius: 22,
-                background: 'rgba(249,250,252,0.84)',
-                border: '1px solid rgba(13,26,51,0.06)',
-              }}
-            >
-              <div style={{ display: 'grid', gap: 10 }}>
-                <TimerBar timeLeft={timeLeft} phase={phase} progress={progress} />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    alignItems: 'center',
-                  }}
-                >
-                  <span
-                    className={phase === 'red' ? 'anim-timerPulse' : ''}
-                    style={{
-                      minWidth: 48,
-                      textAlign: 'right',
-                      fontSize: 22,
-                      lineHeight: 1,
-                      fontWeight: 700,
-                      color: phaseColor,
-                    }}
-                  >
-                    {timeLeft}s
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                justifySelf: 'stretch',
-                padding: '14px 16px',
-                borderRadius: 22,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(246,249,253,0.96) 100%)',
-                border: '1px solid rgba(13,26,51,0.06)',
-              }}
-            >
               <div
-                ref={scoreDisplayRef}
                 style={{
-                  fontSize: 34,
-                  lineHeight: 1,
-                  fontWeight: 700,
-                  letterSpacing: '-0.05em',
-                  color: '#111827',
+                  padding: '12px 14px',
+                  borderRadius: 22,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(245,248,252,0.92) 100%)',
+                  border: '1px solid rgba(13,26,51,0.06)',
                 }}
               >
-                {totalScore}
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <TimerBar timeLeft={timeLeft} phase={phase} progress={progress} />
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 12,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div style={{ fontSize: 12, color: 'rgba(17,24,39,0.48)' }}>
+                      Time remaining
+                    </div>
+                    <span
+                      className={phase === 'red' ? 'anim-timerPulse' : ''}
+                      style={{
+                        minWidth: 62,
+                        textAlign: 'right',
+                        fontSize: 22,
+                        lineHeight: 1,
+                        fontWeight: 700,
+                        color: phaseColor,
+                      }}
+                    >
+                      {formatClock(timeLeft)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  justifySelf: 'stretch',
+                  padding: '14px 16px',
+                  borderRadius: 22,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(246,249,253,0.96) 100%)',
+                  border: '1px solid rgba(13,26,51,0.06)',
+                  display: 'grid',
+                  gap: 6,
+                  alignContent: 'center',
+                }}
+              >
+                <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.46)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Score
+                </div>
+                <div
+                  ref={scoreDisplayRef}
+                  style={{
+                    fontSize: 34,
+                    lineHeight: 1,
+                    fontWeight: 700,
+                    letterSpacing: '-0.05em',
+                    color: '#111827',
+                  }}
+                >
+                  {totalScore}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div
-          className="game-round-main"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.08fr) minmax(340px, 0.92fr)',
-            gap: 14,
-            alignItems: 'stretch',
-            flex: 1,
-            minHeight: 0,
-          }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              className="game-round-email-wrap"
-              key={email?.id}
-              initial={{ opacity: 0, x: -14 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 12 }}
-              transition={{ duration: 0.28, ease: 'easeOut' }}
-              style={{
-                ...surface,
-                borderRadius: 30,
-                padding: 16,
-                minHeight: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ minHeight: 0, overflow: 'auto', paddingRight: 4 }}>
-                <EmailCard email={email} giveawayHighlight={false} />
-              </div>
-            </motion.div>
-          </AnimatePresence>
 
           <div
-            className="game-round-side"
+            className="game-round-main"
             style={{
-              ...surface,
-              borderRadius: 28,
-              padding: '18px',
               display: 'grid',
-              gap: 18,
-              alignContent: 'start',
-              minHeight: 0,
-              overflow: 'auto',
+              gridTemplateColumns: 'minmax(0, 1.08fr) minmax(360px, 0.92fr)',
+              gap: 14,
+              alignItems: 'start',
+              minHeight: 'calc(100dvh - 146px)',
             }}
           >
-            {/* A+B — Classification (Primary + Secondary) */}
-            <div>
-              <Classifier
-                selectedL1={round.selectedL1}
-                selectedL2={round.selectedL2}
-                onSelectL1={onSelectL1}
-                onSelectL2={onSelectL2}
-                disabled={round.submitted}
-              />
-            </div>
-
-            {/* C — Hints */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(17,24,39,0.52)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                  Hints
-                </div>
-                <div style={{
-                  padding: '3px 10px',
-                  borderRadius: 999,
-                  background: 'rgba(255,184,0,0.12)',
-                  color: '#A16207',
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}>
-                  {cluesSeen}/{clueCount}
-                </div>
-              </div>
-              <div style={{ borderRadius: 16, background: 'rgba(249,250,252,0.88)', border: '1px solid rgba(13,26,51,0.06)', padding: '12px 12px 8px', overflow: 'auto' }}>
-                <ClueSystem
-                  clues={email?.clues || []}
-                  revealed={round.cluesRevealed}
-                  onReveal={onRevealClue}
-                  disabled={round.submitted}
-                />
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.48)', marginTop: 6 }}>
-                Using hints reduces your score
-              </div>
-            </div>
-
-            {/* D — Submit */}
-            <div>
-              <div style={{ fontSize: 13, color: 'rgba(17,24,39,0.52)', marginBottom: 10 }}>
-                {round.selectedL1 ? `${round.selectedL1} selected` : 'No category selected'}
-              </div>
-              <motion.button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                whileHover={canSubmit ? { scale: 1.015 } : {}}
-                whileTap={canSubmit ? { scale: 0.985 } : {}}
+            <AnimatePresence mode="wait">
+              <motion.div
+                className="game-round-email-wrap"
+                key={email?.id}
+                initial={{ opacity: 0, x: -14 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
                 style={{
-                  width: '100%',
-                  padding: '16px 18px',
-                  borderRadius: 18,
-                  border: '1px solid rgba(255,255,255,0.45)',
-                  background: canSubmit
-                    ? `linear-gradient(135deg, ${meta.accent} 0%, ${zone === 3 ? '#E56A00' : '#0066CC'} 100%)`
-                    : 'rgba(17,24,39,0.08)',
-                  color: canSubmit ? '#fff' : 'rgba(17,24,39,0.36)',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  letterSpacing: '0.01em',
-                  boxShadow: canSubmit ? `0 18px 30px ${meta.accent}2E` : 'none',
-                  cursor: canSubmit ? 'pointer' : 'default',
+                  ...surface,
+                  borderRadius: 30,
+                  padding: 16,
+                  minHeight: 0,
+                  maxHeight: 'calc(100dvh - 160px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.72)',
                 }}
               >
-                Submit
-              </motion.button>
+                <div style={{ minHeight: 0, overflow: 'auto', paddingRight: 4 }}>
+                  <EmailCard email={email} giveawayHighlight={false} />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <div
+              className="game-round-side"
+              style={{
+                ...surface,
+                borderRadius: 28,
+                padding: 18,
+                display: 'grid',
+                gap: 18,
+                alignContent: 'start',
+                minHeight: 0,
+                maxHeight: 'calc(100dvh - 160px)',
+                overflow: 'auto',
+              }}
+            >
+              <div style={{ display: 'grid', gap: 8 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={sectionLabelStyle}>Decision</div>
+                  <div style={helperStyle}>Choose the strongest category, then refine if needed.</div>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 22,
+                    padding: 14,
+                    background: `linear-gradient(180deg, ${meta.accent}10 0%, rgba(255,255,255,0.94) 100%)`,
+                    border: `1px solid ${meta.accent}18`,
+                    display: 'grid',
+                    gap: 18,
+                  }}
+                >
+                  <Classifier
+                    selectedL1={round.selectedL1}
+                    selectedL2={round.selectedL2}
+                    onSelectL1={onSelectL1}
+                    onSelectL2={onSelectL2}
+                    disabled={round.submitted}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: 10 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={sectionLabelStyle}>Hints</div>
+                  <div
+                    style={{
+                      padding: '3px 10px',
+                      borderRadius: 999,
+                      background: 'rgba(255,184,0,0.12)',
+                      color: '#A16207',
+                      fontSize: 11,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {cluesSeen}/{clueCount}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 20,
+                    background: 'rgba(249,250,252,0.88)',
+                    border: '1px solid rgba(13,26,51,0.06)',
+                    padding: '12px 12px 8px',
+                    overflow: 'auto',
+                  }}
+                >
+                  <ClueSystem
+                    clues={email?.clues || []}
+                    revealed={round.cluesRevealed}
+                    onReveal={onRevealClue}
+                    disabled={round.submitted}
+                  />
+                </div>
+
+                <div style={{ fontSize: 11, color: 'rgba(17,24,39,0.48)' }}>
+                  Each revealed hint costs one point, so use them when the evidence is genuinely unclear.
+                </div>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 20,
+                  background: `linear-gradient(180deg, ${meta.accent}0D 0%, rgba(255,255,255,0.82) 100%)`,
+                  border: `1px solid ${meta.accent}1F`,
+                  padding: 16,
+                  display: 'grid',
+                  gap: 12,
+                }}
+              >
+                <div style={{ display: 'grid', gap: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(17,24,39,0.46)' }}>
+                    Ready to submit
+                  </div>
+                  <div style={{ fontSize: 13, color: 'rgba(17,24,39,0.60)' }}>
+                    {round.selectedL1 ? `${round.selectedL1} selected` : 'Pick a primary category to unlock submission.'}
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  whileHover={canSubmit ? { scale: 1.015 } : {}}
+                  whileTap={canSubmit ? { scale: 0.985 } : {}}
+                  style={{
+                    width: '100%',
+                    padding: '16px 18px',
+                    borderRadius: 18,
+                    border: '1px solid rgba(255,255,255,0.45)',
+                    background: canSubmit
+                      ? `linear-gradient(135deg, ${meta.accent} 0%, ${zone === 3 ? '#E56A00' : '#0066CC'} 100%)`
+                      : 'rgba(17,24,39,0.08)',
+                    color: canSubmit ? '#fff' : 'rgba(17,24,39,0.36)',
+                    fontSize: 15,
+                    fontWeight: 700,
+                    letterSpacing: '0.01em',
+                    boxShadow: canSubmit ? `0 18px 30px ${meta.accent}2E` : 'none',
+                    cursor: canSubmit ? 'pointer' : 'default',
+                  }}
+                >
+                  Submit
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
