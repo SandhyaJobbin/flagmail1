@@ -75,6 +75,15 @@ export function useScoring() {
     return record;
   }, []);
 
+  const scoreReasoning = useCallback(({ emailId, correct }) => {
+    setPerEmail(prev => prev.map(r =>
+      r.emailId === emailId
+        ? { ...r, reasoningCorrect: correct, reasoningPoints: correct ? 1 : 0 }
+        : r
+    ));
+    if (correct) setTotalScore(prev => prev + 1);
+  }, []);
+
   const resetScoring = useCallback(() => {
     setTotalScore(0);
     setPerEmail([]);
@@ -89,5 +98,7 @@ export function useScoring() {
     });
   }, []);
 
-  return { totalScore, perEmail, zoneScores, categoryCorrect, scoreRound, resetScoring };
+  const displayScore = Math.round((totalScore / 75) * 100);
+
+  return { totalScore, displayScore, perEmail, zoneScores, categoryCorrect, scoreRound, scoreReasoning, resetScoring };
 }

@@ -6,13 +6,14 @@ export const SCREENS = {
   TUTORIAL:      'tutorial',
   ZONE_INTRO:    'zone_intro',
   ROUND:         'round',
+  REASONING:     'reasoning',
   EXPLANATION:   'explanation',
   ZONE_COMPLETE: 'zone_complete',
   RESULTS:       'results',
   LEADERBOARD:   'leaderboard',
 };
 
-const ZONE_EMAIL_COUNTS = { 1: 10, 2: 10, 3: 5 };
+const ZONE_EMAIL_COUNTS = { 1: 5, 2: 5, 3: 5 };
 
 function initialRoundState() {
   return {
@@ -39,8 +40,8 @@ export function useGameState() {
   // Computed helpers
   const currentEmail = emailPool[currentIndex] || null;
 
-  const zoneStart = zone === 1 ? 0 : zone === 2 ? 10 : 20;
-  const zoneEnd   = zone === 1 ? 10 : zone === 2 ? 20 : 25;
+  const zoneStart = zone === 1 ? 0 : zone === 2 ? 5 : 10;
+  const zoneEnd   = zone === 1 ? 5 : zone === 2 ? 10 : 15;
   const emailInZone = currentIndex - zoneStart + 1;
   const emailsInZone = ZONE_EMAIL_COUNTS[zone];
 
@@ -93,19 +94,22 @@ export function useGameState() {
 
   const submitRound = useCallback((record) => {
     setRound(prev => ({ ...prev, submitted: true, lastRecord: record }));
+    setScreen(SCREENS.REASONING);
+  }, []);
 
-    // Track consecutive perfect scores
-    const perfect = record.points === 4;
-    setConsecutivePerfect(prev => {
-      const next = perfect ? prev + 1 : 0;
-      if (next >= 3 && !earlyUnlocked) {
-        setEarlyUnlocked(true);
-      }
-      return next;
+  const onReasoningComplete = useCallback((reasoningPoints) => {
+    // Check perfect round after reasoning is scored
+    setRound(prev => {
+      const perfect = (prev.lastRecord?.points ?? 0) + reasoningPoints === 5;
+      setConsecutivePerfect(cp => {
+        const next = perfect ? cp + 1 : 0;
+        if (next >= 3) setEarlyUnlocked(true);
+        return next;
+      });
+      return prev;
     });
-
     setScreen(SCREENS.EXPLANATION);
-  }, [earlyUnlocked]);
+  }, []);
 
   const nextEmail = useCallback(() => {
     const nextIndex = currentIndex + 1;
@@ -181,6 +185,7 @@ export function useGameState() {
     selectL2,
     handleTimeout,
     submitRound,
+    onReasoningComplete,
     nextEmail,
     advanceZone,
     goToResults,

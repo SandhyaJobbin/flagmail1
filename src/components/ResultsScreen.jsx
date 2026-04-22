@@ -16,7 +16,7 @@ const glass = {
   boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
 };
 
-const MAX_SCORE = 100; // 40 + 40 + 20
+const MAX_SCORE = 75; // 5 emails × 5 pts × 3 zones (display normalized to 100)
 
 // Staggered section entry variant
 const sectionVariant = {
@@ -31,6 +31,7 @@ const sectionVariant = {
 export default function ResultsScreen({
   player,
   finalScore,
+  displayScore,
   zoneScores,
   categoryCorrect,
   earned,
@@ -38,8 +39,9 @@ export default function ResultsScreen({
   onLeaderboard,
   onPlayAgain,
 }) {
-  const title = getProgressTitle(finalScore);
-  const isPerfect = finalScore >= MAX_SCORE;
+  const normalized = displayScore ?? Math.round((finalScore / MAX_SCORE) * 100);
+  const title = getProgressTitle(normalized);
+  const isPerfect = normalized >= 100;
 
   const zone1Emails = perEmail.filter(r => r.zone === 1);
   const zone2Emails = perEmail.filter(r => r.zone === 2);
@@ -120,7 +122,7 @@ export default function ResultsScreen({
         animate="visible"
         style={{ marginBottom: 16 }}
       >
-        <RankCard player={player} finalScore={finalScore} badgeCount={earned.length} />
+        <RankCard player={player} finalScore={normalized} badgeCount={earned.length} />
       </motion.div>
 
       {/* Zone breakdown */}
@@ -136,9 +138,9 @@ export default function ResultsScreen({
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {[
-            { zone: 1, score: zoneScores[1], max: 40, acc: zoneAcc(zone1Emails) },
-            { zone: 2, score: zoneScores[2], max: 40, acc: zoneAcc(zone2Emails) },
-            { zone: 3, score: zoneScores[3], max: 20, acc: zoneAcc(zone3Emails) },
+            { zone: 1, score: zoneScores[1], max: 25, acc: zoneAcc(zone1Emails) },
+            { zone: 2, score: zoneScores[2], max: 25, acc: zoneAcc(zone2Emails) },
+            { zone: 3, score: zoneScores[3], max: 25, acc: zoneAcc(zone3Emails) },
           ].map((z, i) => (
             <motion.div
               key={z.zone}

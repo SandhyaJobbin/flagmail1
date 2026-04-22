@@ -1,30 +1,16 @@
-function getInitials(from) {
-  // Extract display name before the email address
-  const match = from.match(/^([^<@]+)/);
-  const name = match ? match[1].trim() : from;
-  const parts = name.split(/\s+/);
+import EmailHeaderPanel from './EmailHeaderPanel.jsx';
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return name.slice(0, 2).toUpperCase();
 }
 
-function getSenderName(from) {
-  const nameMatch = from.match(/^([^<]+)</) ;
-  if (nameMatch) return nameMatch[1].trim();
-  const atIdx = from.indexOf('@');
-  if (atIdx !== -1) return from.slice(0, atIdx);
-  return from;
-}
-
-function getSenderEmail(from) {
-  const match = from.match(/<([^>]+)>/);
-  return match ? match[1] : from;
-}
-
 // Deterministic avatar color based on sender string
-function avatarColor(from) {
+function avatarColor(str) {
   const colors = ['#0A84FF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA', '#FF2D55'];
   let hash = 0;
-  for (let i = 0; i < from.length; i++) hash = from.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
 }
 
@@ -52,10 +38,10 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
     );
   }
 
-  const initials = getInitials(email.from);
-  const senderName = getSenderName(email.from);
-  const senderEmail = getSenderEmail(email.from);
-  const color = avatarColor(email.from);
+  const displayName = email.fromName || email.from;
+  const displayEmail = email.sender || email.from;
+  const initials = getInitials(displayName);
+  const color = avatarColor(displayName);
 
   return (
     <div className="anim-envelopeOpen" style={{
@@ -102,7 +88,7 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
               }}>
-                {senderName}
+                {displayName}
               </span>
               <span style={{ fontSize: 12, color: '#AEAEB2', flexShrink: 0 }}>
                 {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -116,8 +102,9 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              fontFamily: 'ui-monospace, "SF Mono", monospace',
             }}>
-              {senderEmail}
+              {displayEmail}
             </div>
 
             <div style={{
@@ -144,6 +131,26 @@ export default function EmailCard({ email, giveawayHighlight = false }) {
         <span style={{ fontSize: 12, color: '#AEAEB2', fontWeight: 500 }}>To:</span>
         <span style={{ fontSize: 12, color: '#636366' }}>Security Analyst (You)</span>
       </div>
+
+      {/* ── Email Header Panel ── */}
+      <EmailHeaderPanel email={email} />
+
+      {/* ── User Context bar ── */}
+      {email.userContext && (
+        <div style={{
+          padding: '8px 20px',
+          background: 'rgba(0,0,0,0.03)',
+          borderBottom: '1px solid rgba(0,0,0,0.05)',
+          display: 'flex',
+          gap: 6,
+          alignItems: 'flex-start',
+        }}>
+          <span style={{ fontSize: 12, color: '#636366', flexShrink: 0 }}>ℹ</span>
+          <span style={{ fontSize: 12, color: '#3A3A3C', lineHeight: 1.5 }}>
+            {email.userContext}
+          </span>
+        </div>
+      )}
 
       {/* ── Body ── */}
       <div style={{

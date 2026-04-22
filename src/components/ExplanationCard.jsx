@@ -240,6 +240,7 @@ export default function ExplanationCard({ email, record, totalScore, onNext }) {
     if (l1Points > 0) parts.push(`+${l1Points} L1`);
     if (l2Points > 0) parts.push(`+${l2Points} L2`);
     if (clueDeduction > 0) parts.push(`−${clueDeduction} clue${clueDeduction > 1 ? 's' : ''}`);
+    if (record.reasoningCorrect) parts.push('+1 reasoning');
     if (parts.length === 0) parts.push('0 pts');
     return parts.join(' · ');
   }
