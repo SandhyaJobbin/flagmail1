@@ -762,7 +762,7 @@ export default function ZoneIntroCard({ zone, onStart, earlyUnlocked }) {
                 letterSpacing: '0.01em',
               }}
             >
-              Start Zone {meta.zone}
+              Start {meta.difficulty} Zone
             </motion.button>
           </div>
         </motion.div>
