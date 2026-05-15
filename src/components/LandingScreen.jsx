@@ -476,6 +476,34 @@ export default function LandingScreen({ onStart }) {
                 </p>
               )}
 
+              {checking && (
+                <div
+                  style={{
+                    width: '100%',
+                    height: 4,
+                    borderRadius: 999,
+                    overflow: 'hidden',
+                    background: 'rgba(10,132,255,0.12)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '40%',
+                      height: '100%',
+                      borderRadius: 999,
+                      background: 'linear-gradient(90deg, #0A84FF 0%, #30B0C7 100%)',
+                      animation: 'loadingSlide 1s ease-in-out infinite',
+                    }}
+                  />
+                  <style>{`
+                    @keyframes loadingSlide {
+                      0% { transform: translateX(-100%); }
+                      100% { transform: translateX(350%); }
+                    }
+                  `}</style>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={checking}
@@ -496,7 +524,7 @@ export default function LandingScreen({ onStart }) {
                   cursor: checking ? 'not-allowed' : 'pointer',
                 }}
               >
-                {checking ? 'Checking…' : 'Start Assessment'}
+                {checking ? 'Verifying eligibility…' : 'Start Assessment'}
               </button>
             </form>
 
