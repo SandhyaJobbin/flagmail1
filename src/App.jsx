@@ -40,6 +40,7 @@ export default function App() {
   const handleAdvanceZone = useCallback(() => {
     if (gs.zone === 3) {
       gs.submitToSheet({
+        action: 'submit',
         name: gs.player.name,
         email: gs.player.email,
         score: sc.totalScore,
@@ -66,7 +67,10 @@ export default function App() {
       position: 'relative',
     }}>
       {gs.screen === SCREENS.LANDING && (
-        <LandingScreen onStart={gs.startGame} />
+        <LandingScreen onStart={(name, email) => {
+          gs.submitToSheet({ action: 'register', name, email });
+          gs.startGame(name, email);
+        }} />
       )}
 
       {gs.screen === SCREENS.TUTORIAL && (
