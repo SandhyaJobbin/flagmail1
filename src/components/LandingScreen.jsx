@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { LEADERBOARD_URL } from '../config.js';
 
 const glass = {
   background: 'rgba(255,255,255,0.72)',
@@ -25,9 +26,10 @@ export default function LandingScreen({ onStart }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [checking, setChecking] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       setError('Both fields are required to begin.');
@@ -38,6 +40,19 @@ export default function LandingScreen({ onStart }) {
       return;
     }
     setError('');
+    setChecking(true);
+    try {
+      const res = await fetch(`${LEADERBOARD_URL}?checkEmail=${encodeURIComponent(email.trim())}`);
+      const data = await res.json();
+      if (data.exists) {
+        setError('This email has already been used for an assessment. Each email is limited to one attempt.');
+        setChecking(false);
+        return;
+      }
+    } catch {
+      // If check fails, allow the user to proceed
+    }
+    setChecking(false);
     onStart(name.trim(), email.trim());
   }
 
@@ -463,21 +478,25 @@ export default function LandingScreen({ onStart }) {
 
               <button
                 type="submit"
+                disabled={checking}
                 style={{
                   width: '100%',
                   marginTop: 4,
                   padding: '15px 18px',
                   borderRadius: 18,
                   border: '1px solid rgba(10,132,255,0.32)',
-                  background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+                  background: checking
+                    ? 'rgba(10,132,255,0.5)'
+                    : 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
                   color: '#fff',
                   fontSize: 15,
                   fontWeight: 700,
                   letterSpacing: '0.01em',
                   boxShadow: '0 18px 32px rgba(10,132,255,0.22)',
+                  cursor: checking ? 'not-allowed' : 'pointer',
                 }}
               >
-                Start Assessment
+                {checking ? 'Checking…' : 'Start Assessment'}
               </button>
             </form>
 
@@ -505,7 +524,7 @@ export default function LandingScreen({ onStart }) {
               {[
                 'Enter your details and start the assessment.',
                 'Classify each email in a timed round.',
-                'Receive your competency result and ranking.',
+                'Receive your competency result.',
               ].map((line, index) => (
                 <div
                   key={line}

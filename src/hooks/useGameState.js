@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { shuffleEmails } from '../utils/shuffle.js';
+import { LEADERBOARD_URL } from '../config.js';
 
 export const SCREENS = {
   LANDING:       'landing',
@@ -10,7 +11,6 @@ export const SCREENS = {
   EXPLANATION:   'explanation',
   ZONE_COMPLETE: 'zone_complete',
   RESULTS:       'results',
-  LEADERBOARD:   'leaderboard',
 };
 
 const ZONE_EMAIL_COUNTS = { 1: 5, 2: 5, 3: 5 };
@@ -143,23 +143,16 @@ export function useGameState() {
     setScreen(SCREENS.RESULTS);
   }, []);
 
-  const goToLeaderboard = useCallback(() => {
-    setScreen(SCREENS.LEADERBOARD);
-  }, []);
-
-  const goBackToResults = useCallback(() => {
-    setScreen(SCREENS.RESULTS);
-  }, []);
-
-  const resetGame = useCallback(() => {
-    setScreen(SCREENS.LANDING);
-    setPlayer({ name: '', email: '' });
-    setEmailPool([]);
-    setCurrentIndex(0);
-    setZone(1);
-    setConsecutivePerfect(0);
-    setEarlyUnlocked(false);
-    setRound(initialRoundState());
+  const submitToSheet = useCallback(async (playerData) => {
+    if (!LEADERBOARD_URL || LEADERBOARD_URL === 'YOUR_APPS_SCRIPT_URL') return;
+    try {
+      await fetch(LEADERBOARD_URL, {
+        method: 'POST',
+        body: JSON.stringify(playerData),
+      });
+    } catch (err) {
+      console.warn('Score submit failed:', err);
+    }
   }, []);
 
   return {
@@ -189,8 +182,6 @@ export function useGameState() {
     nextEmail,
     advanceZone,
     goToResults,
-    goToLeaderboard,
-    goBackToResults,
-    resetGame,
+    submitToSheet,
   };
 }
