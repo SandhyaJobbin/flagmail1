@@ -22,15 +22,24 @@ const STATS = [
   { value: '120s', label: 'per round' },
 ];
 
+const ATTEMPT_KEY = 'flagmail_attempted';
+
 export default function LandingScreen({ onStart }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+  const [blocked, setBlocked] = useState(() => {
+    try { return localStorage.getItem(ATTEMPT_KEY) === 'true'; } catch { return false; }
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (blocked) {
+      setError('You have already completed this assessment on this device. Only one attempt is allowed.');
+      return;
+    }
     if (!name.trim() || !email.trim()) {
       setError('Both fields are required to begin.');
       return;
@@ -53,6 +62,8 @@ export default function LandingScreen({ onStart }) {
       // If check fails, allow the user to proceed
     }
     setChecking(false);
+    try { localStorage.setItem(ATTEMPT_KEY, 'true'); } catch {}
+    setBlocked(true);
     onStart(name.trim(), email.trim());
   }
 
@@ -464,6 +475,18 @@ export default function LandingScreen({ onStart }) {
                 />
               </div>
 
+              {blocked && !error && (
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: '#FF9500',
+                    margin: 0,
+                  }}
+                >
+                  You have already completed this assessment on this device.
+                </p>
+              )}
+
               {error && (
                 <p
                   style={{
@@ -506,14 +529,14 @@ export default function LandingScreen({ onStart }) {
 
               <button
                 type="submit"
-                disabled={checking}
+                disabled={checking || blocked}
                 style={{
                   width: '100%',
                   marginTop: 4,
                   padding: '15px 18px',
                   borderRadius: 18,
                   border: '1px solid rgba(10,132,255,0.32)',
-                  background: checking
+                  background: (checking || blocked)
                     ? 'rgba(10,132,255,0.5)'
                     : 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
                   color: '#fff',
@@ -521,10 +544,10 @@ export default function LandingScreen({ onStart }) {
                   fontWeight: 700,
                   letterSpacing: '0.01em',
                   boxShadow: '0 18px 32px rgba(10,132,255,0.22)',
-                  cursor: checking ? 'not-allowed' : 'pointer',
+                  cursor: (checking || blocked) ? 'not-allowed' : 'pointer',
                 }}
               >
-                {checking ? 'Verifying eligibility…' : 'Start Assessment'}
+                {blocked ? 'Assessment Already Taken' : checking ? 'Verifying eligibility…' : 'Start Assessment'}
               </button>
             </form>
 
