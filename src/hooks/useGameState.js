@@ -7,7 +7,6 @@ export const SCREENS = {
   TUTORIAL:      'tutorial',
   ZONE_INTRO:    'zone_intro',
   ROUND:         'round',
-  REASONING:     'reasoning',
   EXPLANATION:   'explanation',
   ZONE_COMPLETE: 'zone_complete',
   RESULTS:       'results',
@@ -94,19 +93,11 @@ export function useGameState() {
 
   const submitRound = useCallback((record) => {
     setRound(prev => ({ ...prev, submitted: true, lastRecord: record }));
-    setScreen(SCREENS.REASONING);
-  }, []);
-
-  const onReasoningComplete = useCallback((reasoningPoints) => {
-    // Check perfect round after reasoning is scored
-    setRound(prev => {
-      const perfect = (prev.lastRecord?.points ?? 0) + reasoningPoints === 5;
-      setConsecutivePerfect(cp => {
-        const next = perfect ? cp + 1 : 0;
-        if (next >= 3) setEarlyUnlocked(true);
-        return next;
-      });
-      return prev;
+    const perfect = record.points === 4;
+    setConsecutivePerfect(cp => {
+      const next = perfect ? cp + 1 : 0;
+      if (next >= 3) setEarlyUnlocked(true);
+      return next;
     });
     setScreen(SCREENS.EXPLANATION);
   }, []);
@@ -178,7 +169,6 @@ export function useGameState() {
     selectL2,
     handleTimeout,
     submitRound,
-    onReasoningComplete,
     nextEmail,
     advanceZone,
     goToResults,
