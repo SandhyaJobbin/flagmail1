@@ -140,6 +140,7 @@ export function useGameState() {
       await fetch(LEADERBOARD_URL, {
         method: 'POST',
         body: JSON.stringify(playerData),
+        mode: 'no-cors',
       });
     } catch (err) {
       console.warn('Score submit failed:', err);
